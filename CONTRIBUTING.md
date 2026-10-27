@@ -10,8 +10,8 @@
    ```
 3. **Commit small and often.** Message: imperative, says what changed, e.g.
    `Add upwind FD solver for the HJB`. Pre-commit formats and lints on each commit.
-4. **Push and open a pull request** into `main`. Fill in the template and write `Closes #<issue>`.
-5. **CI must pass** (ruff + pytest).
+4. **Run the tests locally** with `pytest`. They must all pass.
+5. **Push and open a pull request** into `main`. Fill in the template and write `Closes #<issue>`.
 6. **The other person reviews.** Reviewer checks the maths as well as the code: does the
    discretisation match the equation, and does the test compare against a real known answer?
 7. **Squash-merge**, delete the branch, pull `main`.
