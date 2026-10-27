@@ -32,8 +32,13 @@ results/      Experiment outputs (git-ignored; regenerate from configs).
 conda env create -f environment.yml
 conda activate ams516-mfg
 pip install -e ".[dev]"
-pre-commit install
 pytest
+```
+
+Optional tidy-up before opening a pull request (formats code, strips notebook outputs):
+
+```bash
+pre-commit run --all-files
 ```
 
 The CPU build of PyTorch is enough for these one-dimensional problems. To use an NVIDIA GPU, install
