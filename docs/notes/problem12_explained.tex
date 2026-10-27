@@ -1,0 +1,373 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\definecolor{keyblue}{RGB}{30,70,140}
+\newtcolorbox{keyidea}[1][]{colback=keyblue!5,colframe=keyblue!70,
+  fonttitle=\bfseries,title=#1,boxrule=0.6pt,arc=2pt,left=6pt,right=6pt}
+\newtcolorbox{caution}[1][]{colback=orange!6,colframe=orange!70!black,
+  fonttitle=\bfseries,title=#1,boxrule=0.6pt,arc=2pt,left=6pt,right=6pt}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\rxy}{\rho_{XY}}
+\setlist{itemsep=2pt,topsep=4pt}
+
+\title{\textbf{Optimal Life-Cycle Portfolio with Stochastic Labor Income}\\[4pt]
+\large AMS 516 Project --- Problem 12: an explanatory overview}
+\author{Deepak Singh}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+These notes explain Problem 12 of the AMS 516 project description: a worker who
+chooses consumption and a stock/bond portfolio over a 30-year working life while
+receiving a risky salary. We describe the economic story, walk through the
+Hamilton--Jacobi--Bellman (HJB) equation term by term, derive the optimal controls,
+build intuition through the concept of \emph{human capital}, show that the problem
+reduces from two state variables to one, and list the analytical benchmarks and the
+numerical difficulties relevant for a neural PDE solver.
+\end{abstract}
+
+\setcounter{tocdepth}{1}
+\tableofcontents
+
+%======================================================================
+\section{The story in plain words}
+
+Picture a 35-year-old with $T=30$ working years ahead. At each moment they
+\begin{itemize}
+  \item \textbf{earn a salary} $Y_t$, which grows on average but is hit by random,
+        permanent shocks (raises, bad years, career luck);
+  \item \textbf{hold financial wealth} $X_t$ (savings);
+  \item \textbf{choose a consumption rate} $C_t \ge 0$;
+  \item \textbf{choose a dollar amount $\pi_t$ in stocks}; the rest, $X_t-\pi_t$,
+        sits in a safe bond paying $r$ (negative means borrowing).
+\end{itemize}
+They want a smooth, comfortable life without going broke. The central question is:
+
+\begin{keyidea}[The question]
+How should the fact that you \emph{own a future salary} change how you invest and
+how much you spend today?
+\end{keyidea}
+
+This is the economics behind target-date retirement funds (``hold more stocks when
+young, fewer when old''). Problem~12 lets us \emph{derive} that advice rather than
+assume it.
+
+%======================================================================
+\section{The model}
+
+\subsection{Wealth dynamics}
+\begin{equation}\label{eq:wealth}
+dX_t = \big(\underbrace{rX_t}_{\text{interest}}
+      + \underbrace{\pi_t(\mu-r)}_{\text{risk premium}}
+      - \underbrace{C_t}_{\text{spending}}
+      + \underbrace{Y_t}_{\text{salary}}\big)\,dt
+      + \underbrace{\sigma\pi_t\,dW^X_t}_{\text{stock risk}} .
+\end{equation}
+All wealth earns $r$; the amount in stocks earns an additional $\mu-r$ and carries
+risk $\sigma\pi_t$. Because $\pi_t$ is in dollars, $\pi_t > X_t$ means leverage and
+$\pi_t<0$ means shorting.
+
+\subsection{Salary dynamics}
+\begin{equation}\label{eq:income}
+dY_t = \alpha Y_t\,dt + \beta Y_t\,dW^Y_t,
+\qquad d\langle W^X, W^Y\rangle_t = \rxy\,dt .
+\end{equation}
+Salary is a geometric Brownian motion: $\alpha$ is average growth and $\beta$ the
+volatility of \emph{permanent} shocks (a bad year lowers the whole future path).
+$Y_t$ stays positive but can drift arbitrarily close to zero. The correlation
+$\rxy$ measures how much wages move with the stock market.
+
+\subsection{Objective}
+\begin{equation}\label{eq:objective}
+\max_{\{\pi_t,\,C_t\}}\;
+\E\!\left[\int_0^T e^{-\rho t}\,U(C_t)\,dt + e^{-\rho T}\,U(X_T)\right],
+\qquad U(c) = \frac{c^{1-\gamma}}{1-\gamma}.
+\end{equation}
+\begin{itemize}
+  \item $\rho$ is impatience (not to be confused with the correlation $\rxy$;
+        in code we will call them \texttt{rho} and \texttt{corr\_xy}).
+  \item $\gamma$ is relative risk aversion; $1/\gamma$ is also the willingness to
+        shift consumption across time.
+  \item With $\gamma=3$, $U(c) = -\tfrac{1}{2c^2}$: always negative and
+        $U(c)\to-\infty$ as $c\to0$. The agent fears very low consumption.
+  \item $U(X_T)$ is a terminal (bequest / retirement-pot) value of wealth.
+\end{itemize}
+
+\subsection{Parameters}
+The project description gives two parameter sets:
+
+\begin{center}
+\begin{tabular}{lcccccccccc}
+\toprule
+ & $r$ & $\mu$ & $\sigma$ & $\rho$ & $\alpha$ & $\beta$ & $\rxy$ & $\gamma$ & $X_0$ & $Y_0$ \\
+\midrule
+Set 1 & 0.02 & 0.06 & 0.18 & 0.03 & 0.01 & 0.10 & 0 (or 0.3) & 3 & 1 & 0.5 \\
+Set 2 & 0.03 & 0.08 & 0.20 & 0.04 & 0.02 & 0.15 & 0.25 & 3 & 100 & 30 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Both use $T=30$. Suggested domains: $x\in[0,500]$ (or $[-200,500]$ if borrowing is
+allowed), $y\in[0,150]$.
+
+%======================================================================
+\section{The HJB equation, term by term}
+
+Define the value function
+\[
+V(t,x,y) = \sup_{\pi,C}\,
+\E\!\left[\int_t^T e^{-\rho(s-t)}U(C_s)\,ds + e^{-\rho(T-t)}U(X_T)
+\;\Big|\; X_t=x,\;Y_t=y\right].
+\]
+It satisfies
+\begin{equation}\label{eq:hjb}
+\partial_t V - \rho V + \sup_{\pi\in\mathbb{R},\,C\ge0} \mathcal{H} = 0,
+\qquad V(T,x,y) = U(x),
+\end{equation}
+with Hamiltonian
+\begin{align*}
+\mathcal{H} \;=\;& U(C) && \text{utility from consuming now}\\
+&+ \big(rx + \pi(\mu-r) - C + y\big)\,V_x && \text{wealth drift $\times$ value of a dollar}\\
+&+ \alpha y\,V_y && \text{salary drift $\times$ value of salary}\\
+&+ \tfrac12\sigma^2\pi^2\,V_{xx} && \text{portfolio risk ($V_{xx}<0$, so it hurts)}\\
+&+ \tfrac12\beta^2y^2\,V_{yy} && \text{salary risk}\\
+&+ \rxy\,\sigma\beta\,\pi y\,V_{xy} && \text{covariance of portfolio and salary.}
+\end{align*}
+
+\paragraph{Reading the equation.}
+By It\^o's lemma, $\mathcal{H}-U(C)$ is the expected rate of change of $V$ along the
+state dynamics. The HJB therefore says: \emph{required return $\rho V$ = flow
+utility + expected change in value}. The last term is where the interesting
+economics lives: stock holdings interact with the risk already carried through
+one's job. At $t=T$ working life ends and only wealth matters, hence
+$V(T,x,y)=U(x)$, independent of $y$.
+
+%======================================================================
+\section{Optimal decisions}
+
+\subsection{Consumption}
+\[
+\frac{\partial\mathcal{H}}{\partial C}=0
+\;\Longrightarrow\;
+U'(C^*) = V_x
+\;\Longrightarrow\;
+C^* = (V_x)^{-1/\gamma}.
+\]
+Consume until the utility of one more dollar spent equals the value of one more
+dollar saved; $V_x$ is the shadow value of wealth.
+
+\subsection{Portfolio}
+\[
+\frac{\partial\mathcal{H}}{\partial \pi}=0
+\;\Longrightarrow\;
+(\mu-r)V_x + \sigma^2\pi^* V_{xx} + \rxy\sigma\beta y\,V_{xy} = 0,
+\]
+which splits naturally into two pieces:
+\begin{equation}\label{eq:pistar}
+\pi^* \;=\;
+\underbrace{\frac{\mu-r}{\sigma^2}\left(-\frac{V_x}{V_{xx}}\right)}_{\text{speculative (Merton) demand}}
+\;+\;
+\underbrace{\left(-\rxy\,\frac{\beta y}{\sigma}\,\frac{V_{xy}}{V_{xx}}\right)}_{\text{hedging demand}} .
+\end{equation}
+\begin{itemize}
+  \item $-V_x/V_{xx}$ is \emph{risk tolerance}: exploit the risk premium in
+        proportion to it.
+  \item More salary typically lowers the marginal value of a dollar, so $V_{xy}<0$;
+        with $V_{xx}<0$ and $\rxy>0$ the hedging demand is \textbf{negative}: your
+        job already exposes you to the market, so you hold \emph{less} stock. A job
+        that pays well in crashes ($\rxy<0$) would imply \emph{more} stock.
+\end{itemize}
+
+\subsection{The PDE we actually solve}
+Substituting $C^*$ and $\pi^*$ back in, and using
+$U(C^*) - C^*V_x = \frac{\gamma}{1-\gamma}V_x^{(\gamma-1)/\gamma}$ and
+$\sup_\pi\{a\pi+\tfrac12 b\pi^2\} = -a^2/(2b)$ for $b<0$:
+\begin{equation}\label{eq:hjb-reduced}
+\boxed{
+\partial_tV - \rho V + \frac{\gamma}{1-\gamma}V_x^{\frac{\gamma-1}{\gamma}}
++ (rx+y)V_x + \alpha yV_y + \tfrac12\beta^2y^2V_{yy}
+- \frac{\big[(\mu-r)V_x + \rxy\sigma\beta y V_{xy}\big]^2}{2\sigma^2 V_{xx}} = 0 }
+\end{equation}
+This is a \textbf{fully nonlinear} PDE: $V_{xx}$ sits in a denominator and $V_x$ is
+raised to a fractional power. It is well defined only while $V_x>0$ and $V_{xx}<0$,
+which is the root of most numerical difficulties (Section~\ref{sec:difficulties}).
+
+%======================================================================
+\section{Key intuition: human capital}
+
+\subsection{Riskless salary ($\beta=0$)}
+If salary is certain, the future salary stream is worth exactly its present value,
+like owning a bond:
+\begin{equation}\label{eq:human-capital}
+H(t,y) = \int_t^T y\,e^{(\alpha-r)(s-t)}\,ds
+       = y\,\frac{1-e^{-(r-\alpha)(T-t)}}{r-\alpha}.
+\end{equation}
+The problem then has an exact solution: behave like Merton, but on
+\textbf{total wealth} $x+H$:
+\begin{equation}\label{eq:det-income}
+V = \frac{f(t)^\gamma\,(x+H)^{1-\gamma}}{1-\gamma},\qquad
+\pi^* = \frac{\mu-r}{\gamma\sigma^2}\,(x+H),\qquad
+C^* = \frac{x+H}{f(t)},
+\end{equation}
+where
+\[
+f(t) = \frac{1-e^{-\nu(T-t)}}{\nu} + e^{-\nu(T-t)},
+\qquad
+\nu = \frac{1}{\gamma}\left[\rho - (1-\gamma)\left(r + \frac{(\mu-r)^2}{2\gamma\sigma^2}\right)\right].
+\]
+(With $H\equiv0$ this is the classical Merton problem with consumption and bequest.)
+
+\subsection{What it implies (parameter set 2, $t=0$)}
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Quantity & Value \\
+\midrule
+Human capital $H = 30\times 25.9$ & $\approx 778$ \quad(vs.\ savings of 100) \\
+Merton fraction $(\mu-r)/(\gamma\sigma^2) = 0.05/0.12$ & $\approx 0.417$ \\
+$\nu$,\; $f(0)$ & $\approx 0.0403$,\; $\approx 17.7$ \\
+Stock holding $\pi^* = 0.417\times 878$ & $\approx 366$ \quad($3.7\times$ financial wealth) \\
+Consumption $C^* = 878/17.7$ & $\approx 49.5$ \quad(salary is only 30) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{keyidea}[The life-cycle glide path]
+A young worker should invest aggressively relative to savings (the large implicit
+``bond'' $H$ provides safety) and consume more than they earn (borrowing against
+future salary). As they age, $H$ shrinks to $0$ at $T$, and the stock share of
+savings $\pi^*/x = \frac{\mu-r}{\gamma\sigma^2}(1 + H/x)$ falls toward the plain
+Merton fraction. \textbf{That decline is the life-cycle glide path.}
+\end{keyidea}
+
+\subsection{Risky salary ($\beta>0$): the interesting case}
+Now human capital is risky: partly market-like (through $\rxy$) and partly purely
+personal risk that cannot be traded away. The market is \textbf{incomplete} and
+there is no closed form. Three effects appear:
+\begin{enumerate}
+  \item \textbf{Hedging.} The market-correlated part makes human capital look a bit
+        like stock, so the agent holds less stock (negative hedging demand
+        in~\eqref{eq:pistar}).
+  \item \textbf{Precautionary saving.} The uninsurable part makes the agent consume
+        less and save more as a buffer.
+  \item \textbf{No borrowing against salary.} Salary can collapse toward $0$ and
+        $U\to-\infty$ at zero consumption, so the agent effectively will not borrow
+        against it: $x\ge0$ becomes a self-imposed constraint. Near $x=0$, behaviour
+        changes sharply ($\pi^*\to0$, consumption held near or below salary).
+\end{enumerate}
+This case is exactly what the neural PDE solver is for, and where the economics is
+richest.
+
+%======================================================================
+\section{Dimension reduction: only the wealth-to-income ratio matters}
+
+The dynamics \eqref{eq:wealth}--\eqref{eq:income} are linear in $(x,y,\pi,C)$ and
+CRRA utility is homogeneous: $U(\lambda c)=\lambda^{1-\gamma}U(c)$. Scaling wealth,
+salary and both controls by $\lambda>0$ therefore scales the whole problem, so
+\[
+V(t,\lambda x,\lambda y) = \lambda^{1-\gamma}V(t,x,y)
+\quad\Longrightarrow\quad
+\boxed{V(t,x,y) = y^{1-\gamma}\,v(t,z),\qquad z = \frac{x}{y}.}
+\]
+Consequences:
+\begin{itemize}
+  \item The 2-D (plus time) HJB collapses to a 1-D (plus time) PDE for $v(t,z)$, with
+        controls per unit of salary, $c=C/y$ and $p=\pi/y$. This gives cheap,
+        accurate finite-difference \textbf{ground truth} for the incomplete-market case.
+  \item Only $z_0=X_0/Y_0$ matters, not the absolute scale: Set~1 has $z_0=2$ and
+        Set~2 has $z_0\approx3.3$; the factor of 100 between them is irrelevant.
+  \item $z$ (the wealth-to-income ratio) is the variable economists use to present
+        policies in this literature.
+\end{itemize}
+Deriving the reduced PDE for $v(t,z)$ via the chain rule is a natural next step.
+
+%======================================================================
+\section{Benchmarks for validation}
+\begin{enumerate}
+  \item \textbf{No income} ($y=0$): classical Merton solution, \eqref{eq:det-income}
+        with $H=0$. Also the exact boundary value at $y=0$, since salary that hits
+        zero stays there.
+  \item \textbf{Deterministic income} ($\beta=0$): human-capital solution
+        \eqref{eq:human-capital}--\eqref{eq:det-income}.
+  \item \textbf{Perfectly correlated income} ($\rxy=\pm1$): the market is complete;
+        human capital is priced under the risk-neutral measure and the solution is
+        again Merton on total wealth plus an explicit hedging term.
+  \item \textbf{General case}: finite-difference / policy-iteration solution of the
+        reduced 1-D PDE in $z$.
+  \item \textbf{Monte Carlo policy evaluation}: simulate
+        \eqref{eq:wealth}--\eqref{eq:income} under any learned policy and estimate
+        its expected utility. No policy can beat the optimum, so this is a
+        method-independent check.
+\end{enumerate}
+
+\begin{caution}[Note on the project description]
+The remark lists ``$\sigma=0$'' as a special case with an analytical benchmark.
+This almost certainly means $\beta=0$ (deterministic income): a riskless stock with
+$\mu\ne r$ would be an arbitrage.
+\end{caution}
+
+%======================================================================
+\section{Difficulties and modelling issues}\label{sec:difficulties}
+\begin{enumerate}
+  \item \textbf{Huge range of values.} $V<0$ and $V\to-\infty$ as $x\to0$. Fitting
+        $V$ directly lets the region near $x=0$ dominate the loss. Better: learn a
+        rescaled quantity such as the certainty-equivalent wealth
+        $\big((1-\gamma)V\big)^{1/(1-\gamma)}$, or build the Merton form into the
+        network.
+  \item \textbf{Fragile controls.} $C^*$ needs $V_x>0$ and $\pi^*$ needs $V_{xx}<0$.
+        If a network violates either during training, \eqref{eq:hjb-reduced} produces
+        NaNs or nonsense. Remedies: architectures that enforce monotonicity and
+        concavity, separate policy networks (actor--critic / policy iteration), or
+        Deep BSDE methods.
+  \item \textbf{Leverage near small $x$.} Optimal $\pi^*/x$ is large when $H\gg x$,
+        giving steep features near $x=0$; collocation points should concentrate there.
+  \item \textbf{The $x=0$ boundary} is a genuine economic constraint, not merely the
+        edge of the grid. Our borrowing assumption must be stated explicitly.
+  \item \textbf{The $y=0$ boundary} is a gift: the exact Merton solution.
+  \item \textbf{Terminal condition quirk.} Since $V(T,x,y)=U(x)$, the consumption rule
+        gives $C^*(T)=x$ exactly: the agent reaches $T$ with only about one year's
+        consumption saved. For a retirement-savings story, a natural extension is a
+        bequest weight $b\,U(X_T)$ or an explicit retirement phase.
+  \item \textbf{Long horizon.} $T=30$ years means value and policies change
+        substantially over time; time sampling and normalisation ($t/T$) matter.
+\end{enumerate}
+
+%======================================================================
+\section{Project in one sentence}
+
+\begin{keyidea}
+Solve a fully nonlinear two-dimensional HJB with neural networks, validate it
+against the Merton and human-capital formulas and a one-dimensional
+finite-difference solver, then use it to show how risky, partly uninsurable labor
+income shapes the life-cycle glide path, precautionary saving, and the
+stock--salary hedge.
+\end{keyidea}
+
+\subsection*{Further reading}
+\begin{itemize}
+  \item Merton, R.\,C.\ (1969, 1971). Lifetime portfolio selection under uncertainty;
+        Optimum consumption and portfolio rules in a continuous-time model.
+  \item Bodie, Z., Merton, R.\,C., \& Samuelson, W.\ (1992). Labor supply flexibility
+        and portfolio choice in a life cycle model.
+  \item Viceira, L.\ (2001). Optimal portfolio choice for long-horizon investors with
+        nontradable labor income.
+  \item Cocco, J., Gomes, F., \& Maenhout, P.\ (2005). Consumption and portfolio choice
+        over the life cycle.
+  \item Achdou, Y., Han, J., Lasry, J.-M., Lions, P.-L., \& Moll, B.\ (2022). Income and
+        wealth distribution in macroeconomics: a continuous-time approach.
+  \item Sirignano, J., \& Spiliopoulos, K.\ (2018). DGM: a deep learning algorithm for
+        solving partial differential equations.
+\end{itemize}
+
+\end{document}

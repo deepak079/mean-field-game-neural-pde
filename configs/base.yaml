@@ -1,0 +1,16 @@
+# Baseline parameters for the proposed Problem 21 (see docs/problem/AMS516_Project21_proposal.pdf).
+market:
+  r: 0.02        # risk-free rate
+  mu: 0.08       # stock drift
+  sigma: 0.20    # stock volatility
+preferences:
+  gamma: 1.0     # CARA risk aversion
+  lam: 2.0       # shortfall-penalty strength (lambda); 0 = no interaction
+horizon:
+  T: 1.0
+population:
+  m0_mean: 1.0   # initial wealth distribution N(m0_mean, m0_std^2)
+  m0_std: 0.2
+domain:
+  x_min: -1.0
+  x_max: 3.0

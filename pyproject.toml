@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mfg"
+version = "0.1.0"
+description = "PINN solution of a mean-field portfolio game with a shortfall penalty (AMS 516, Problem 21)"
+requires-python = ">=3.10"
+dependencies = ["numpy", "scipy", "matplotlib", "pyyaml"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "pre-commit", "nbstripout"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

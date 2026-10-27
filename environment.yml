@@ -1,0 +1,16 @@
+# Create with:  conda env create -f environment.yml && conda activate ams516-mfg
+# Then:         pip install -e ".[dev]" && pre-commit install
+name: ams516-mfg
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - matplotlib
+  - pyyaml
+  - jupyterlab
+  - pip
+  - pip:
+      # CPU build is enough for these 1-D problems; see README for the GPU option.
+      - torch
