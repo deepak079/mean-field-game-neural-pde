@@ -2,7 +2,8 @@
 
 ## The loop
 
-1. **Pick or open an issue.** Every piece of work has one. Assign yourself so we don't overlap.
+1. **Pick a task from the roadmap** in `README.md` and put your initials next to it, so we don't
+   overlap.
 2. **Branch from an up-to-date `main`:**
    ```bash
    git switch main && git pull
@@ -12,7 +13,8 @@
    `Add upwind FD solver for the HJB`. Optionally run `pre-commit run --all-files` to format
    the code before pushing.
 4. **Run the tests locally** with `pytest`. They must all pass.
-5. **Push and open a pull request** into `main`. Fill in the template and write `Closes #<issue>`.
+5. **Push and open a pull request** into `main`. Fill in the template, and if the PR finishes a
+   roadmap task, tick its box in `README.md` in the same PR.
 6. **The other person reviews.** Reviewer checks the maths as well as the code: does the
    discretisation match the equation, and does the test compare against a real known answer?
 7. **Squash-merge**, delete the branch, pull `main`.
@@ -45,4 +47,4 @@ Nobody pushes directly to `main`.
 
 - Pull `main` before starting a branch, and rebase or merge `main` into long-lived branches often.
 - Split work by file/module where possible (e.g. one person on `fd/`, the other on `pinn/`).
-- Keep pull requests small: one issue, one PR.
+- Keep pull requests small: one task, one PR.

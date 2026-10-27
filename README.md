@@ -46,7 +46,7 @@ the matching CUDA build of PyTorch from https://pytorch.org/get-started/locally/
 
 ## Roadmap
 
-Each item is a GitHub issue; tick it here when the issue is closed.
+Put your initials next to a task when you start it, and tick it in the pull request that finishes it.
 
 - [x] Parameters, utility and λ = 0 closed-form benchmarks, with tests
 - [ ] Finite-difference solver for the HJB (fixed m̄_T)
