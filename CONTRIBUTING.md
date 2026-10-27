@@ -9,7 +9,8 @@
    git switch -c feat/fd-hjb        # or fix/..., exp/..., docs/...
    ```
 3. **Commit small and often.** Message: imperative, says what changed, e.g.
-   `Add upwind FD solver for the HJB`. Pre-commit formats and lints on each commit.
+   `Add upwind FD solver for the HJB`. Optionally run `pre-commit run --all-files` to format
+   the code before pushing.
 4. **Run the tests locally** with `pytest`. They must all pass.
 5. **Push and open a pull request** into `main`. Fill in the template and write `Closes #<issue>`.
 6. **The other person reviews.** Reviewer checks the maths as well as the code: does the
@@ -36,7 +37,8 @@ Nobody pushes directly to `main`.
 - **Don't commit outputs.** `results/`, checkpoints and arrays are git-ignored; only final report
   figures are committed, under `report/figures/`.
 - **Notebooks are for exploring.** Once code is reused, move it into `src/mfg` and test it.
-  Notebook outputs are stripped on commit.
+  Clear notebook outputs before committing (Kernel → Restart & Clear Output, or
+  `pre-commit run --all-files`) to keep diffs readable.
 - **Fix the seed** for anything random, and record it.
 
 ## Avoiding merge conflicts

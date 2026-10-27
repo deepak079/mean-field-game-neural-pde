@@ -1,5 +1,5 @@
 # Create with:  conda env create -f environment.yml && conda activate ams516-mfg
-# Then:         pip install -e ".[dev]" && pre-commit install
+# Then:         pip install -e ".[dev]"
 name: ams516-mfg
 channels:
   - conda-forge
