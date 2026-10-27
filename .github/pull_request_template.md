@@ -1,6 +1,6 @@
 ## What and why
 
-<!-- One or two sentences. Link the issue: "Closes #12". -->
+<!-- One or two sentences. Which roadmap task does this work on? -->
 
 ## How it was checked
 
