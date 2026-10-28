@@ -26,7 +26,8 @@ class Params:
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "Params":
-        with open(path) as f:
+        # Read as UTF-8, otherwise Windows uses its own encoding and fails on Greek letters.
+        with open(path, encoding="utf-8") as f:
             raw = yaml.safe_load(f)
         flat = {k: v for section in raw.values() for k, v in section.items()}
         return cls(**flat)
