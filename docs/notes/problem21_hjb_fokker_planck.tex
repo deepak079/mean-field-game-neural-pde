@@ -1,0 +1,499 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\definecolor{keyblue}{RGB}{30,70,140}
+\newtcolorbox{keyidea}[1][]{colback=keyblue!5,colframe=keyblue!70,
+  fonttitle=\bfseries,title=#1,boxrule=0.6pt,arc=2pt,left=6pt,right=6pt}
+\newtcolorbox{caution}[1][]{colback=orange!6,colframe=orange!70!black,
+  fonttitle=\bfseries,title=#1,boxrule=0.6pt,arc=2pt,left=6pt,right=6pt}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\mb}{\bar m}
+\setlist{itemsep=2pt,topsep=4pt}
+
+\title{\textbf{The HJB and Fokker--Planck Equations of Problem 21}\\[4pt]
+\large AMS 516 Project --- step-by-step derivations and what they mean for the solvers}
+\author{Deepak Singh}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+These notes derive the two equations of the mean-field portfolio game with a shortfall
+penalty: the Hamilton--Jacobi--Bellman (HJB) equation for one investor's value function,
+solved backward in time, and the Fokker--Planck (FP) equation for the population's wealth
+distribution, solved forward in time. Each derivation goes one step at a time, is checked
+against the $\lambda=0$ closed forms, and ends with what it implies for the finite-difference,
+Monte Carlo and PINN solvers. The companion notes \texttt{problem21\_utilities.pdf} cover
+the utilities, CARA and the Merton position. Numbers use \texttt{configs/base.yaml}:
+$r=0.02$, $\mu=0.08$, $\sigma=0.20$, $\gamma=1$, $\lambda=2$, $T=1$,
+$m_0=\mathcal N(1,0.2^2)$, domain $x\in[-1,3]$.
+\end{abstract}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+%======================================================================
+\section{The model in one place}
+
+Each investor holds wealth $X_t$ and puts a dollar amount $\pi_t$ in the stock:
+\[
+  dX_t = \bigl[rX_t + \pi_t(\mu-r)\bigr]\,dt + \pi_t\sigma\,dW_t ,
+\]
+with their own Brownian motion $W_t$ (independent noise). They maximise
+$\E[U(X_T,\mb_T)]$ with
+\[
+  U(x,\mb) = -e^{-\gamma x} - \tfrac{\lambda}{2}\bigl((\mb-x)^+\bigr)^2 ,
+\]
+where $\mb_T$ is the population's average terminal wealth. Throughout,
+$\kappa=(\mu-r)/\sigma=0.3$ is the Sharpe ratio (\texttt{Params.kappa}) and the Merton
+position is $(\mu-r)/(\gamma\sigma^2)=1.5$.
+
+%======================================================================
+\section{The HJB equation}
+
+\subsection*{Step 1: The value function}
+\addcontentsline{toc}{subsection}{Step 1: The value function}
+\[
+  V(t,x) = \sup_{\pi}\ \E\bigl[\,U(X_T,\mb_T)\ \big|\ X_t = x\,\bigr] .
+\]
+$V(t,x)$ is the best expected utility still available to an investor who has wealth $x$ at
+time $t$ and invests optimally until $T$.
+\begin{itemize}
+  \item It depends only on the current time and wealth.
+  \item $\mb_T$ is a \textbf{fixed number} here: one investor can't move the average.
+  \item At $T$ there is nothing left to choose: $V(T,x)=U(x,\mb_T)$. This is the only place
+        the utility enters.
+\end{itemize}
+
+\subsection*{Step 2: Dynamic programming principle}
+\addcontentsline{toc}{subsection}{Step 2: Dynamic programming principle}
+Split the remaining time into the next instant $dt$ and everything after:
+\[
+  V(t,x) = \sup_{\pi}\ \E\bigl[\,V(t+dt,\,X_{t+dt})\ \big|\ X_t = x\,\bigr] .
+\]
+Choose $\pi$ for the next instant; after that, act optimally, which is worth
+$V(t+dt,X_{t+dt})$ by definition. There is no consumption, so nothing is collected along the
+way.
+
+\subsection*{Step 3: It\^o's formula}
+\addcontentsline{toc}{subsection}{Step 3: It\^o's formula}
+With $dX = [rx+\pi(\mu-r)]\,dt + \pi\sigma\,dW$ and $(dX)^2=\pi^2\sigma^2\,dt$,
+\[
+  dV = \Bigl(V_t + \bigl[rx+\pi(\mu-r)\bigr]V_x + \tfrac12\pi^2\sigma^2V_{xx}\Bigr)dt
+       + \pi\sigma V_x\,dW .
+\]
+The $dW$ term has mean zero, so $\E[dV]$ is the bracket times $dt$.
+
+\subsection*{Step 4: The HJB in sup form}
+\addcontentsline{toc}{subsection}{Step 4: The HJB in sup form}
+Substituting $V(t+dt,X_{t+dt})=V(t,x)+dV$ into the DPP, $V(t,x)$ cancels, leaving
+$0=\sup_\pi\E[dV]$. Dividing by $dt$:
+\[
+  \boxed{\;V_t + \sup_{\pi}\Bigl\{\bigl[rx+\pi(\mu-r)\bigr]V_x + \tfrac12\pi^2\sigma^2V_{xx}\Bigr\} = 0,
+  \qquad V(T,x)=U(x,\mb_T).\;}
+\]
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Term & Meaning \\
+\midrule
+$V_t$ & how prospects change as time passes \\
+$rx\,V_x$ & interest on wealth, valued at the marginal value of a dollar \\
+$\pi(\mu-r)\,V_x$ & expected excess return from the stock \\
+$\tfrac12\pi^2\sigma^2\,V_{xx}$ & cost of risk: variance times curvature (negative) \\
+\bottomrule
+\end{tabular}
+\end{center}
+The braces hold the same ``gain minus risk cost'' trade-off as the Merton problem,
+with $V_x$ and $V_{xx}$ in place of the utility's slope and curvature.
+
+The equation contains no utility: it depends only on the wealth dynamics. Plain
+CARA, the original utility and the shortfall utility share it, and differ only in the
+terminal condition.
+
+\subsection*{Step 5: Choosing the best \texorpdfstring{$\pi$}{pi}}
+\addcontentsline{toc}{subsection}{Step 5: Choosing the best position}
+At fixed $(t,x)$, only the part depending on $\pi$ matters:
+\[
+  f(\pi) = \pi(\mu-r)V_x + \tfrac12\pi^2\sigma^2V_{xx},
+\]
+a parabola with $f''(\pi)=\sigma^2V_{xx}$.
+
+\textbf{Second-order condition.} If $V_{xx}<0$ the parabola opens downward and has a single
+maximum. If $V_{xx}\ge0$ the supremum is infinite (unlimited risk). Concavity of $V$ is
+therefore essential (Step 9d shows it holds).
+
+\textbf{First-order condition.} $f'(\pi)=0$ gives
+\[
+  \boxed{\;\pi^*(t,x) = -\frac{(\mu-r)\,V_x}{\sigma^2\,V_{xx}}
+          = \frac{\mu-r}{\sigma^2}\cdot\frac{1}{A_V(t,x)},
+  \qquad A_V = -\frac{V_{xx}}{V_x}.\;}
+\]
+$A_V$ is the \emph{indirect risk aversion}: how risk-averse the investor effectively is at
+$(t,x)$, given optimal investing afterwards. At $t=T$, $V=U$ and $A_V=A(x)$, which gives the
+terminal position $\pi^*(T,x)=1.5\cdot\gamma/A(x)$ of the utility notes.
+
+\textbf{Worked example at $t=T$, $\mb=1.1$.} Here
+$f(\pi)=0.06\,U'\pi-\tfrac12\,0.04\,(-U'')\pi^2$.
+\begin{itemize}
+  \item Just above $\mb$: $U'\approx0.333$, $-U''\approx0.333$, so
+        $f=0.0200\pi-0.00667\pi^2$, maximised at $\pi=1.5$.
+  \item Just below $\mb$: $U'\approx0.333$ (continuous), $-U''\approx2.333$, so
+        $f=0.0200\pi-0.0467\pi^2$, maximised at $\pi\approx0.214$.
+\end{itemize}
+The gain slope is the same on both sides; only the risk cost changes. The parabola below
+$\mb$ is 7 times steeper, so its peak is 7 times closer to zero.
+
+\textbf{Feedback rule.} $\pi^*$ depends on the state $(t,x)$ through $V_x$ and $V_{xx}$.
+A solver learns $V$, and $\pi^*$ is read off its derivatives, so the derivatives must be
+accurate, not just $V$.
+
+\subsection*{Step 6: The reduced PDE}
+\addcontentsline{toc}{subsection}{Step 6: The reduced PDE}
+Substituting $\pi^*$,
+\[
+  \text{gain} = -\frac{(\mu-r)^2V_x^2}{\sigma^2V_{xx}} > 0,\qquad
+  \text{risk cost} = \frac{(\mu-r)^2V_x^2}{2\sigma^2V_{xx}} = -\tfrac12\,\text{gain},
+\]
+so at the optimum the risk cost eats exactly half the expected gain, and
+\[
+  \boxed{\;V_t + rx\,V_x - \tfrac12\kappa^2\,\frac{V_x^2}{V_{xx}} = 0,
+  \qquad V(T,x)=U(x,\mb_T).\;}
+\]
+With our numbers $\tfrac12\kappa^2=0.045$.
+
+\textbf{Nonlinear.} The ratio $V_x^2/V_{xx}$ makes the equation nonlinear. For a fixed
+strategy $\pi(t,x)$ it would be linear:
+$V_t + [rx+\pi(\mu-r)]V_x + \tfrac12\pi^2\sigma^2V_{xx}=0$. The nonlinearity comes entirely
+from the investor choosing the risk.
+
+\textbf{Two invariances.} If $V$ solves the PDE, so do $V+c$ and $cV$ for $c>0$. The second
+is why the original utility $-e^{-\gamma(x-\theta\mb)}$ changes nothing: its terminal
+condition is a positive multiple of CARA's, so its solution is too, and the constant cancels
+in $\pi^*$. The shortfall penalty is neither a shift nor a multiple.
+
+\begin{caution}[Division by the second derivative]
+If $V_{xx}$ is close to zero or positive anywhere, the residual blows up. Ways around it:
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Approach & Idea & Watch out for \\
+\midrule
+Reduced PDE & train or solve on the residual above & keep $V$ concave \\
+Multiplied through & $V_{xx}(V_t+rxV_x)-\tfrac12\kappa^2V_x^2=0$ & admits wrong solutions (constants) \\
+Sup form + policy & learn $V$ and $\pi$ together & two unknowns, harder training \\
+Policy iteration & fix $\pi$, solve the linear PDE, update $\pi$ & a few outer iterations \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{caution}
+
+\subsection*{Step 7: Terminal and boundary conditions}
+\addcontentsline{toc}{subsection}{Step 7: Terminal and boundary conditions}
+
+\textbf{Terminal condition.} $V(T,x)=U(x,\mb_T)$, solved backward from $T$. Two features:
+\begin{enumerate}
+  \item It has a kink at $\mb_T$: $V$ and $V_x$ are continuous, $V_{xx}$ jumps by $\lambda$.
+        Close to $T$, $V_{xx}$ and therefore $\pi^*$ change sharply near $\mb_T$.
+  \item It contains $\mb_T$, which depends on everyone's $\pi^*$. This is the coupling to the
+        Fokker--Planck equation (Section~\ref{sec:system}).
+\end{enumerate}
+
+\textbf{Why wealth boundaries.} The true problem lives on all of $\mathbb R$; the solver uses
+$[-1,3]$. The cut is artificial, and what $V$ does at the edges is a modeling choice. A
+condition is needed at both ends, because the diffusion $\pi^{*2}\sigma^2>0$ carries
+information from both edges inward.
+
+\textbf{Upper boundary, $x=3$.} The penalty can only matter if wealth falls from 3 below 1.1
+by $T$, a drop of about 6 standard deviations ($\pi\sigma\approx0.3$ per $\sqrt{\text{year}}$).
+So the investor is effectively CARA, and the closed form serves as a Dirichlet condition:
+\[
+  V(t,3) = -\exp\!\bigl(-3\gamma e^{r(T-t)} - \tfrac12\kappa^2(T-t)\bigr).
+\]
+
+\textbf{Lower boundary, $x=-1$.} Here both the exponential and the penalty matter and there is
+no closed form. The options:
+\begin{itemize}
+  \item \textbf{Value of a fixed strategy (recommended).} If the investor holds the Merton
+        position from $t$ on, $X_T$ is Gaussian with
+        \[
+          M = x\,e^{r(T-t)} + \frac{\kappa^2}{\gamma}(T-t),\qquad
+          S^2 = \frac{\kappa^2}{\gamma^2}(T-t),\qquad d=\mb_T-M,
+        \]
+        and both parts of the expected utility have closed forms:
+        \[
+          V_{\text{fix}}(t,x) = -e^{-\gamma M+\gamma^2S^2/2}
+          - \tfrac{\lambda}{2}\Bigl[(d^2+S^2)\,\Phi\!\bigl(\tfrac{d}{S}\bigr)
+                                   + dS\,\varphi\!\bigl(\tfrac{d}{S}\bigr)\Bigr],
+        \]
+        with $\Phi,\varphi$ the standard normal CDF and density. Its CARA part reproduces the
+        Merton value function exactly. Because the strategy isn't optimal near $x=-1$
+        (optimal is about 2.2, Merton 1.5), this is a \emph{lower bound} on $V$. (Checked
+        against Monte Carlo with $10^6$ paths: $-6.863$ vs $-6.861$ at $(t,x)=(0,-1)$.)
+  \item \textbf{Push $x_{\min}$ far down and use CARA.} As $x\to-\infty$, $e^{-\gamma x}$
+        outgrows the quadratic penalty and $A(x)\to\gamma$, but only for $x\lesssim-8$, where
+        $V\sim e^{8}\approx3000$: a poor scale for a network.
+  \item \textbf{Not} the option-pricing ``linearity'' condition $V_{xx}=0$: it makes
+        $\pi^*$ infinite.
+\end{itemize}
+
+\textbf{The check that matters.} The population lives roughly in $[0,2.2]$ (at $T$, mean
+$\approx1.11$, standard deviation $\approx0.36$). Move the boundary ($x_{\min}=-1\to-2$) and
+confirm $V$ and $\pi^*$ don't change there.
+
+\subsection*{Step 8: The CARA case solved exactly}
+\addcontentsline{toc}{subsection}{Step 8: The CARA case solved exactly}
+For $\lambda=0$, guess the shape of the terminal condition:
+\[
+  V(t,x) = -\exp\bigl(-\gamma a(t)x - b(t)\bigr),\qquad a(T)=1,\ b(T)=0 .
+\]
+Every derivative is $V$ times something simple:
+\[
+  V_t = (-\gamma a'x - b')V,\qquad V_x = -\gamma aV,\qquad V_{xx}=\gamma^2a^2V,
+  \qquad \frac{V_x^2}{V_{xx}} = V .
+\]
+Substituting into the PDE and dividing by $V$:
+\[
+  -\gamma(a'+ra)\,x - \bigl(b'+\tfrac12\kappa^2\bigr) = 0\qquad\text{for all }x .
+\]
+Both the coefficient of $x$ and the constant must vanish, which gives two ODEs:
+\[
+  a' = -ra \;\Rightarrow\; a(t)=e^{r(T-t)},\qquad
+  b' = -\tfrac12\kappa^2 \;\Rightarrow\; b(t)=\tfrac12\kappa^2(T-t),
+\]
+\[
+  V(t,x) = -\exp\!\bigl(-\gamma x\,e^{r(T-t)} - \tfrac12\kappa^2(T-t)\bigr)
+  \qquad(\texttt{merton\_value}).
+\]
+Then $A_V=\gamma e^{r(T-t)}$, independent of $x$, and $\pi^*=1.5\,e^{-r(T-t)}$: the Merton
+position. The \emph{certainty equivalent}
+$\mathrm{CE}=-\tfrac1\gamma\ln(-V)=x\,e^{r(T-t)}+\kappa^2(T-t)/(2\gamma)$ shows that access
+to the stock is worth $\kappa^2/(2\gamma)=0.045$ of terminal wealth over one year. For the
+original utility, $b(T)=-\gamma\theta\mb$, so $V_{\text{orig}}=e^{\gamma\theta\mb}V_{\text{CARA}}$.
+
+The guess works because the PDE maps ``exponential of a linear function of $x$'' to itself,
+collapsing into two ODEs.
+
+\subsection*{Step 9: What the shortfall penalty changes}
+\addcontentsline{toc}{subsection}{Step 9: What the shortfall penalty changes}
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{No closed form.} The terminal condition is not an exponential of a linear
+        function, so the guess of Step 8 fails. $V$ must be computed numerically.
+  \item \textbf{The position depends on wealth and time.} $A_V(t,x)$ now varies with $x$.
+        At $T$ it is $A(x)$ with its three regimes; for $t<T$ diffusion smooths the spike
+        into a bump of width roughly $\pi\sigma\sqrt{T-t}\approx0.3\sqrt{T-t}$. Close to $T$
+        the reaction near $\mb$ is sharp; early on it is milder and spread out.
+  \item \textbf{The ``fear zone'' extends above $\mb$ before $T$.} An investor slightly above
+        $\mb$ at $t<T$ may still finish below it, so their $V$ carries some expected penalty,
+        $A_V>\gamma$, and they hold a little less than Merton.
+  \item \textbf{Concavity is preserved.} Wealth is linear in $(x,\pi)$: averaging the
+        strategies from two starting wealths gives the average wealth path. With a concave
+        utility this makes $V(t,\cdot)$ concave for every $t$, so $V_{xx}<0$ and the reduced
+        PDE of Step 6 is legitimate.
+  \item \textbf{$V$ depends on $\mb_T$.} Strictly $V=V(t,x;\mb_T)$: moving $\mb_T$ moves the
+        kink and the fear zone. Finding $\mb_T$ requires the population's wealth distribution,
+        which is the Fokker--Planck equation.
+\end{enumerate}
+
+\begin{keyidea}[Where the HJB is hard]
+Close to $T$ and near $x=\mb_T$: $V_{xx}$ changes fastest there and $\pi^*$ drops from 1.5 to
+0.214. Finite-difference grids should be finest there; PINNs should sample extra collocation
+points there.
+\end{keyidea}
+
+%======================================================================
+\section{The Fokker--Planck equation}
+
+\subsection*{Step 1: The wealth density}
+\addcontentsline{toc}{subsection}{Step 1: The wealth density}
+$m(t,x)$ is the density of investors at wealth $x$ at time $t$:
+\[
+  \text{fraction in }[a,b] = \int_a^b m(t,x)\,dx,\qquad \int m\,dx = 1,\qquad
+  \mb(t) = \int x\,m(t,x)\,dx .
+\]
+It is both the smoothed histogram of the population and the probability density of one
+typical investor's $X_t$; with independent noise and a continuum of investors these coincide
+by the law of large numbers. Initially $m(0,\cdot)=\mathcal N(1,0.2^2)$.
+
+\subsection*{Step 2: Derivation}
+\addcontentsline{toc}{subsection}{Step 2: Derivation}
+Everyone follows $\pi^*(t,x)$, which is now a \emph{known} function, not a choice. Name the
+pieces of the dynamics:
+\[
+  b(t,x) = rx + \pi^*(t,x)(\mu-r),\qquad s^2(t,x) = \pi^*(t,x)^2\sigma^2,\qquad
+  dX = b\,dt + s\,dW .
+\]
+\textbf{2a. It\^o on a test function.} For any smooth $\varphi(x)$ that vanishes, with its
+derivative, at the edges:
+$d\varphi(X) = [b\varphi' + \tfrac12s^2\varphi'']\,dt + s\varphi'\,dW$, so
+\[
+  \frac{d}{dt}\E[\varphi(X_t)] = \E\bigl[b\varphi' + \tfrac12s^2\varphi''\bigr].
+\]
+\textbf{2b. Write expectations as integrals against $m$:}
+\[
+  \frac{d}{dt}\int\varphi\,m\,dx = \int\bigl(b\varphi' + \tfrac12s^2\varphi''\bigr)m\,dx .
+\]
+\textbf{2c. Integrate by parts} (once on the first term, twice on the second; boundary
+terms vanish):
+\[
+  \int\varphi\,\Bigl[m_t + \partial_x(bm) - \tfrac12\partial_{xx}(s^2m)\Bigr]dx = 0
+  \qquad\text{for every }\varphi .
+\]
+\textbf{2d. Conclude.} The bracket must vanish everywhere:
+\[
+  \boxed{\;m_t = -\partial_x\bigl(b\,m\bigr) + \tfrac12\,\partial_{xx}\bigl(s^2m\bigr),
+  \qquad m(0,x)=m_0(x).\;}
+\]
+The derivatives act on the products $bm$ and $s^2m$, not on $m$ alone. Both $b$ and $s^2$
+depend on $x$ through $\pi^*$, which changes sharply near $\mb$, so this matters.
+
+\textbf{Duality with the HJB.} For fixed $\pi$ the HJB uses
+$\mathcal L V = bV_x + \tfrac12s^2V_{xx}$; the Fokker--Planck equation uses its
+\emph{adjoint} $\mathcal L^*m = -\partial_x(bm)+\tfrac12\partial_{xx}(s^2m)$, defined by
+$\int(\mathcal L\varphi)\,m = \int\varphi\,(\mathcal L^*m)$, which is exactly Step 2c.
+$\mathcal L$ backward, $\mathcal L^*$ forward: this pairing is the structure of every
+mean-field game.
+
+\subsection*{Step 3: Conservation form}
+\addcontentsline{toc}{subsection}{Step 3: Conservation form}
+\[
+  m_t + \partial_xJ = 0,\qquad J = b\,m - \tfrac12\,\partial_x\bigl(s^2m\bigr).
+\]
+$J(t,x)$ is the \textbf{flux}: investors per unit time crossing wealth level $x$ upward.
+Density changes only through flow; nobody is created or destroyed.
+\begin{itemize}
+  \item \textbf{Drift part $bm$:} everyone is carried by expected growth.
+  \item \textbf{Diffusion part $-\tfrac12\partial_x(s^2m)$:} randomness spreads investors from
+        crowded to sparse regions, more strongly where $\pi^*$ is large.
+\end{itemize}
+\textbf{For $\lambda=0$:} $b\approx0.02x+0.09$ and $s^2\approx(1.5\times0.2)^2=0.09$ for
+everyone, so the bell curve shifts right and widens evenly, staying Gaussian.
+
+\textbf{With the penalty (a prediction to test):} investors just below $\mb$ hold little stock
+(small $s^2$) and barely spread; those far behind hold more than Merton and spread more. Mass
+tends to build up where the variance is small, so near $T$ the distribution should bunch up
+just below the average and grow a fatter left tail.
+
+\begin{caution}[The FP needs derivatives of the position]
+$\partial_{xx}(\pi^{*2}\sigma^2m)$ involves $\partial_{xx}(\pi^{*2})$, and
+$\pi^*\propto V_x/V_{xx}$. Expanded naively, the FP residual needs $V$ up to its
+\emph{fourth} derivative, which is fragile for a PINN. The finite-volume flux form avoids
+this (it only differences $s^2m$ at grid points). For a PINN, options are a separate network
+for $\pi$, writing the FP loss in flux form, or computing the population side by Monte Carlo
+and using the PINN only for $V$.
+\end{caution}
+
+\subsection*{Step 4: Initial and boundary conditions}
+\addcontentsline{toc}{subsection}{Step 4: Initial and boundary conditions}
+\textbf{Initial condition.} $m(0,x)=\mathcal N(1,0.2^2)$. The FP equation runs
+\emph{forward} from it, opposite to the HJB.
+
+\textbf{Boundaries: zero flux.} Use $J=0$ at $x=-1$ and $x=3$: nobody leaves the domain, and
+$\frac{d}{dt}\int m\,dx = -[J]_{-1}^{3} = 0$ conserves mass exactly. (Setting $m=0$ instead
+also works but leaks a little mass.) For $\lambda=0$ the true mass outside the domain at $T$
+is tiny: about $3\times10^{-9}$ below $-1$ (5.8 standard deviations) and $10^{-7}$ above 3
+(5.2 standard deviations). With the penalty the left tail is fatter, so monitor the mass in
+the outermost cells; if it isn't negligible, widen the domain.
+
+This choice is much easier than for the HJB, because nobody lives near the edges.
+
+\subsection*{Step 5: Mean and variance, checked at \texorpdfstring{$\lambda=0$}{lambda = 0}}
+\addcontentsline{toc}{subsection}{Step 5: Mean and variance, checked at lambda = 0}
+Take $\varphi(x)=x$ in Step 2b (allowed because $m$ decays fast). Since $\varphi'=1$,
+$\varphi''=0$:
+\[
+  \boxed{\;\frac{d\mb}{dt} = r\,\mb(t) + (\mu-r)\int\pi^*(t,x)\,m(t,x)\,dx .\;}
+\]
+This holds for \emph{any} $\lambda$: the average grows at the risk-free rate plus the risk
+premium times the \emph{average position}. With the penalty, near-losers hold less and deep
+losers hold more, so whether $\mb_T$ ends above or below 1.11 depends on the balance.
+
+\textbf{At $\lambda=0$,} $\pi^*=1.5\,e^{-r(T-t)}$ for everyone, so
+$\mb'=r\mb+0.09\,e^{-r(T-t)}$, giving
+\[
+  \mb(t) = e^{rt} + 0.09\,t\,e^{r(t-T)},\qquad \mb_T \approx 1.110 .
+\]
+Similarly $\varphi=x^2$ gives the variance $v(t)$: $v' = 2rv + \pi^{*2}\sigma^2
+= 2rv + 0.09\,e^{-2r(T-t)}$, so
+\[
+  v(t) = 0.04\,e^{2rt} + 0.09\,t\,e^{2r(t-T)} .
+\]
+In fact, at $\lambda=0$ the exact solution is $m(t,\cdot)=\mathcal N(\mb(t),v(t))$, so an FP
+solver can be checked pointwise, not just through moments. (\texttt{population\_mean} and
+\texttt{population\_var} in \texttt{benchmarks.py}.)
+
+\subsection*{Step 6: The coupled system and its fixed point}
+\addcontentsline{toc}{subsection}{Step 6: The coupled system and its fixed point}
+\label{sec:system}
+\begin{keyidea}[The mean-field game system]
+\vspace{-6pt}
+\begin{align*}
+  &\text{HJB (backward):} && V_t + rxV_x - \tfrac12\kappa^2\,V_x^2/V_{xx} = 0,
+     && V(T,x) = U(x,\mb_T),\\
+  &\text{position:}       && \pi^* = -(\mu-r)\,V_x/(\sigma^2V_{xx}), \\
+  &\text{FP (forward):}   && m_t = -\partial_x\bigl([rx+\pi^*(\mu-r)]m\bigr)
+                               + \tfrac12\partial_{xx}\bigl(\pi^{*2}\sigma^2m\bigr),
+     && m(0,x) = m_0(x),\\
+  &\text{consistency:}    && \mb_T = \textstyle\int x\,m(T,x)\,dx .
+\end{align*}
+\end{keyidea}
+
+\textbf{The coupling is a single number.} Each investor's best response depends on the
+population only through $\mb_T$. So define
+\[
+  \Phi(\mb) = \text{average terminal wealth when everyone best-responds to }\mb ,
+\]
+computed by: solve the HJB with $V(T,x)=U(x,\mb)$, read off $\pi^*$, solve the FP, take the
+mean at $T$. An equilibrium is a solution of
+\[
+  \Phi(\mb) = \mb ,
+\]
+a \textbf{one-dimensional root-finding problem}. Options: damped iteration
+$\mb_{k+1}=(1-\omega)\mb_k+\omega\,\Phi(\mb_k)$, or the secant method on $\Phi(\mb)-\mb$,
+starting from the $\lambda=0$ value $1.110$. Plotting $\Phi(\mb)-\mb$ over a range of $\mb$
+also shows whether the equilibrium is unique, which isn't guaranteed a priori.
+
+By Step 5, $\Phi$ only needs the average position over time, so a Monte Carlo simulation of
+investors under $\pi^*$ can stand in for the FP solver when computing $\Phi$.
+
+\subsection*{Step 7: What it means for the solvers}
+\addcontentsline{toc}{subsection}{Step 7: What it means for the solvers}
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.13\textwidth}p{0.47\textwidth}p{0.34\textwidth}@{}}
+\toprule
+Solver & Approach & Checks \\
+\midrule
+HJB, FD & backward in time; policy iteration (linear solve per iteration); grid
+refined near $\mb$ and small steps near $T$; boundaries of HJB Step 7
+& matches \texttt{merton\_value} at $\lambda=0$; boundary-moving test \\
+FP, FD & finite-volume (flux) form, zero flux at the edges; $\pi^*$ evaluated at cell
+faces from the HJB solution
+& mass conserved; Gaussian solution at $\lambda=0$ \\
+Monte Carlo & simulate many investors under $\pi^*$ (interpolated)
+& mean and variance at $\lambda=0$; matches FD density for $\lambda>0$ \\
+Equilibrium & secant or damped iteration on $\Phi(\mb)=\mb$
+& $\lambda=0$ gives $1.110$; $\Phi(\mb)-\mb$ plotted \\
+HJB, PINN & network $V_\theta(t,x)$; loss = PDE residual + terminal + boundaries;
+$\pi^*$ from automatic differentiation
+& $\lambda=0$ closed form; FD for $\lambda>0$ \\
+FP, PINN & network $m_\theta(t,x)$ on the FP residual
+& Gaussian at $\lambda=0$; FD and Monte Carlo for $\lambda>0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+\end{document}
