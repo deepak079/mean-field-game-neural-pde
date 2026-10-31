@@ -34,7 +34,8 @@ penalty: the Hamilton--Jacobi--Bellman (HJB) equation for one investor's value f
 solved backward in time, and the Fokker--Planck (FP) equation for the population's wealth
 distribution, solved forward in time. Each derivation goes one step at a time, is checked
 against the $\lambda=0$ closed forms, and ends with what it implies for the finite-difference,
-Monte Carlo and PINN solvers. Numbers use \texttt{configs/base.yaml}:
+Monte Carlo and PINN solvers. Appendix~\ref{app:fd-hjb} turns the HJB into the
+finite-difference scheme used in the code. Numbers use \texttt{configs/base.yaml}:
 $r=0.02$, $\mu=0.08$, $\sigma=0.20$, $\gamma=1$, $\lambda=2$, $T=1$,
 $m_0=\mathcal N(1,0.2^2)$, domain $x\in[-1,3]$.
 \end{abstract}
@@ -477,8 +478,8 @@ investors under $\pi^*$ can stand in for the FP solver when computing $\Phi$.
 \toprule
 Solver & Approach & Checks \\
 \midrule
-HJB, FD & backward in time; policy iteration (linear solve per iteration); grid
-refined near $\mb$ and small steps near $T$; boundaries of HJB Step 7
+HJB, FD & implicit Euler backward in time; policy iteration (one tridiagonal solve per
+iteration); boundaries of HJB Step 7 (details in Appendix~\ref{app:fd-hjb})
 & matches \texttt{merton\_value} at $\lambda=0$; boundary-moving test \\
 FP, FD & finite-volume (flux) form, zero flux at the edges; $\pi^*$ evaluated at cell
 faces from the HJB solution
@@ -496,5 +497,318 @@ FP, PINN & network $m_\theta(t,x)$ on the FP residual
 \end{tabular}
 \end{center}
 
+%======================================================================
+\appendix
+\section{The finite-difference HJB solver}
+\label{app:fd-hjb}
+
+This appendix turns the HJB of Section~2 into the scheme implemented in
+\texttt{src/mfg/fd/hjb.py}. The terminal value $\mb$ is a fixed number throughout. Each step
+says what the code does and why.
+
+\subsection*{Step 1: The grid and the unknowns}
+\addcontentsline{toc}{subsection}{Step 1: The grid and the unknowns}
+Replace $(t,x)$ by grid points:
+\[
+  x_j = x_{\min} + j\,\Delta x,\quad j=0,\dots,J,\qquad
+  t_0=0<t_1<\dots<t_N=T,\quad \Delta t_n = t_{n+1}-t_n ,
+\]
+\[
+  V_j^n \approx V(t_n,x_j),\qquad \pi_j^n \approx \pi^*(t_n,x_j),
+\]
+stored as arrays of shape $(N+1,J+1)$. The time steps are uniform to begin with
+($\Delta t_n=T/N$), but the scheme doesn't need that.
+
+\textbf{Default resolution.} $J=800$, $N=400$: $\Delta x=0.005$, $\Delta t=0.0025$, about
+$3\times10^5$ values, solved in seconds. With $x_{\min}=-1$ the kink $\mb=1.1$ is exactly the
+grid point $j=420$. This isn't required, but it makes the discrete terminal condition
+cleaner.
+
+\textbf{Is it fine enough near the kink?} By HJB Step 9b the bump in $A_V$ has width about
+$0.3\sqrt{T-t}$. One step before $T$ that is $0.3\sqrt{0.0025}=0.015$, about three cells, so
+the last few steps are only coarsely resolved; everywhere else the resolution is
+comfortable. The convergence study (Step 8) shows whether this matters.
+
+\textbf{Known values on the edges of the grid.}
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Where & Value & Function \\
+\midrule
+top row, $t=T$ & $V_j^N = U(x_j,\mb)$, $\pi_j^N=\pi^*(T,x_j)$ & \texttt{utility}, \texttt{pi\_terminal} \\
+left column, $x=-1$ & $V_0^n = V_{\text{fix}}(t_n,x_{\min})$ & \texttt{merton\_strategy\_value} \\
+right column, $x=3$ & $V_J^n = V_{\text{CARA}}(t_n,x_{\max})$ & \texttt{merton\_value} \\
+\bottomrule
+\end{tabular}
+\end{center}
+Everything else is unknown.
+
+\subsection*{Step 2: Time stepping}
+\addcontentsline{toc}{subsection}{Step 2: Time stepping}
+Write the HJB as $V_t + H(V)=0$ with
+$H(V)=\sup_\pi\{[rx+\pi(\mu-r)]V_x+\tfrac12\pi^2\sigma^2V_{xx}\}$. We know row $n+1$ and want
+row $n$ (backward in time). Replacing $V_t$ by $(V^{n+1}-V^n)/\Delta t_n$, the choice is
+where to evaluate $H$:
+\begin{center}
+\small
+\begin{tabular}{@{}lp{0.34\textwidth}p{0.36\textwidth}@{}}
+\toprule
+Scheme & Update & Here \\
+\midrule
+Explicit & $V^n = V^{n+1} + \Delta t\,H(V^{n+1})$
+  & stable only if $\Delta t\le\Delta x^2/s^2_{\max}\approx1.3\times10^{-4}$: about 7700
+    steps, and fragile \\
+\textbf{Implicit Euler} & $V^n - \Delta t\,H(V^n) = V^{n+1}$
+  & stable for any $\Delta t$; \textbf{used} \\
+Crank--Nicolson & average of the two
+  & second order, but oscillates near the kink \\
+\bottomrule
+\end{tabular}
+\end{center}
+Reasons for implicit Euler:
+\begin{itemize}
+  \item \textbf{Stable for any step,} so $\Delta t$ is chosen for accuracy, not to avoid
+        blow-up.
+  \item \textbf{Monotone} (with the space derivatives of Step 4): it creates no wiggles.
+        $\pi^*$ is read off $V_{xx}$, so wiggles in $V$ would become wild positions.
+  \item \textbf{Safe with the kink.} Crank--Nicolson is known to oscillate when the terminal
+        data has a kink, and the usual cure is a few implicit Euler steps first anyway.
+  \item The price is first-order accuracy in time. If the convergence study shows the time
+        error dominates, use smaller steps near $T$, where $V$ changes fastest.
+\end{itemize}
+Each time step therefore solves, at every interior node $j$,
+\[
+  \boxed{\;V_j^n - \Delta t_n\sup_{\pi}\Bigl\{b_j(\pi)\,(D_xV^n)_j
+      + \tfrac12 s_j^2(\pi)\,(D_{xx}V^n)_j\Bigr\} = V_j^{n+1},\;}
+\]
+with $b_j(\pi)=rx_j+\pi(\mu-r)$, $s_j^2(\pi)=\pi^2\sigma^2$, and $D_x$, $D_{xx}$ the difference
+operators of Step 4 applied to the \emph{unknown} row $V^n$. Because of the sup, this is
+nonlinear in $V^n$.
+
+\subsection*{Step 3: Policy iteration inside each time step}
+\addcontentsline{toc}{subsection}{Step 3: Policy iteration inside each time step}
+For a \emph{fixed} policy the problem is linear, so alternate two easy steps.
+
+\textbf{(a) Fix $\pi$, solve for $V$.} With $\pi^{(k)}$ given, $b_j$ and $s_j^2$ are numbers,
+and
+\[
+  (L^{(k)}V)_j = b_j\,(D_xV)_j + \tfrac12 s_j^2\,(D_{xx}V)_j
+\]
+is a linear operator. Then $V^{(k)}$ solves $(I-\Delta t_n L^{(k)})\,V^{(k)} = V^{n+1}$: one
+tridiagonal solve (Step 5).
+
+\textbf{(b) Fix $V$, update $\pi$.} The sup is a separate parabola in $\pi$ at each node, so
+\[
+  \pi_j^{(k+1)} = -\frac{(\mu-r)\,(D_xV^{(k)})_j}{\sigma^2\,(D_{xx}V^{(k)})_j},
+\]
+the discrete version of HJB Step 5 (with the guard of Step 6). It is one array expression.
+
+\begin{keyidea}[One time step]
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+  \item Warm start: $\pi \leftarrow \pi^{n+1}$ (at the first step, $\pi^N$ from
+        \texttt{pi\_terminal}, which already jumps from 1.5 to 0.214 at $\mb$).
+  \item Solve $(I-\Delta t_n L^{\pi})\,V = V^{n+1}$ with the boundary values at $t_n$.
+  \item Update $\pi$ from $D_xV$ and $D_{xx}V$.
+  \item Stop if $\max_j|V_j-V_j^{\text{old}}|<\text{tol}$ or after \texttt{max\_iter}
+        iterations; otherwise go to 2.
+  \item Store $V^n\leftarrow V$, $\pi^n\leftarrow\pi$ and the iteration count.
+\end{enumerate}
+\end{keyidea}
+
+\textbf{Why it converges.}
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{$V$ only goes up.} The new policy maximises the bracket at every node, so
+        $L^{(k+1)}V^{(k)}\ge L^{(k)}V^{(k)}$, hence
+        $(I-\Delta tL^{(k+1)})V^{(k)} \le V^{n+1} = (I-\Delta tL^{(k+1)})V^{(k+1)}$. If
+        $I-\Delta tL$ is an \textbf{M-matrix} (nonnegative inverse; Step 4), the inverse
+        keeps the inequality: $V^{(k+1)}\ge V^{(k)}$. A better strategy never lowers the value.
+        $V$ is also bounded above (by the CARA value), so the iteration can't run away.
+  \item \textbf{It is Newton's method in disguise.} With
+        $F(V)=V-\Delta t\sup_\pi L^\pi V - V^{n+1}$, the envelope theorem says the derivative of
+        the sup is the operator at the maximising $\pi$, so step (a) is a Newton step on
+        $F=0$. Convergence is fast near the solution, and the warm start puts us there; the
+        code records the iteration counts so this can be checked.
+\end{enumerate}
+
+\textbf{Lagged policy.} Stopping after one solve (\texttt{max\_iter=1}) uses $\pi^{n+1}$ for
+step $n$. It is still consistent and first order in time, but lags where $\pi$ moves fast
+(near the kink, close to $T$). The test of Step 8 checks that both versions agree as
+$\Delta t\to0$.
+
+\subsection*{Step 4: Space derivatives and the M-matrix check}
+\addcontentsline{toc}{subsection}{Step 4: Space derivatives and the M-matrix check}
+At an interior node, the second derivative is always central:
+\[
+  (D_{xx}V)_j = \frac{V_{j+1}-2V_j+V_{j-1}}{\Delta x^2}.
+\]
+For the first derivative there are two choices:
+\[
+  \text{central: } \frac{V_{j+1}-V_{j-1}}{2\Delta x}\ \ (\text{error }O(\Delta x^2)),
+  \qquad
+  \text{upwind: } \begin{cases}\dfrac{V_{j+1}-V_j}{\Delta x}, & b_j>0,\\[8pt]
+                                \dfrac{V_j-V_{j-1}}{\Delta x}, & b_j<0,\end{cases}
+  \ \ (\text{error }O(\Delta x)).
+\]
+(Upwind looks toward larger $x$ when $b>0$ because the HJB runs backward: the value at $x$
+depends on where the investor drifts \emph{to}.)
+
+\textbf{Coefficients.} Either way, $L$ couples each node to its two neighbours:
+\[
+  (LV)_j = \alpha_j\,V_{j-1} - (\alpha_j+\beta_j)\,V_j + \beta_j\,V_{j+1},
+\]
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & $\alpha_j$ (to $j-1$) & $\beta_j$ (to $j+1$) \\
+\midrule
+central & $\dfrac{s_j^2}{2\Delta x^2}-\dfrac{b_j}{2\Delta x}$
+        & $\dfrac{s_j^2}{2\Delta x^2}+\dfrac{b_j}{2\Delta x}$ \\[10pt]
+upwind  & $\dfrac{s_j^2}{2\Delta x^2}+\dfrac{\max(-b_j,0)}{\Delta x}$
+        & $\dfrac{s_j^2}{2\Delta x^2}+\dfrac{\max(b_j,0)}{\Delta x}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+The rows of $L$ sum to zero (a constant has zero derivatives).
+
+\textbf{The M-matrix condition.} The matrix $A=I-\Delta tL$ has diagonal
+$1+\Delta t(\alpha_j+\beta_j)$ and off-diagonals $-\Delta t\alpha_j$, $-\Delta t\beta_j$.
+If $\alpha_j,\beta_j\ge0$, the off-diagonals are $\le0$ and every row sums to $1>0$, which
+makes $A$ an M-matrix: $A^{-1}\ge0$ entrywise. Two consequences:
+\begin{itemize}
+  \item the policy-iteration argument of Step 3(i) holds;
+  \item the scheme is \textbf{monotone}: a larger $V^{n+1}$ gives a larger $V^n$, so there
+        are no new wiggles and no new maxima.
+\end{itemize}
+Upwind always has $\alpha_j,\beta_j\ge0$. Central needs the \textbf{P\'eclet condition}
+\[
+  s_j^2 \ge |b_j|\,\Delta x \quad\Longleftrightarrow\quad \text{diffusion beats drift on the
+  scale of one cell.}
+\]
+\textbf{Rule used:} central where the P\'eclet condition holds (second order), upwind where
+it fails (always monotone). With $\Delta x=0.005$, central works wherever $\pi\gtrsim0.06$
+near $\mb$ (at worst $\pi\gtrsim0.09$, at $x=3$). The smallest position we expect is 0.214,
+so central should be used everywhere and upwind is only a safety net; the code counts the
+upwind nodes, and the tests expect zero.
+
+\subsection*{Step 5: The tridiagonal system}
+\addcontentsline{toc}{subsection}{Step 5: The tridiagonal system}
+Each solve in Step 3(a) is $AV=\text{rhs}$ over all $J+1$ nodes. Writing
+$a_j=\Delta t_n\alpha_j$ and $c_j=\Delta t_n\beta_j$:
+\[
+\begin{pmatrix}
+1 & 0 \\
+-a_1 & 1+a_1+c_1 & -c_1 \\
+ & \ddots & \ddots & \ddots \\
+ & & -a_{J-1} & 1+a_{J-1}+c_{J-1} & -c_{J-1} \\
+ & & & 0 & 1
+\end{pmatrix}
+\begin{pmatrix} V_0 \\ V_1 \\ \vdots \\ V_{J-1} \\ V_J \end{pmatrix}
+=
+\begin{pmatrix} V_{\text{fix}}(t_n,x_{\min}) \\ V_1^{n+1} \\ \vdots \\ V_{J-1}^{n+1} \\
+                V_{\text{CARA}}(t_n,x_{\max}) \end{pmatrix}.
+\]
+\begin{itemize}
+  \item \textbf{Dirichlet rows.} The first and last rows just say ``$V$ equals the boundary
+        value at $t_n$''. They keep the M-matrix property.
+  \item \textbf{Tridiagonal.} Each node talks only to its neighbours, so the solve costs
+        $O(J)$ (Thomas algorithm), via \texttt{scipy.linalg.solve\_banded} with the three
+        diagonals stacked in an array of shape $(3,J+1)$.
+  \item \textbf{Cost.} $N$ steps $\times$ (a few iterations) $\times$ $O(J)$: well under a
+        second per iteration sweep at the default grid.
+\end{itemize}
+
+\subsection*{Step 6: Reading off the position, with a guard}
+\addcontentsline{toc}{subsection}{Step 6: Reading off the position, with a guard}
+At the interior nodes, using the \emph{central} $D_x$:
+\[
+  \pi_j = \operatorname{clip}\Bigl(-\frac{(\mu-r)(D_xV)_j}{\sigma^2(D_{xx}V)_j},\ 0,\ \pi_{\max}\Bigr)
+  \quad\text{if }(D_{xx}V)_j<0,\qquad \pi_j=\pi_{\max}\ \text{otherwise.}
+\]
+\begin{itemize}
+  \item \textbf{Why a box $[0,\pi_{\max}]$.} If the discrete $V$ were locally convex, the
+        sup would be $+\infty$. In theory it can't be: $U$ is strictly concave (only $U''$
+        jumps at $\mb$, by $-\lambda$) and the HJB preserves concavity (Step 9d). On a
+        bounded box the maximum always exists: the clipped formula when $D_{xx}V<0$, the
+        upper edge otherwise (where $V_x>0$). Default $\pi_{\max}=10$, far above the
+        $\approx2.2$ expected at $x=-1$.
+  \item \textbf{Clipping is a symptom.} The code counts clipped nodes; the tests expect zero.
+  \item \textbf{Edge nodes.} $\pi$ isn't needed at $j=0,J$ (Dirichlet rows), but the
+        Fokker--Planck solver wants it everywhere, so it is copied from the neighbouring node.
+        Positions at the edges are unreliable anyway (see the boundary-moving test).
+  \item \textbf{At $t=T$,} $\pi^N$ comes from \texttt{pi\_terminal} exactly, not from
+        differencing the kinked $U$.
+\end{itemize}
+
+\subsection*{Step 7: The solution object}
+\addcontentsline{toc}{subsection}{Step 7: The solution object}
+Following \texttt{CONTRIBUTING.md}, the solver returns an object the PINN side can be
+compared with:
+\begin{center}
+\small
+\begin{tabular}{@{}lp{0.62\textwidth}@{}}
+\toprule
+Item & Meaning \\
+\midrule
+\texttt{solve\_hjb(p, mbar, nx, nt, ...)} & runs Steps 1--6; returns the object below \\
+\texttt{t}, \texttt{x} & the grids, shapes $(N+1)$ and $(J+1)$ \\
+\texttt{V}, \texttt{pi} & the arrays $V_j^n$, $\pi_j^n$, shape $(N+1,J+1)$ \\
+\texttt{value(t, x)}, \texttt{position(t, x)} & bilinear interpolation of \texttt{V}, \texttt{pi};
+  NumPy arrays broadcasting like \texttt{t + x} \\
+\texttt{iterations} & policy iterations per time step \\
+\texttt{n\_clipped}, \texttt{n\_upwind} & guard counters of Steps 4 and 6 (expected 0) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Linear interpolation in $x$ has error $O(\Delta x^2)$, the same order as the scheme.
+
+\subsection*{Step 8: Tests and convergence study}
+\addcontentsline{toc}{subsection}{Step 8: Tests and convergence study}
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.27\textwidth}p{0.66\textwidth}@{}}
+\toprule
+Test & What it checks \\
+\midrule
+$\lambda=0$: $V$ and $\pi$ & against \texttt{merton\_value} and \texttt{merton\_pi}: the whole
+  scheme on a problem with a known answer \\
+Convergence at $\lambda=0$ & refine $(J,N)=(200,100),(400,200),(800,400)$: the error should
+  roughly halve each time (implicit Euler is first order in time, which dominates) \\
+Sandwich at $\lambda=2$ & $V_{\text{fix}}\le V\le V_{\text{CARA}}$ everywhere: no strategy
+  beats optimal, and the penalty only lowers utility \\
+Shape at $\lambda=2$ & $D_xV>0$ and $D_{xx}V<0$ at every node; no clipping, no upwinding \\
+Near $T$ at $\lambda=2$ & one step before $T$, $\pi$ matches \texttt{pi\_terminal} away from
+  the kink and the edge node \\
+Policy vs lagged & full policy iteration and \texttt{max\_iter=1}: $V$ agrees; $\pi$ agrees for
+  $t\le0.9$ \\
+Boundary-moving & $x_{\min}=-1$ vs $-2$: $V$ and $\pi$ agree on $[0,2.2]$, where the
+  population lives \\
+\bottomrule
+\end{tabular}
+\end{center}
+At $\lambda=2$ there is no closed form, so a refinement study (same three grids, differences
+between successive solutions) gives the accuracy of the reference solution the PINN will be
+compared against.
+
+\textbf{What the first runs showed} (default grid $J=800$, $N=400$; about 0.2\,s):
+\begin{itemize}
+  \item \textbf{$\lambda=0$:} largest errors $2.4\times10^{-6}$ in $V$ and $3.3\times10^{-4}$ in
+        $\pi$. Refining $(400,200)\to(800,400)\to(1600,800)$ divides them by 1.7--1.9: first
+        order, as expected.
+  \item \textbf{$\lambda=2$:} three to four policy iterations per step (up to six at the first
+        step below $T$), no clipping, no upwinding, and $V$ concave and increasing at every
+        node. $V(0,1.1)$ changes by less than $10^{-6}$ between the two finest grids.
+  \item \textbf{Positions at $t=0$:} $\pi=1.86$ at $x=-0.5$, $1.00$ at $x=0.5$, $0.65$ at the
+        average $x=1.1$ and $1.47$ (Merton) at $x=2$. The fear zone is wide at $t=0$: an
+        investor exactly at the average holds less than half the Merton position.
+  \item \textbf{The edge node.} Near $x=-1$ the solver's $\pi$ is pulled towards the boundary
+        strategy (Merton, 1.5) instead of the optimal 2.2. On $[0,2.2]$ moving the boundary to
+        $-2$ changes $V$ by $2.5\times10^{-5}$ and $\pi$ by $1.5\times10^{-3}$, but at
+        $x=-0.5$ it changes $\pi$ by 0.04: at $t=0$ the boundary's influence reaches about half
+        a unit into the domain.
+  \item \textbf{Lagged policy.} $V$ agrees with full policy iteration to $10^{-5}$, and $\pi$
+        to $10^{-3}$ for $t\le0.9$. At the kink in the first steps below $T$ the two differ by
+        $O(1)$ in $\pi$: the lagged step uses the terminal policy, which jumps there. Full
+        policy iteration is the default.
+\end{itemize}
 
 \end{document}
