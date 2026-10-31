@@ -35,8 +35,9 @@ penalty: the Hamilton--Jacobi--Bellman (HJB) equation for one investor's value f
 solved backward in time, and the Fokker--Planck (FP) equation for the population's wealth
 distribution, solved forward in time. Each derivation goes one step at a time, is checked
 against the $\lambda=0$ closed forms, and ends with what it implies for the finite-difference,
-Monte Carlo and PINN solvers. Appendices~\ref{app:fd-hjb} and~\ref{app:fd-fp} turn the two
-equations into the finite-difference schemes used in the code. Numbers use \texttt{configs/base.yaml}:
+Monte Carlo and PINN solvers. Appendices~\ref{app:fd-hjb}--\ref{app:fd-eq} turn the
+equations into the finite-difference solvers used in the code and find the equilibrium.
+Numbers use \texttt{configs/base.yaml}:
 $r=0.02$, $\mu=0.08$, $\sigma=0.20$, $\gamma=1$, $\lambda=2$, $T=1$,
 $m_0=\mathcal N(1,0.2^2)$, domain $x\in[-1,3]$.
 \end{abstract}
@@ -491,7 +492,7 @@ the grid nodes from the HJB solution (Appendix~B)
 Monte Carlo & simulate many investors under $\pi^*$ (interpolated)
 & mean and variance at $\lambda=0$; matches FD density for $\lambda>0$ \\
 Equilibrium & secant or damped iteration on $\Phi(\mb)=\mb$
-& $\lambda=0$ gives $1.110$; $\Phi(\mb)-\mb$ plotted \\
+& $\lambda=0$ gives $1.110$; $\Phi(\mb)-\mb$ plotted (Appendix~\ref{app:fd-eq}) \\
 HJB, PINN & network $V_\theta(t,x)$; loss = PDE residual + terminal + boundaries;
 $\pi^*$ from automatic differentiation
 & $\lambda=0$ closed form; FD for $\lambda>0$ \\
@@ -983,5 +984,146 @@ If everyone fears ending below 1.1, the average ends below 1.1. For a low enough
 penalty hardly bites and $\Phi(\mb)\approx1.110>\mb$, so $\Phi(\mb)-\mb$ changes sign and there
 is an equilibrium below 1.1. The secant method on $\Phi(\mb)-\mb$ can start from the two points
 $1.1$ and $1.063$. Each evaluation is one HJB solve and one FP solve, well under a second.
+
+%======================================================================
+\section{The equilibrium with the finite-difference solvers}
+\label{app:fd-eq}
+
+This appendix finds the equilibrium of FP Step 6 with the solvers of Appendices~A and~B, as
+implemented in \texttt{src/mfg/fd/equilibrium.py}.
+
+\subsection*{Step 1: The problem is one equation in one unknown}
+\addcontentsline{toc}{subsection}{Step 1: One equation in one unknown}
+\[
+  g(\mb) = \Phi(\mb) - \mb = 0,
+\]
+where $\Phi(\mb)$ is the average terminal wealth when everyone best-responds to $\mb$: one HJB
+solve with $V(T,x)=U(x,\mb)$, one FP solve under its $\pi^*$, then the mean at $T$
+(\texttt{phi}, about 0.3\,s on the default grid). Each evaluation is expensive compared with the
+arithmetic around it, so the goal is to evaluate $\Phi$ as few times as possible.
+
+\subsection*{Step 2: The secant method}
+\addcontentsline{toc}{subsection}{Step 2: The secant method}
+Newton's method would step to $\mb-g(\mb)/g'(\mb)$, but $g'$ is unknown and estimating it costs
+extra solves. The \textbf{secant method} uses the slope of the line through the last two points
+instead: from $(a,g(a))$ and $(b,g(b))$, the next guess is where that line crosses zero,
+\[
+  \boxed{\;c = b - g(b)\,\frac{b-a}{g(b)-g(a)},\;}
+\]
+then repeat with $(b,c)$.
+\begin{itemize}
+  \item One new evaluation of $\Phi$ per iteration.
+  \item Superlinear convergence, of order $(1+\sqrt5)/2\approx1.618$: near the root the number
+        of correct digits grows by about $1.6\times$ per step.
+  \item If $g$ is a straight line, one step lands exactly on the root.
+\end{itemize}
+
+\textbf{Starting points.} $a=1.110$, the $\lambda=0$ equilibrium (\texttt{population\_mean}),
+and $b=\Phi(a)$, one step of plain iteration. Stop when $|g(b)|<10^{-10}$.
+
+\subsection*{Step 3: The run at \texorpdfstring{$\lambda=2$}{lambda = 2}}
+\addcontentsline{toc}{subsection}{Step 3: The run at lambda = 2}
+\begin{center}
+\small
+\begin{tabular}{@{}cccc@{}}
+\toprule
+Evaluation & $\mb$ & $\Phi(\mb)$ & $g(\mb)$ \\
+\midrule
+1 & 1.11020134 & 1.06221731 & $-4.8\times10^{-2}$ \\
+2 & 1.06221731 & 1.06534024 & $+3.1\times10^{-3}$ \\
+3 & 1.06514941 & 1.06512682 & $-2.3\times10^{-5}$ \\
+4 & 1.06512835 & 1.06512834 & $-9.3\times10^{-9}$ \\
+5 & \textbf{1.06512834} & 1.06512834 & $+3\times10^{-14}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Equilibrium: $\mb_T\approx1.0651$}, against $1.110$ without the penalty. Five
+evaluations, about 1.5\,s.
+
+\textbf{Why not just iterate $\mb\leftarrow\Phi(\mb)$?} That is the damped iteration of FP
+Step 6 with $\omega=1$. Here it also converges, in about seven evaluations to $10^{-8}$, because
+the slope of $\Phi$ near the root is only about $-0.065$: each step shrinks the error by that
+factor and flips its sign. Economically, raising the target makes investors slightly more
+cautious, which slightly lowers the average. The secant method is the default because it needs
+no condition like $|\Phi'|<1$, which could fail for other parameters, and it is faster here.
+
+\subsection*{Step 4: The shape of \texorpdfstring{$\Phi$}{Phi}, and uniqueness}
+\addcontentsline{toc}{subsection}{Step 4: The shape of Phi, and uniqueness}
+Neither method says whether the equilibrium is unique. Evaluating $\Phi$ over a wide range:
+\begin{center}
+\small
+\begin{tabular}{@{}lcccccccccc@{}}
+\toprule
+$\mb$ & 0 & 0.4 & 0.8 & 1.0 & 1.05 & 1.1 & 1.2 & 1.3 & 1.8 & 2.2 \\
+\midrule
+$\Phi(\mb)$ & 1.110 & 1.108 & 1.089 & 1.070 & 1.066 & 1.063 & 1.059 & 1.059 & 1.090 & 1.118 \\
+$g(\mb)$ & $+1.11$ & $+0.71$ & $+0.29$ & $+0.07$ & $+0.02$ & $-0.04$ & $-0.14$ & $-0.24$ &
+  $-0.71$ & $-1.08$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}
+  \item \textbf{$g$ is strictly decreasing,} so it crosses zero exactly once: the equilibrium is
+        unique on this range. ($|\Phi'|$ stays well below 1, so $g'=\Phi'-1<0$.)
+  \item \textbf{$\Phi$ is not monotone.} For a low target nobody fears the penalty and
+        $\Phi\approx1.110$. Raising the target makes the investors just below it cautious, and
+        the average falls, to a minimum of about 1.059 near $\mb\approx1.25$. Raising it further
+        puts almost everyone well behind, where they gamble ($\pi^*>$ Merton, HJB Step 9b), and
+        the average rises again, above 1.110 for $\mb=2.2$.
+\end{itemize}
+
+\subsection*{Step 5: Accuracy}
+\addcontentsline{toc}{subsection}{Step 5: Accuracy}
+The secant tolerance is far below the grid error, so the accuracy of $\mb_T$ is set by the HJB
+and FP grids:
+\begin{center}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+$(J,N)$ & $(200,100)$ & $(400,200)$ & $(800,400)$ & $(1600,800)$ \\
+\midrule
+$\mb_T$ & 1.0651431 & 1.0651322 & 1.0651283 & 1.0651268 \\
+change & & $-1.1\times10^{-5}$ & $-3.9\times10^{-6}$ & $-1.5\times10^{-6}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+The changes shrink by a factor of 2.6--2.8 per refinement, so the default grid is within a few
+$10^{-6}$ of the limit: $\mb_T=1.06513$ to five decimals. At $\lambda=0$ the same code gives
+$1.1102021$ against the exact $1.1102013$.
+
+\subsection*{Step 6: Code and tests}
+\addcontentsline{toc}{subsection}{Step 6: Code and tests}
+\begin{center}
+\small
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{0.55\textwidth}@{}}
+\toprule
+Item & Meaning \\
+\midrule
+\texttt{best\_response(p, mbar)} & HJB solve, then FP solve under its position \\
+\texttt{phi(p, mbar)} & $\Phi(\mb)$: the mean of the FP solution at $T$ \\
+\texttt{solve\_equilibrium(p)} & the secant method; returns \texttt{mbar}, \texttt{hjb},
+  \texttt{fp} (the best response to \texttt{mbar}) and \texttt{history} \\
+\midrule
+Test: $\lambda=0$ & $\Phi$ is constant, so $g$ is a line: 1.110 after two evaluations \\
+Test: fixed point & $|\Phi(\mb)-\mb|<10^{-10}$, $\mb\in(1.06,1.07)$, at most six evaluations \\
+Test: uniqueness & $g$ strictly decreasing on $[0,2.2]$ (coarse grid) \\
+Test: refinement & the change in $\mb_T$ shrinks and is below $10^{-5}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{A preview of the sweep.} The same code at other penalty strengths (grid $(400,200)$):
+\begin{center}
+\small
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+$\lambda$ & 0 & 0.5 & 1 & 2 & 5 & 10 \\
+\midrule
+$\mb_T$ & 1.110 & 1.085 & 1.074 & 1.065 & 1.057 & 1.054 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The first bit of penalty costs the most: the equilibrium average falls quickly and then levels
+off, because once $\lambda$ is large, investors near the average already hold little stock.
 
 \end{document}
