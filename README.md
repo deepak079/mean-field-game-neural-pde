@@ -17,11 +17,11 @@ The formulation, and why it differs from the original statement, is in
 
 ```
 configs/      Parameter sets (YAML). Every reported result should come from one of these.
-src/mfg/      The package: parameters, utility, benchmarks, solvers.
+src/mfg/      The package: parameters, utility, benchmarks; solvers in fd/ and pinn/.
 tests/        Pytest checks against known answers. Run on every pull request.
 scripts/      Entry points: train / solve / make figures.
 notebooks/    Exploration only. Reusable code moves into src/mfg.
-docs/         Problem statement, proposal, explanatory notes.
+docs/         Problem statement, proposal, explanatory notes (start with docs/notes/).
 report/       Final report and the figures it uses.
 results/      Experiment outputs (git-ignored; regenerate from configs).
 ```
@@ -46,15 +46,20 @@ the matching CUDA build of PyTorch from https://pytorch.org/get-started/locally/
 
 ## Roadmap
 
-Put your initials next to a task when you start it, and tick it in the pull request that finishes it.
+DS works on the finite-difference side and AI on the PINN side. Tick a task in the pull request
+that finishes it. Unassigned tasks: agree in chat who takes them, then add your initials.
 
-- [x] Parameters, utility and λ = 0 closed-form benchmarks, with tests
-- [ ] Finite-difference solver for the HJB (fixed m̄_T)
-- [ ] Finite-difference solver for the Fokker–Planck equation (given π*)
-- [ ] Equilibrium loop on m̄_T with the FD solvers (reference solution for λ > 0)
+- [x] DS: Parameters, utility and λ = 0 closed-form benchmarks, with tests
+- [x] DS: Notes on the HJB and the Fokker–Planck equation (`docs/notes/`)
+- [ ] DS: Lower-boundary value for the HJB in `benchmarks.py` (shared by both solvers)
+- [ ] DS: Finite-difference solver for the HJB (fixed m̄_T)
+- [ ] DS: Finite-difference solver for the Fokker–Planck equation (given π*)
+- [ ] DS: Equilibrium on m̄_T with the FD solvers (secant on Φ(m̄) = m̄; reference for λ > 0)
+- [ ] AI: PINN for V at λ = 0 (validate against `merton_value`)
+- [ ] AI: PINN for V at λ = 2, m̄ = 1.1 fixed (validate against the FD solver)
+- [ ] AI: PINN for m (validate against the Gaussian at λ = 0, then FD)
+- [ ] AI: PINN equilibrium: alternating and joint training
 - [ ] Monte Carlo simulation of N investors under a given π*
-- [ ] PINN for V (validate against λ = 0 and FD)
-- [ ] PINN for m (validate against FD)
-- [ ] PINN equilibrium: alternating and joint training
+- [ ] Comparison script: FD vs PINN for V, π* and m
 - [ ] Sweep over the interaction strength; figures of π*(t, x), m̄_T and the wealth spread
 - [ ] Report and presentation

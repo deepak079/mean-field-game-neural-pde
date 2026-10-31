@@ -2,8 +2,8 @@
 
 ## The loop
 
-1. **Pick a task from the roadmap** in `README.md` and put your initials next to it, so we don't
-   overlap.
+1. **Pick one of your tasks from the roadmap** in `README.md`. For an unassigned task, agree in
+   chat first, then add your initials in the PR.
 2. **Branch from an up-to-date `main`:**
    ```bash
    git switch main && git pull
@@ -29,6 +29,23 @@ Nobody pushes directly to `main`.
 | `fix/`  | bug fixes |
 | `exp/`  | experiments and sweeps (code that produces results/figures) |
 | `docs/` | notes, report, README |
+
+## How the FD and PINN solvers fit together
+
+The finite-difference solvers (`src/mfg/fd/`, DS) and the PINNs (`src/mfg/pinn/`, AI) solve the
+same equations, so their answers must be directly comparable.
+
+- **Same interface.** For given `Params` and a fixed m̄, every HJB solver returns an object with
+  `value(t, x)` and `position(t, x)`; every Fokker–Planck solver returns one with
+  `density(t, x)`. They take and return NumPy arrays (broadcasting like `t + x`), so a PINN
+  wrapper converts to and from tensors inside.
+- **Same boundary conditions.** Both use the functions in `benchmarks.py`: `merton_value` at
+  x = 3, and the lower-boundary value at x = −1 once it exists (at λ = 0, `merton_value` at both
+  ends). Different boundary choices would show up as solver error.
+- **Same test case.** Before the equilibrium is known, compare at λ = 2 with m̄ = 1.1 fixed,
+  on the domain and parameters of `configs/base.yaml`.
+- **Separate folders.** Each side edits its own folder; shared code (`params.py`, `utility.py`,
+  `benchmarks.py`) changes only in small PRs of its own.
 
 ## Rules that keep results trustworthy
 
