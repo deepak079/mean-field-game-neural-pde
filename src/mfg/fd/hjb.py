@@ -12,6 +12,7 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.linalg import solve_banded
 
 from mfg.benchmarks import merton_strategy_value, merton_value
+from mfg.fd.generator import jump_rates
 from mfg.params import Params
 from mfg.utility import pi_terminal, utility
 
@@ -96,12 +97,7 @@ def solve_hjb(
 
 def _solve_linear(policy, x, dx, dt, rhs, p: Params):
     """Solve (I - dt L) v = rhs for a fixed policy, with Dirichlet rows at both ends (Steps 4-5)."""
-    b = p.r * x + policy * (p.mu - p.r)
-    diffusion = (policy * p.sigma) ** 2 / (2 * dx**2)
-    # Central V_x where it keeps the off-diagonals of L nonnegative (Peclet), upwind elsewhere.
-    central = (policy * p.sigma) ** 2 >= np.abs(b) * dx
-    alpha = np.where(central, diffusion - b / (2 * dx), diffusion + np.maximum(-b, 0.0) / dx)
-    beta = np.where(central, diffusion + b / (2 * dx), diffusion + np.maximum(b, 0.0) / dx)
+    alpha, beta, central = jump_rates(policy, x, dx, p)
 
     # Banded storage for solve_banded: row 0 the upper diagonal, row 1 the main, row 2 the lower.
     ab = np.zeros((3, x.size))

@@ -5,6 +5,7 @@
 \usepackage{microtype}
 \usepackage{amsmath,amssymb,mathtools}
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage[most]{tcolorbox}
@@ -34,8 +35,8 @@ penalty: the Hamilton--Jacobi--Bellman (HJB) equation for one investor's value f
 solved backward in time, and the Fokker--Planck (FP) equation for the population's wealth
 distribution, solved forward in time. Each derivation goes one step at a time, is checked
 against the $\lambda=0$ closed forms, and ends with what it implies for the finite-difference,
-Monte Carlo and PINN solvers. Appendix~\ref{app:fd-hjb} turns the HJB into the
-finite-difference scheme used in the code. Numbers use \texttt{configs/base.yaml}:
+Monte Carlo and PINN solvers. Appendices~\ref{app:fd-hjb} and~\ref{app:fd-fp} turn the two
+equations into the finite-difference schemes used in the code. Numbers use \texttt{configs/base.yaml}:
 $r=0.02$, $\mu=0.08$, $\sigma=0.20$, $\gamma=1$, $\lambda=2$, $T=1$,
 $m_0=\mathcal N(1,0.2^2)$, domain $x\in[-1,3]$.
 \end{abstract}
@@ -386,7 +387,10 @@ everyone, so the bell curve shifts right and widens evenly, staying Gaussian.
 \textbf{With the penalty (a prediction to test):} investors just below $\mb$ hold little stock
 (small $s^2$) and barely spread; those far behind hold more than Merton and spread more. Mass
 tends to build up where the variance is small, so near $T$ the distribution should bunch up
-just below the average and grow a fatter left tail.
+just below the average and grow a fatter left tail. \emph{The FD solver (Appendix~B, Step 6)
+confirms the bunching but not the fatter left tail:} almost everyone starts close to $\mb$ and
+cuts risk, so few investors ever get far enough behind to gamble, and the left tail ends up
+thinner than at $\lambda=0$.
 
 \begin{caution}[The FP needs derivatives of the position]
 $\partial_{xx}(\pi^{*2}\sigma^2m)$ involves $\partial_{xx}(\pi^{*2})$, and
@@ -481,8 +485,8 @@ Solver & Approach & Checks \\
 HJB, FD & implicit Euler backward in time; policy iteration (one tridiagonal solve per
 iteration); boundaries of HJB Step 7 (details in Appendix~\ref{app:fd-hjb})
 & matches \texttt{merton\_value} at $\lambda=0$; boundary-moving test \\
-FP, FD & finite-volume (flux) form, zero flux at the edges; $\pi^*$ evaluated at cell
-faces from the HJB solution
+FP, FD & transpose of the HJB matrix (a flux form), zero flux at the edges; $\pi^*$ at
+the grid nodes from the HJB solution (Appendix~B)
 & mass conserved; Gaussian solution at $\lambda=0$ \\
 Monte Carlo & simulate many investors under $\pi^*$ (interpolated)
 & mean and variance at $\lambda=0$; matches FD density for $\lambda>0$ \\
@@ -810,5 +814,174 @@ compared against.
         $O(1)$ in $\pi$: the lagged step uses the terminal policy, which jumps there. Full
         policy iteration is the default.
 \end{itemize}
+
+%======================================================================
+\section{The finite-difference Fokker--Planck solver}
+\label{app:fd-fp}
+
+This appendix turns the Fokker--Planck equation of Section~3 into the scheme implemented in
+\texttt{src/mfg/fd/fokker\_planck.py}. The position $\pi^*(t,x)$ is given, usually by the HJB
+solver of Appendix~\ref{app:fd-hjb}. The main idea is that the FP matrix is the transpose of the
+HJB matrix, so almost everything is reused.
+
+\subsection*{Step 1: Cells and unknowns}
+\addcontentsline{toc}{subsection}{Step 1: Cells and unknowns}
+Use the HJB grid $x_j=x_{\min}+j\Delta x$, $t_n$, and think of node $j$ as the centre of the cell
+$[x_j-\Delta x/2,\,x_j+\Delta x/2]$:
+\[
+  m_j^n\approx m(t_n,x_j),\qquad
+  \text{mass}^n = \Delta x\sum_j m_j^n,\qquad
+  \mb^n = \Delta x\sum_j x_j\,m_j^n .
+\]
+With the same grid, $\pi^*$ is already known at every node (\texttt{HJBSolution.pi}): it never
+has to be interpolated or differentiated.
+
+\subsection*{Step 2: The transpose of the HJB matrix}
+\addcontentsline{toc}{subsection}{Step 2: The transpose of the HJB matrix}
+\textbf{The Markov-chain picture.} The HJB operator of Appendix~A, Step 4,
+\[
+  (LV)_j = \alpha_jV_{j-1} - (\alpha_j+\beta_j)V_j + \beta_jV_{j+1},\qquad \alpha_j,\beta_j\ge0,
+\]
+is the generator of a random walk on the grid: from node $j$ an investor jumps to $j+1$ at rate
+$\beta_j$ and to $j-1$ at rate $\alpha_j$. Its rows sum to zero and its off-diagonals are jump
+rates, exactly a continuous-time Markov chain approximating the wealth SDE. (The rates are
+computed once, by \texttt{jump\_rates} in \texttt{src/mfg/fd/generator.py}, for both solvers.)
+\begin{itemize}
+  \item \textbf{HJB (backward):} the expected future value from node $j$ uses $L$.
+  \item \textbf{FP (forward):} mass arrives at $j$ from $j-1$ at rate $\beta_{j-1}$ and from
+        $j+1$ at rate $\alpha_{j+1}$, and leaves at rate $\alpha_j+\beta_j$:
+        \[
+          \frac{dm_j}{dt} = \beta_{j-1}m_{j-1} - (\alpha_j+\beta_j)m_j + \alpha_{j+1}m_{j+1}
+          = (L^{\mathsf T}m)_j .
+        \]
+\end{itemize}
+This is the discrete version of FP Step 2: the FP operator is the adjoint of the HJB operator.
+
+\textbf{It is the flux form.} With $F_{j+1/2}=\Delta x\,(\beta_jm_j-\alpha_{j+1}m_{j+1})$, the
+net flow from cell $j$ to cell $j+1$,
+\[
+  \frac{dm_j}{dt} = -\frac{F_{j+1/2}-F_{j-1/2}}{\Delta x},
+\]
+and with the central coefficients
+\[
+  F_{j+1/2} = \tfrac12\bigl(b_jm_j+b_{j+1}m_{j+1}\bigr)
+              - \tfrac12\,\frac{(s^2m)_{j+1}-(s^2m)_j}{\Delta x}
+  \;\approx\; bm - \tfrac12\,\partial_x(s^2m) = J ,
+\]
+the flux of FP Step 3. The product $s^2m$ is differenced as a whole, so the derivatives of
+$\pi^*$ (and the fourth derivative of $V$) never appear.
+
+\textbf{Zero flux at the edges.} Set $\alpha_0=0$ and $\beta_J=0$: nobody jumps off the grid.
+Every column of $L^{\mathsf T}$ then sums to zero.
+
+\subsection*{Step 3: Time stepping, and what it gives for free}
+\addcontentsline{toc}{subsection}{Step 3: Time stepping, and what it gives for free}
+Implicit Euler forward from $m^0$:
+\[
+  \boxed{\;(I-\Delta t_n L^n)^{\mathsf T}\,m^{n+1} = m^n,\;}
+\]
+where $L^n$ is built from $\pi^n=\pi^*(t_n,\cdot)$: the same matrix the HJB step from
+$t_{n+1}$ to $t_n$ used. It is one tridiagonal solve per step and no iteration, since $\pi$ is
+given. The transpose swaps the two off-diagonals of the HJB's banded storage.
+\begin{center}
+\small
+\begin{tabular}{@{}lp{0.45\textwidth}l@{}}
+\toprule
+Property & Why & Measured \\
+\midrule
+Mass conserved & columns of $L^{\mathsf T}$ sum to zero & $10^{-15}$ \\
+$m\ge0$ & $(I-\Delta tL)^{\mathsf T}$ is an M-matrix, so its inverse is $\ge0$ & exact \\
+Mean ODE & $(Lx)_j=b_j$ for central and upwind alike, so
+  $\mb^{n+1}-\mb^n=\Delta t\,\Delta x\sum_jb_j(\pi^n)\,m_j^{n+1}$ & $2\times10^{-10}$ \\
+$\E[V(t,X_t)]$ constant & $m^n\!\cdot V^n = m^{n+1}\!\cdot(I-\Delta tL^n)V^n = m^{n+1}\!\cdot V^{n+1}$
+  & $5\times10^{-8}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+The last row is the dynamic programming principle seen from the population: the average value
+is the same at every time, so the expected terminal utility equals $\int V(0,x)\,m_0(x)\,dx$. It
+holds up to the HJB's Dirichlet rows (multiplied by an almost-zero density) and its
+policy-iteration tolerance. It checks that the two solvers are consistent with each other.
+
+\subsection*{Step 4: Initial condition}
+\addcontentsline{toc}{subsection}{Step 4: Initial condition}
+Cell averages of $m_0=\mathcal N(1,0.2^2)$: $m_j^0=[\Phi_0(x_j+\Delta x/2)-\Phi_0(x_j-\Delta x/2)]/\Delta x$
+with $\Phi_0$ its CDF, rescaled so the discrete mass is exactly 1 (the mass outside the grid is
+below $10^{-12}$).
+
+\subsection*{Step 5: The solution object}
+\addcontentsline{toc}{subsection}{Step 5: The solution object}
+\begin{center}
+\small
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{0.5\textwidth}@{}}
+\toprule
+Item & Meaning \\
+\midrule
+\texttt{solve\_fokker\_planck(p, position, ...)} & \texttt{position(t, x)} is any strategy,
+  e.g.\ \texttt{HJBSolution.position} (or a PINN's) \\
+\texttt{t}, \texttt{x}, \texttt{m} & the grids and the density, shape $(N+1,J+1)$ \\
+\texttt{density(t, x)} & bilinear interpolation, broadcasting like \texttt{t + x}; zero outside
+  the grid \\
+\texttt{mass}, \texttt{mean} & per time step; \texttt{mean[-1]} is $\mb_T$ \\
+\texttt{n\_upwind} & nodes where the P\'eclet condition failed (expected 0) \\
+\bottomrule
+\end{tabular}
+\end{center}
+On the HJB's own grid (same \texttt{nx}, \texttt{nt}) interpolating \texttt{position} returns the
+nodal values, so Step 3's identities hold exactly.
+
+\subsection*{Step 6: Tests, and what the first runs showed}
+\addcontentsline{toc}{subsection}{Step 6: Tests, and what the first runs showed}
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.3\textwidth}p{0.63\textwidth}@{}}
+\toprule
+Test & Result (default grid, about 0.1\,s per solve) \\
+\midrule
+$\lambda=0$: Gaussian & density within $8\times10^{-4}$ of $\mathcal N(\mb(t),v(t))$ (peak
+  about 2); mean within $10^{-6}$, variance within $4\times10^{-5}$ \\
+Convergence at $\lambda=0$ & density error halves with each refinement: first order \\
+Mass, positivity & mass $1$ to $10^{-15}$, $m\ge0$, no upwinding \\
+Mean ODE, $\E[V]$ constant & Step 3's identities, at $\lambda=2$ \\
+Edges & mass within 0.1 of either edge below $10^{-5}$ at all times \\
+Shape at $\lambda=2$ & the bunching below, as a regression test \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{The wealth distribution at $T$ with $\lambda=2$, $\mb=1.1$ fixed,} compared with
+$\lambda=0$:
+\begin{center}
+\small
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+ & mean & mode & peak density & $P(X_T<1.1)$ & 1\% & 50\% & 99\% \\
+\midrule
+$\lambda=0$ & 1.110 & 1.11 & 1.1 & 0.49 & 0.27 & 1.11 & 1.96 \\
+$\lambda=2$ & 1.063 & 1.09 & 4.0 & 0.72 & 0.47 & 1.04 & 1.89 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}
+  \item \textbf{Bunching just below $\mb$: confirmed.} The density peaks at 1.09 and is almost
+        four times as high as at $\lambda=0$; 72\% of investors finish below 1.1. Near $\mb$
+        they hold little stock, so they stop spreading out.
+  \item \textbf{Fatter left tail: not confirmed.} The 1\% quantile rises from 0.27 to 0.47 and
+        the skewness is $+0.82$. Almost everyone starts close to $\mb$ ($m_0=\mathcal
+        N(1,0.2^2)$) and cuts risk, so few ever fall far enough behind to gamble.
+  \item \textbf{The average position is about half of Merton} (0.68 at $t=0$, 0.75 at $T$,
+        against 1.47--1.5), so the average grows more slowly and ends at $1.063$, not $1.110$.
+\end{itemize}
+
+\subsection*{Step 7: Towards the equilibrium}
+\addcontentsline{toc}{subsection}{Step 7: Towards the equilibrium}
+The last row of that table is one evaluation of the map of FP Step 6:
+\[
+  \Phi(1.1) = 1.063 < 1.1 .
+\]
+If everyone fears ending below 1.1, the average ends below 1.1. For a low enough $\mb$ the
+penalty hardly bites and $\Phi(\mb)\approx1.110>\mb$, so $\Phi(\mb)-\mb$ changes sign and there
+is an equilibrium below 1.1. The secant method on $\Phi(\mb)-\mb$ can start from the two points
+$1.1$ and $1.063$. Each evaluation is one HJB solve and one FP solve, well under a second.
 
 \end{document}
