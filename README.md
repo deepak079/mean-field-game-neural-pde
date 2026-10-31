@@ -50,7 +50,7 @@ DS works on the finite-difference side and AI on the PINN side. Tick a task in t
 that finishes it. Unassigned tasks: agree in chat who takes them, then add your initials.
 
 - [x] DS: Parameters, utility and λ = 0 closed-form benchmarks, with tests
-- [x] DS: Notes on the utilities, the HJB and the Fokker–Planck equation (`docs/notes/`)
+- [x] DS: Notes on the HJB and the Fokker–Planck equation (`docs/notes/`)
 - [ ] DS: Lower-boundary value for the HJB in `benchmarks.py` (shared by both solvers)
 - [ ] DS: Finite-difference solver for the HJB (fixed m̄_T)
 - [ ] DS: Finite-difference solver for the Fokker–Planck equation (given π*)
