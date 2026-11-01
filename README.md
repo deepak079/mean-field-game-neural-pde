@@ -55,8 +55,8 @@ that finishes it. Unassigned tasks: agree in chat who takes them, then add your 
 - [x] DS: Finite-difference solver for the HJB (fixed m̄_T)
 - [x] DS: Finite-difference solver for the Fokker–Planck equation (given π*)
 - [x] DS: Equilibrium on m̄_T with the FD solvers (secant on Φ(m̄) = m̄; reference for λ > 0)
-- [ ] AI: PINN for V at λ = 0 (validate against `merton_value`)
-- [ ] AI: PINN for V at λ = 2, m̄ = 1.1 fixed (validate against the FD solver)
+- [x] AI: PINN for V at λ = 0 (validate against `merton_value`)
+- [x] AI: PINN for V at λ = 2, m̄ = 1.1 fixed (validate against the FD solver)
 - [ ] AI: PINN for m (validate against the Gaussian at λ = 0, then FD)
 - [ ] AI: PINN equilibrium: alternating and joint training
 - [ ] Monte Carlo simulation of N investors under a given π*

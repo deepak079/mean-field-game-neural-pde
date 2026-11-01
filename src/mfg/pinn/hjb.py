@@ -27,6 +27,15 @@ What it is trained on: a loss with four parts, each a mean of squares
 Reading the strategy
     pi* = -(mu - r) / sigma^2 * v_x / (v_xx + v_x^2), where v_xx + v_x^2 = V_xx / V is positive
     because V is concave.
+
+Accuracy (default settings, checked on x in [0, 2.2] against exact Merton and the FD solver)
+    lam = 0:  V within 0.2%, pi* within 0.012 at every t, up to and including T.
+    lam = 2, mbar = 1.1:  V within 0.2% everywhere, pi* within 0.07 for t <= 0.9. Near (T, mbar)
+              the network can't follow the kink: pi* is off by 0.1 at t = 0.95, 0.4 at t = 0.99
+              and about 1 at T. An accurate V does not mean an accurate pi* there.
+    Under this pi*, the FD Fokker-Planck solver gives the same mbar_T as under FD's pi* (within
+    1e-4), but the bunching just below mbar at T is too low (peak density 3.4 against 4.0). Read
+    densities near (T, mbar) from the FD solver.
 """
 
 import copy
