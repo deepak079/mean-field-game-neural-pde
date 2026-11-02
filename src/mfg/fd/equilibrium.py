@@ -2,7 +2,8 @@
 
 Phi(m̄) is the average terminal wealth when everyone best-responds to m̄: one HJB solve, then one
 Fokker-Planck solve under the resulting position. The root of Phi(m̄) - m̄ is found by the
-secant method. Appendix C of docs/notes/problem21_hjb_fokker_planck.pdf.
+secant method. Appendix C of DS's notes on the HJB and the Fokker-Planck equation (kept outside
+the repo).
 """
 
 from dataclasses import dataclass

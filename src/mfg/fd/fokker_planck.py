@@ -2,7 +2,7 @@
 
 The matrix is the transpose of the HJB's: the HJB generator L read as a Markov chain on the
 grid, with no jumps off the ends (zero flux). Implicit Euler forward from m_0. The steps follow
-Appendix B of docs/notes/problem21_hjb_fokker_planck.pdf.
+Appendix B of DS's notes on the HJB and the Fokker-Planck equation (kept outside the repo).
 """
 
 from dataclasses import dataclass, field

@@ -2,7 +2,7 @@
 
 Implicit Euler backward from T, with policy iteration inside each time step: fix pi, solve
 the linear tridiagonal system, update pi, repeat. The steps follow Appendix A of
-docs/notes/problem21_hjb_fokker_planck.pdf.
+DS's notes on the HJB and the Fokker-Planck equation (kept outside the repo).
 """
 
 from dataclasses import dataclass, field

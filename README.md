@@ -21,7 +21,7 @@ src/mfg/      The package: parameters, utility, benchmarks; solvers in fd/ and p
 tests/        Pytest checks against known answers. Run on every pull request.
 scripts/      Entry points: train / solve / make figures.
 notebooks/    Exploration only. Reusable code moves into src/mfg.
-docs/         Problem statement, proposal, explanatory notes (start with docs/notes/).
+docs/         Problem statement, proposal and task summaries.
 report/       Final report and the figures it uses.
 results/      Experiment outputs (git-ignored; regenerate from configs).
 ```
@@ -41,8 +41,10 @@ Optional tidy-up before opening a pull request (formats code, strips notebook ou
 pre-commit run --all-files
 ```
 
-The CPU build of PyTorch is enough for these one-dimensional problems. To use an NVIDIA GPU, install
-the matching CUDA build of PyTorch from https://pytorch.org/get-started/locally/ instead.
+`environment.yml` installs the CPU build of PyTorch (`pytorch-cpu` from conda-forge), which is enough
+for these one-dimensional problems. To use an NVIDIA GPU, replace it with `pytorch-gpu`. Install
+PyTorch with conda rather than pip in this environment: pip's build can load an older system C++
+library and break conda's numpy.
 
 ## Roadmap
 
@@ -50,7 +52,7 @@ DS works on the finite-difference side and AI on the PINN side. Tick a task in t
 that finishes it. Unassigned tasks: agree in chat who takes them, then add your initials.
 
 - [x] DS: Parameters, utility and λ = 0 closed-form benchmarks, with tests
-- [x] DS: Notes on the HJB and the Fokker–Planck equation (`docs/notes/`)
+- [x] DS: Notes on the HJB and the Fokker–Planck equation (kept outside the repo)
 - [x] DS: Lower-boundary value for the HJB in `benchmarks.py` (shared by both solvers)
 - [x] DS: Finite-difference solver for the HJB (fixed m̄_T)
 - [x] DS: Finite-difference solver for the Fokker–Planck equation (given π*)
