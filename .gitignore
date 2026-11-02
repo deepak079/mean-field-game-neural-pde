@@ -35,3 +35,6 @@ checkpoints/
 .DS_Store
 Thumbs.db
 *:Zone.Identifier
+
+# Personal notes: kept local, never committed
+docs/notes/

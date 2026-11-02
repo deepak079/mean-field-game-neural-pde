@@ -10,7 +10,8 @@ dependencies:
   - matplotlib
   - pyyaml
   - jupyterlab
+  # PyTorch from conda-forge, not pip: pip's torch loads the system C++ library, which on older
+  # Linux (e.g. Ubuntu 20.04) breaks conda's numpy. CPU build is enough for these 1-D problems;
+  # see README for the GPU option.
+  - pytorch-cpu
   - pip
-  - pip:
-      # CPU build is enough for these 1-D problems; see README for the GPU option.
-      - torch
