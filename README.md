@@ -59,7 +59,7 @@ that finishes it. Unassigned tasks: agree in chat who takes them, then add your 
 - [x] DS: Equilibrium on m̄_T with the FD solvers (secant on Φ(m̄) = m̄; reference for λ > 0)
 - [x] AI: PINN for V at λ = 0 (validate against `merton_value`)
 - [x] AI: PINN for V at λ = 2, m̄ = 1.1 fixed (validate against the FD solver)
-- [ ] AI: PINN for m (validate against the Gaussian at λ = 0, then FD)
+- [x] DS (taken over from AI): PINN for m (validate against the Gaussian at λ = 0, then FD)
 - [ ] AI: PINN equilibrium: alternating and joint training
 - [ ] Monte Carlo simulation of N investors under a given π*
 - [ ] Comparison script: FD vs PINN for V, π* and m
