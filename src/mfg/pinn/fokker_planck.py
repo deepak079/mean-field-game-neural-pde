@@ -102,10 +102,13 @@ class PositionNetSettings:
     device: str | None = None
 
 
-def fit_position_net(position, p: Params, mbar, settings: PositionNetSettings | None = None):
+def fit_position_net(
+    position, p: Params, mbar, settings: PositionNetSettings | None = None, net=None
+):
     """A frozen TanhNet fitted to position(t, x) (NumPy in and out, e.g. a solution's .position).
 
-    Returns the network and the root-mean-square misfit on all the points.
+    net: a fitted network to start from (for example the one for a nearby mbar). It is copied
+    first. Returns the network and the root-mean-square misfit on all the points.
     """
     s = settings or PositionNetSettings()
     device = s.device or pick_device()
@@ -130,7 +133,10 @@ def fit_position_net(position, p: Params, mbar, settings: PositionNetSettings | 
         torch.tensor(a, dtype=torch.float32, device=device).reshape(-1, 1) for a in (t, x, y)
     )
 
-    net = TanhNet(p, s.width, s.depth).to(device)
+    net = TanhNet(p, s.width, s.depth) if net is None else copy.deepcopy(net)
+    net = net.to(device)
+    for w in net.parameters():
+        w.requires_grad_(True)  # a fitted network comes frozen
     adam = torch.optim.Adam(net.parameters(), lr=s.lr_start)
     gamma = (s.lr_end / s.lr_start) ** (1 / max(s.adam_steps, 1))
     shrink = torch.optim.lr_scheduler.ExponentialLR(adam, gamma=gamma)
