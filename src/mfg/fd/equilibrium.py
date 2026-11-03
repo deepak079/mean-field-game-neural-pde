@@ -2,13 +2,14 @@
 
 Phi(m̄) is the average terminal wealth when everyone best-responds to m̄: one HJB solve, then one
 Fokker-Planck solve under the resulting position. The root of Phi(m̄) - m̄ is found by the
-secant method. Appendix C of DS's notes on the HJB and the Fokker-Planck equation (kept outside
-the repo).
+secant method in mfg.equilibrium, shared with the PINN solver. Appendix C of DS's notes on the HJB
+and the Fokker-Planck equation (kept outside the repo).
 """
 
 from dataclasses import dataclass
 
 from mfg.benchmarks import population_mean
+from mfg.equilibrium import secant_fixed_point
 from mfg.fd.fokker_planck import FPSolution, solve_fokker_planck
 from mfg.fd.hjb import HJBSolution, solve_hjb
 from mfg.params import Params
@@ -37,22 +38,11 @@ def solve_equilibrium(
     p: Params, nx: int = 800, nt: int = 400, tol: float = 1e-10, max_iter: int = 20
 ) -> Equilibrium:
     """Secant method on g(m̄) = Phi(m̄) - m̄, starting from the lam = 0 equilibrium and Phi of it."""
-    history = []
 
-    def g(mbar):
+    def phi_with_solutions(mbar):
         hjb, fp = best_response(p, mbar, nx, nt)
-        history.append((mbar, fp.mean[-1]))
-        return fp.mean[-1] - mbar, hjb, fp
+        return fp.mean[-1], (hjb, fp)
 
-    a = population_mean(p.T, p)
-    g_a, _, _ = g(a)
-    b = a + g_a  # = Phi(a): one step of plain iteration gives the second point
-    g_b, hjb, fp = g(b)
-
-    for _ in range(max_iter):
-        if abs(g_b) < tol:
-            return Equilibrium(b, hjb, fp, history)
-        a, g_a, b = b, g_b, b - g_b * (b - a) / (g_b - g_a)
-        g_b, hjb, fp = g(b)
-
-    raise RuntimeError(f"no equilibrium after {len(history)} evaluations: {history}")
+    fixed = secant_fixed_point(phi_with_solutions, population_mean(p.T, p), tol, max_iter)
+    hjb, fp = fixed.solution
+    return Equilibrium(fixed.mbar, hjb, fp, fixed.history)
