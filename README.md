@@ -60,7 +60,7 @@ that finishes it. Unassigned tasks: agree in chat who takes them, then add your 
 - [x] AI: PINN for V at λ = 0 (validate against `merton_value`)
 - [x] AI: PINN for V at λ = 2, m̄ = 1.1 fixed (validate against the FD solver)
 - [x] DS (taken over from AI): PINN for m (validate against the Gaussian at λ = 0, then FD)
-- [ ] AI: PINN equilibrium: alternating and joint training
+- [x] DS (taken over from AI): PINN equilibrium, alternating training with the secant outer loop (m̄ within 1.5e−4 of FD; joint training left out)
 - [ ] Monte Carlo simulation of N investors under a given π*
 - [ ] Comparison script: FD vs PINN for V, π* and m
 - [ ] Sweep over the interaction strength; figures of π*(t, x), m̄_T and the wealth spread
