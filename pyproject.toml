@@ -26,5 +26,6 @@ src = ["src", "tests"]
 select = ["E", "F", "I", "B", "UP"]
 
 [tool.ruff.lint.per-file-ignores]
-# Notebooks: imports after the sys.path setup, long plotting lines, zip without strict=.
-"*.ipynb" = ["E402", "E501", "B905"]
+# Notebooks: imports after the sys.path setup, long plotting lines, zip without strict=, and
+# lambdas in loops that timed() calls at once (B023 flags them, but they see the current values).
+"*.ipynb" = ["E402", "E501", "B905", "B023"]
