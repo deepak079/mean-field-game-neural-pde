@@ -56,8 +56,8 @@ same equations, so their answers must be directly comparable.
 - **Don't commit outputs.** `results/`, checkpoints and arrays are git-ignored; only final report
   figures are committed, under `report/figures/`.
 - **Notebooks are for exploring.** Once code is reused, move it into `src/mfg` and test it.
-  Clear notebook outputs before committing (Kernel → Restart & Clear Output, or
-  `pre-commit run --all-files`) to keep diffs readable.
+  Outputs may be committed, so results can be read without rerunning; run the notebook top to
+  bottom first, so the outputs match the code. Pre-commit rejects files over 2 MB.
 - **Fix the seed** for anything random, and record it.
 
 ## Avoiding merge conflicts

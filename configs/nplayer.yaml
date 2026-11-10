@@ -1,0 +1,50 @@
+# The finite-N game ("league of N investors"): what scripts/run_nplayer.py trains and
+# scripts/analyze_nplayer.py measures. The Params come from `base`; `lam` replaces its penalty.
+# Reasons for every number: src/mfg/pinn/nplayer.py and
+# "docs/tasks/N_investors task/N_investors_guide.html".
+base: configs/base.yaml
+run_name: main                    # everything goes to results/nplayer/<run_name>/
+lam: 2.0
+N: [2, 3, 5, 10, 20]              # in this order: N = 20, the slowest, last
+seeds: [0]
+extra_seeds: {}                   # optional, e.g. {3: [1], 5: [1], 10: [1]}: a second seed gives error bars
+
+settings:                         # NPlayerSettings in src/mfg/pinn/nplayer.py (same names)
+  max_rounds: 6
+  min_rounds: 3                   # the stop rule compares two changes, so it needs three rounds
+  accept_delta: 0.02              # mean change of pi below this: accepted as the equilibrium
+  n_check: 20000                  # check states: how many, with which seed, and t in [0, t_max]
+  check_seed: 1
+  check_t_max: 0.9
+  points:                         # per Adam step
+    n_group: 2000                 # type A: a realistic group
+    n_far: 2000                   # type B: one wealth far away (mine with probability 1/2)
+    n_kink: 1000                  # near T, my wealth near the rivals' mean
+    n_terminal: 1000              # at t = T, half A and half B
+    centre_shift: 0.3             # group centre: M(t) + U[-0.3, 0.3]
+    spread: [0.5, 1.5]            # group width: S(t) times U[0.5, 1.5]
+    far: [-1.5, 3.5]              # the far wealth is uniform here
+    kink_dt: 0.1
+    kink_dx: 0.3
+    kink_band: 0.05               # at T, slopes are not matched closer than this to the rivals' mean
+  first_round: {adam_steps: 10000, lr_start: 1.0e-3, lr_end: 1.0e-4, lbfgs_steps: 500}
+  later_rounds: {adam_steps: 2000, lr_start: 3.0e-4, lr_end: 1.0e-4, lbfgs_steps: 200}
+  net: {features: 32, summary_width: 32, width: 64, depth: 4}
+  rival_clip: [0.0, 10.0]         # the rivals' positions are kept in this range (clips are counted)
+  print_every: 1000               # print the loss every this many Adam steps (0: silent)
+points_scale: {}                  # plan B, e.g. {20: 0.5}: half the points per step for N = 20
+
+montecarlo:
+  investors_per_N: 100000         # games per N = this / N
+  n_steps: 400
+  seed: 7                         # the same random numbers for every rule within an N
+  clip: [0.0, 10.0]
+  band: 0.1                       # "near the group mean" means within this
+
+checks:
+  c2: {N: 5, eta: 0.5}            # mandatory: the exact game with the original utility
+  c1: {N: 5}                      # optional: lam = 0 against Merton
+
+analysis:
+  fd_nx: 800                      # grid of the 1-D finite-difference references (mean-field)
+  fd_nt: 400

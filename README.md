@@ -20,7 +20,7 @@ configs/      Parameter sets (YAML). Every reported result should come from one 
 src/mfg/      The package: parameters, utility, benchmarks; solvers in fd/ and pinn/.
 tests/        Pytest checks against known answers. Run on every pull request.
 scripts/      Entry points: train / solve / make figures.
-notebooks/    Exploration only. Reusable code moves into src/mfg.
+notebooks/    Exploration and result viewers. Reusable code moves into src/mfg.
 docs/         Problem statement, proposal and task summaries.
 report/       Final report and the figures it uses.
 results/      Experiment outputs (git-ignored; regenerate from configs).
@@ -35,7 +35,7 @@ pip install -e ".[dev]"
 pytest
 ```
 
-Optional tidy-up before opening a pull request (formats code, strips notebook outputs):
+Optional tidy-up before opening a pull request (formats and lints the code):
 
 ```bash
 pre-commit run --all-files
@@ -52,7 +52,6 @@ DS works on the finite-difference side and AI on the PINN side. Tick a task in t
 that finishes it. Unassigned tasks: agree in chat who takes them, then add your initials.
 
 - [x] DS: Parameters, utility and λ = 0 closed-form benchmarks, with tests
-- [x] DS: Notes on the HJB and the Fokker–Planck equation (kept outside the repo)
 - [x] DS: Lower-boundary value for the HJB in `benchmarks.py` (shared by both solvers)
 - [x] DS: Finite-difference solver for the HJB (fixed m̄_T)
 - [x] DS: Finite-difference solver for the Fokker–Planck equation (given π*)
@@ -61,7 +60,9 @@ that finishes it. Unassigned tasks: agree in chat who takes them, then add your 
 - [x] AI: PINN for V at λ = 2, m̄ = 1.1 fixed (validate against the FD solver)
 - [x] DS (taken over from AI): PINN for m (validate against the Gaussian at λ = 0, then FD)
 - [x] DS (taken over from AI): PINN equilibrium, alternating training with the secant outer loop (m̄ within 1.5e−4 of FD; joint training left out)
-- [ ] Monte Carlo simulation of N investors under a given π*
+- [x] AI: Monte Carlo simulation of N investors under a given π* (`montecarlo.py`)
+- [x] AI: N-player game: symmetric Nash equilibrium by rounds of best responses with a DeepSets
+  PINN, N = 2 to 20 at λ = 2 (`pinn/nplayer.py`; exact check C2 passed at N = 5)
 - [ ] Comparison script: FD vs PINN for V, π* and m
 - [ ] Sweep over the interaction strength; figures of π*(t, x), m̄_T and the wealth spread
 - [ ] Report and presentation

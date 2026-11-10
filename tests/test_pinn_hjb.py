@@ -46,7 +46,7 @@ def quadratic_target_v(t, x):
     its v_xx is not zero, so it checks the curvature term v_xx + v_x^2.
     """
     tau = P.T - t
-    return -P.kappa**2 * tau + 2 * torch.log(MBAR - x * torch.exp(P.r * tau))
+    return -(P.kappa**2) * tau + 2 * torch.log(MBAR - x * torch.exp(P.r * tau))
 
 
 # Points well below mbar e^{-r tau}, where both exact solutions are valid.
