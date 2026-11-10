@@ -176,6 +176,7 @@ def test_rival_positions_count_the_clips():
         lambda t, own, others: own + 0 * others.sum(1, keepdim=True), t, x, y, P
     )
     assert n_floor == 3 and torch.all(pi == 0.0)
+
     # v = log(4.5 - own) has v_xx + v_x^2 = 0, so the curvature floor acts and the position wanted
     # is 30 / (4.5 - own) = 12, 20 and 60 at the three seats: all above the cap.
     def flat_v(t, own, others):
@@ -320,6 +321,10 @@ def test_stop_rule_and_acceptance():
     assert is_accepted([0.5, 0.1, 0.06], min_rounds=3, accept_delta=0.02) is False
     assert is_accepted([0.5, 0.02, 0.015], min_rounds=3, accept_delta=0.02) is True
     assert is_accepted([0.5, 0.1, 0.04], min_rounds=3, accept_delta=0.02) is False  # not stopped
+    # Still halving at max_rounds: accepted if the last change is small, not if it is large.
+    halving = [0.5, 0.1, 0.04, 0.015, 0.007, 0.003]
+    assert is_accepted(halving, 3, 0.02, max_rounds=6) is True
+    assert is_accepted([0.9, 0.5, 0.2, 0.09, 0.04, 0.019 * 2], 3, 0.02, max_rounds=6) is False
 
 
 def test_rounds_run_save_resume_and_reload(tmp_path):

@@ -357,9 +357,10 @@ class C2Terminal:
         a, b = 1.0 - self.eta / self.N, self.eta / self.N
         tau = self.p.T - t
         linear = a * x - b * y.sum(dim=1, keepdim=True)
-        return -self.p.gamma * torch.exp(self.p.r * tau) * linear + self.p.kappa**2 * c2_k(
-            self.N, self.eta
-        ) * tau
+        return (
+            -self.p.gamma * torch.exp(self.p.r * tau) * linear
+            + self.p.kappa**2 * c2_k(self.N, self.eta) * tau
+        )
 
 
 # ---------------------------------------------------------------- the points
@@ -474,9 +475,7 @@ def nplayer_loss(v_fn, batch, p: Params, s: NPlayerSettings):
     v_T_xx = _grad(v_T_x, x_T, create_graph=True)
     terminal = (v - batch["v_T"]).pow(2).mean()
     away = batch["away"]
-    slopes = (
-        (v_T_x - batch["v_T_x"])[away] ** 2 + (v_T_xx - batch["v_T_xx"])[away] ** 2
-    ).mean()
+    slopes = ((v_T_x - batch["v_T_x"])[away] ** 2 + (v_T_xx - batch["v_T_xx"])[away] ** 2).mean()
 
     parts = {"equation": equation, "terminal": terminal, "slopes": slopes}
     total = s.coef_equation * equation + s.coef_terminal * terminal + s.coef_slopes * slopes
@@ -590,9 +589,13 @@ def should_stop(deltas, min_rounds):
     return len(deltas) >= max(min_rounds, 2) and deltas[-1] >= 0.5 * deltas[-2]
 
 
-def is_accepted(deltas, min_rounds, accept_delta):
-    """Accepted if the rounds stopped by the rule above with a last change below accept_delta."""
-    return bool(should_stop(deltas, min_rounds) and deltas[-1] < accept_delta)
+def is_accepted(deltas, min_rounds, accept_delta, max_rounds=None):
+    """Accepted if the rounds ended, by the rule above or by reaching max_rounds while the change
+    was still halving, with a last change below accept_delta."""
+    ended = should_stop(deltas, min_rounds) or (
+        max_rounds is not None and len(deltas) >= max_rounds
+    )
+    return bool(ended and deltas[-1] < accept_delta)
 
 
 def terminal_position_errors(solution, states, terminal):
@@ -660,7 +663,7 @@ def solve_nplayer_equilibrium(
             on_round(result, net)                          # the script saves the round here
             stop if k >= min_rounds and Delta_k >= Delta_(k-1) / 2
             rivals <- frozen copy of net;  pi_before <- pi_k
-        accepted <- stopped by that rule and the last Delta < accept_delta
+        accepted <- ended (by that rule or at max_rounds) and the last Delta < accept_delta
 
     terminal: the final condition (ShortfallTerminal by default; C2Terminal for check C2). start:
     continue from a network instead (then every round is warm and the rivals start at its rule).
@@ -712,7 +715,7 @@ def solve_nplayer_equilibrium(
         rivals = FrozenRivals(net, p, s.rival_clip)
         pi_before = pi_k
 
-    accepted = finished and is_accepted(deltas, s.min_rounds, s.accept_delta)
+    accepted = finished and is_accepted(deltas, s.min_rounds, s.accept_delta, s.max_rounds)
     return NPlayerEquilibrium(
         NPlayerSolution(net, p, N), rounds, deltas, accepted, finished, time.time() - began
     )

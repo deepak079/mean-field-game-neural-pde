@@ -282,7 +282,8 @@ def time_steps(cfg, p, args, root):
         if device == "cuda":
             torch.cuda.reset_peak_memory_stats()
 
-        def step():
+        # Defaults bind this iteration's objects (ruff B023); step() is only called within it.
+        def step(N=N, s=s, net=net, rivals=rivals, terminal=terminal, rng=rng, adam=adam):
             batch = sample_batch(p, N, s.points, rng, device, terminal, rivals)
             total, _ = nplayer_loss(net, batch, p, s)
             adam.zero_grad()

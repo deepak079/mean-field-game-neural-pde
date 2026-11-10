@@ -322,17 +322,32 @@ def fig_group_by_n(rows, refs, p, out):
         ref_x = [1 / N for N in all_n] + [0.0]
         ref_y = [refs["lam_N"][str(N)][ref_key] for N in all_n] + [refs["lam"][ref_key]]
         ax.plot(
-            ref_x, ref_y, color=REFERENCE, ls="--", marker="o", ms=4,
+            ref_x,
+            ref_y,
+            color=REFERENCE,
+            ls="--",
+            marker="o",
+            ms=4,
             label="mean-field at lam_N (FD), lam at 1/N = 0",
         )
         ax.errorbar(
-            inv_n, [r[key] for r in net_rows], yerr=[r[rng_key] for r in net_rows],
-            color=NETWORK, marker="o", ms=6, capsize=3, label="network (N-player game)",
+            inv_n,
+            [r[key] for r in net_rows],
+            yerr=[r[rng_key] for r in net_rows],
+            color=NETWORK,
+            marker="o",
+            ms=6,
+            capsize=3,
+            label="network (N-player game)",
         )
         for r in net_rows:
             ax.annotate(
-                f"N = {r['N']}", (1 / r["N"], r[key]), xytext=(4, 6),
-                textcoords="offset points", fontsize=8, color=MUTED,
+                f"N = {r['N']}",
+                (1 / r["N"], r[key]),
+                xytext=(4, 6),
+                textcoords="offset points",
+                fontsize=8,
+                color=MUTED,
             )
         ax.set(title=title, xlabel="1 / N")
     axes[0].legend(loc="best", fontsize=8)
@@ -427,7 +442,7 @@ def main():
     # The mean-field equilibrium at lam itself: its rule is the dashed reference of the figures.
     mf = solve_equilibrium(p, cfg["analysis"]["fd_nx"], cfg["analysis"]["fd_nt"])
     stats, extras = {}, {}
-    for N, seed, folder, status in jobs:
+    for N, seed, folder, _status in jobs:
         games = simulate(cfg, p, N, seed, folder, out, args.resimulate, device)
         st = group_statistics(games["X_T"], p, cfg["montecarlo"]["band"])
         stats[(N, seed)] = {**st, "n_clipped": int(games["n_clipped"])}

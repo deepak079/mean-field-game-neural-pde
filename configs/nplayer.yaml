@@ -1,6 +1,7 @@
 # The finite-N game ("league of N investors"): what scripts/run_nplayer.py trains and
 # scripts/analyze_nplayer.py measures. The Params come from `base`; `lam` replaces its penalty.
-# Reasons for every number: src/mfg/pinn/nplayer.py and exploratory/guia_liga_n_inversores.html.
+# Reasons for every number: src/mfg/pinn/nplayer.py and
+# "docs/tasks/N_investors task/N_investors_guide.html".
 base: configs/base.yaml
 run_name: main                    # everything goes to results/nplayer/<run_name>/
 lam: 2.0
