@@ -21,7 +21,7 @@ src/mfg/      The package: parameters, utility, benchmarks; solvers in fd/ and p
 tests/        Pytest checks against known answers. Run on every pull request.
 scripts/      Entry points: train / solve / make figures.
 notebooks/    Exploration and result viewers. Reusable code moves into src/mfg.
-docs/         Problem statement, proposal and task summaries.
+docs/         Problem statement, proposal, task summaries and the class presentation.
 report/       Final report and the figures it uses.
 results/      Experiment outputs (git-ignored; regenerate from configs).
 ```

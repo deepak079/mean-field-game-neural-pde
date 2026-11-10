@@ -1,0 +1,1513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Problem 21 Presentation Figures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=JetBrains+Mono:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,500;1,400;1,500&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column; every figure sits in a 16:9 slide frame, a 1920 x 1080 stage scaled to fit.
+   Page tokens follow the viewer's theme; slide tokens (.s-light / .s-dark) follow the slide the figure sits on. */
+:root{
+  --page:#E6ECE9; --page-ink:#111B17; --page-ink2:#45544D; --page-muted:#56645D;
+  --page-line:#C3CFC9; --page-card:#F4F7F5; --page-accent:#0B6E4F; --page-accent-tint:#D5EADF;
+  --page-code:#D9E2DD; --page-pinn:#2a78d6; --page-fd:#eb6834; --page-ref:#7C8B84;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-text:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --f-math:"STIX Two Text","Cambria Math",Cambria,"Times New Roman",serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#070B09; --page-ink:#E4ECE8; --page-ink2:#A8B6AF; --page-muted:#86958E;
+    --page-line:#24312B; --page-card:#0E1613; --page-accent:#4CC99A; --page-accent-tint:#12352A;
+    --page-code:#15201C; --page-pinn:#3987e5; --page-fd:#d95926; --page-ref:#7C8B84;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#070B09; --page-ink:#E4ECE8; --page-ink2:#A8B6AF; --page-muted:#86958E;
+  --page-line:#24312B; --page-card:#0E1613; --page-accent:#4CC99A; --page-accent-tint:#12352A;
+  --page-code:#15201C; --page-pinn:#3987e5; --page-fd:#d95926; --page-ref:#7C8B84;
+  color-scheme:dark;
+}
+html{box-sizing:border-box}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--page);color:var(--page-ink);font:400 18px/1.55 var(--f-text);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:56px 110px}
+a{color:var(--page-accent)}
+code{font:500 .86em var(--f-mono);background:var(--page-code);padding:.1em .38em;border-radius:5px;overflow-wrap:anywhere}
+.mt{font-family:var(--f-math);font-style:italic}
+.mb{font-family:var(--f-math);font-style:italic;text-decoration:overline}
+.up{font-family:var(--f-math)}
+
+/* ---------- page header ---------- */
+.top{display:flex;flex-direction:column;gap:20px;padding-bottom:40px;border-bottom:1px solid var(--page-line)}
+.kick{margin:0;font:600 14px/1.3 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--page-accent)}
+h1{margin:0;font:800 clamp(40px,6.4vw,72px)/.98 var(--f-display);letter-spacing:-.035em;text-wrap:balance}
+.lead{margin:0;max-width:66ch;font-size:20px;color:var(--page-ink2);text-wrap:pretty}
+.keys{display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;font-size:16px;color:var(--page-ink2)}
+.keys span{display:inline-flex;align-items:center;gap:9px}
+.keys i{display:inline-block;width:30px;border-top:3px solid var(--page-ref)}
+.keys i.p{border-color:var(--page-pinn)}
+.keys i.f{border-top-style:dashed;border-color:var(--page-fd)}
+.bar{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center;justify-content:space-between}
+.meta{margin:0;font:400 14px/1.5 var(--f-mono);color:var(--page-muted)}
+.tone{display:inline-flex;align-items:center;gap:12px;font-size:15px;color:var(--page-muted)}
+.pseg{display:inline-flex;padding:3px;border:1.5px solid var(--page-line);border-radius:999px;background:var(--page-card)}
+.pseg button{font:600 14px/1 var(--f-text);padding:8px 14px;border:0;border-radius:999px;background:transparent;color:var(--page-ink2);cursor:pointer}
+.pseg button[aria-pressed="true"]{background:var(--page-ink);color:var(--page)}
+.pseg button:focus-visible,.tool:focus-visible{outline:3px solid var(--page-accent);outline-offset:2px}
+
+/* ---------- the story ---------- */
+.story-sec{padding-top:44px;display:flex;flex-direction:column;gap:14px}
+.h-small{margin:0;font:600 13px/1.2 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--page-muted)}
+.story{list-style:none;margin:0;padding:0}
+.story li{display:grid;grid-template-columns:40px minmax(0,250px) minmax(0,1fr) auto;gap:4px 18px;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--page-line)}
+.story .n{font:600 15px var(--f-mono);color:var(--page-accent);font-variant-numeric:tabular-nums}
+.story a{font:700 19px/1.25 var(--f-display);letter-spacing:-.01em;color:var(--page-ink);text-decoration:none}
+.story a:hover{text-decoration:underline}
+.story p{margin:0;color:var(--page-ink2)}
+.tag{justify-self:end;font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--page-muted);border:1px solid var(--page-line);border-radius:999px;padding:6px 10px;white-space:nowrap}
+@media (max-width:760px){
+  .story li{grid-template-columns:32px minmax(0,1fr)}
+  .story p,.story .tag{grid-column:2}
+  .story .tag{justify-self:start}
+}
+
+/* ---------- one section per figure ---------- */
+.fig-sec{padding-top:84px;display:flex;flex-direction:column;gap:20px;scroll-margin-top:12px}
+.sec-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sec-head .n{font:700 15px var(--f-mono);color:var(--page-accent)}
+h2{margin:0;font:700 clamp(28px,3.6vw,42px)/1.06 var(--f-display);letter-spacing:-.025em;text-wrap:balance}
+.frame-box{overflow-x:auto;border-radius:14px;box-shadow:0 1px 2px rgba(17,27,23,.08),0 18px 46px rgba(17,27,23,.16)}
+.frame{position:relative;width:100%;min-width:880px;aspect-ratio:16/9;overflow:hidden;border-radius:14px}
+.stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+.frame-box:fullscreen{display:flex;align-items:center;justify-content:center;background:#000;border-radius:0;overflow:hidden}
+.frame-box:fullscreen .frame{width:min(100vw,calc(100vh * 16 / 9));min-width:0;border-radius:0}
+.tools{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.tools .hint{margin:0;font-size:15px;color:var(--page-muted)}
+.tool{font:600 14px/1 var(--f-text);padding:9px 15px;border-radius:999px;border:1.5px solid var(--page-line);background:var(--page-card);color:var(--page-ink);cursor:pointer}
+.tool:hover{border-color:var(--page-ink2)}
+.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 44px}
+.notes > div{min-width:0}
+.notes h3{margin:0 0 6px;font:600 13px/1.2 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--page-muted)}
+.notes p,.notes ul{margin:0;color:var(--page-ink2);text-wrap:pretty}
+.notes ul{padding-left:20px}
+.notes li+li{margin-top:7px}
+.notes b{color:var(--page-ink);font-weight:600}
+@media (max-width:820px){.notes{grid-template-columns:minmax(0,1fr)}}
+details.nums{border:1px solid var(--page-line);border-radius:12px;background:var(--page-card);padding:2px 18px}
+details.nums summary{cursor:pointer;padding:12px 0;font:600 15px var(--f-text);color:var(--page-ink)}
+details.nums summary:focus-visible{outline:3px solid var(--page-accent);outline-offset:2px;border-radius:6px}
+.tbl{overflow-x:auto;padding-bottom:14px}
+.tbl table{border-collapse:collapse;font-size:15px;min-width:100%}
+.tbl th,.tbl td{padding:7px 14px 7px 0;text-align:left;border-bottom:1px solid var(--page-line);white-space:nowrap}
+.tbl th{font:600 13px var(--f-text);letter-spacing:.01em;color:var(--page-muted)}
+.tbl td{font-variant-numeric:tabular-nums;color:var(--page-ink2)}
+.tbl td.v{font-family:var(--f-mono);font-size:14px}
+.after{padding-top:90px;display:flex;flex-direction:column;gap:40px}
+.after section{display:flex;flex-direction:column;gap:12px;max-width:78ch}
+.after h2{font-size:clamp(26px,3vw,34px)}
+.after p,.after li{color:var(--page-ink2)}
+.after ol,.after ul{margin:0;padding-left:22px}
+.after li+li{margin-top:8px}
+.after pre{margin:0;overflow-x:auto;background:var(--page-code);border-radius:10px;padding:14px 16px;font:500 14px/1.5 var(--f-mono)}
+
+/* ================= figures: shared slide styles (copy this block into the slides) ================= */
+.s-light{
+  --bg:#F2F5F3; --surface:#FFFFFF; --sunk:#E3EAE6; --ink:#111B17; --ink2:#45544D; --muted:#5C6A63;
+  --line:#C8D4CE; --grid:#DCE4E0; --accent:#0B6E4F; --accent-tint:#DCEEE5; --on-accent:#FFFFFF;
+  --pinn:#2a78d6; --fd:#eb6834; --ref:#7C8B84; --band:#E3EAE6; --trail:17,27,23; --hist:rgba(17,27,23,.16);
+  --tip-bg:#111B17; --tip-fg:#E4ECE8; --tip-mute:#A8B6AF;
+  --loss-eq:#6250d6; --loss-term:#1baf7a; --loss-slopes:#eda100; --loss-edges:#e87ba4; --loss-mass:#008300;
+  --seq1:#cde2fb; --seq2:#6da7ec; --seq3:#256abf; --seq4:#0d366b;
+  background:var(--bg); color:var(--ink);
+}
+.s-dark{
+  --bg:#0C1210; --surface:#121B17; --sunk:#1A2622; --ink:#E4ECE8; --ink2:#A8B6AF; --muted:#7C8B84;
+  --line:#2C3A34; --grid:#1E2A26; --accent:#4CC99A; --accent-tint:#173A2E; --on-accent:#0C1210;
+  --pinn:#3987e5; --fd:#d95926; --ref:#7C8B84; --band:#1A2622; --trail:228,236,232; --hist:rgba(228,236,232,.18);
+  --tip-bg:#E4ECE8; --tip-fg:#111B17; --tip-mute:#45544D;
+  --loss-eq:#9085e9; --loss-term:#199e70; --loss-slopes:#c98500; --loss-edges:#d55181; --loss-mass:#008300;
+  --seq1:#0d366b; --seq2:#256abf; --seq3:#5598e7; --seq4:#b7d3f6;
+  background:var(--bg); color:var(--ink);
+}
+.slide-head{position:absolute;left:112px;top:72px;width:1696px;display:flex;flex-direction:column;gap:18px}
+.eyebrow{margin:0;font:600 22px/1.2 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.eyebrow .nm{text-transform:none;letter-spacing:.02em;font-family:var(--f-math);font-size:25px}
+.slide-title{margin:0;font:700 60px/1.04 var(--f-display);letter-spacing:-.025em;color:var(--ink);text-wrap:balance}
+.fig-root{position:absolute;left:112px;top:250px;width:1696px;height:740px}
+.fig{font-family:var(--f-text);color:var(--ink)}
+.fig button,.fig input,.fig output{font:inherit}
+.fig svg{display:block;overflow:visible}
+.fig .ax{font:400 18px var(--f-mono);fill:var(--muted)}
+.fig .axt{font:400 21px var(--f-text);fill:var(--ink2)}
+.fig .lab{font:400 20px var(--f-text);fill:var(--ink2)}
+.fig .labm{font:400 19px var(--f-text);fill:var(--muted)}
+.fig .labb{font:600 21px var(--f-text);fill:var(--ink)}
+.fig .num{font:500 19px var(--f-mono);fill:var(--ink)}
+.fig .guide{font:italic 400 20px var(--f-text);fill:var(--muted)}
+.fig .mi{font-family:var(--f-math);font-style:italic}
+.fig .ov{text-decoration:overline}
+.fig .ms{font-size:.68em}
+.fig .gridl{stroke:var(--grid);stroke-width:1}
+.fig .base{stroke:var(--line);stroke-width:1.5}
+.fig .ln{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.fig .ln-pinn{fill:none;stroke:var(--pinn);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.fig .ln-fd{fill:none;stroke:var(--fd);stroke-width:3.5;stroke-dasharray:12 8;stroke-linejoin:round}
+.fig .ln-ref{fill:none;stroke:var(--ref);stroke-width:2}
+.fig .ln-ghost{fill:none;stroke:var(--ref);stroke-width:1.5;opacity:.32}
+.fig .ln-path{fill:none;stroke:var(--pinn);stroke-width:2;stroke-linecap:round}
+.fig .ln-ink{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round}
+.fig .ln-guide{fill:none;stroke:var(--ink2);stroke-width:1.5;stroke-dasharray:2 5}
+.fig .area-pinn{fill:var(--pinn);opacity:.08}
+.fig .band{fill:var(--band)}
+.fig .mark{stroke:var(--ref);stroke-width:1.5}
+.fig .dot-pinn{fill:var(--pinn);stroke:var(--bg);stroke-width:3}
+.fig .dot-fd{fill:var(--fd);stroke:var(--bg);stroke-width:3}
+.fig .ring-fd{fill:var(--bg);stroke:var(--fd);stroke-width:3}
+.fig .dot-ink{fill:var(--ink);stroke:var(--bg);stroke-width:3}
+.fig .cross{stroke:var(--ink);stroke-width:1;opacity:.45;pointer-events:none}
+.fig .hit{fill:transparent;cursor:crosshair}
+.fig .lead-l{stroke:var(--line);stroke-width:1.5}
+.fig .cell{fill:none;stroke:var(--ink);stroke-width:2;pointer-events:none}
+.fig .hbar{fill:var(--hist)}
+.fig .abs{position:absolute}
+.fig canvas{position:absolute;display:block}
+.fig .panel{position:absolute;display:flex;flex-direction:column;gap:20px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:26px 30px}
+.fig .ph{margin:0;font:600 17px/1.2 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fig .fnote{margin:0;font:400 19px/1.4 var(--f-text);color:var(--muted)}
+.fig .row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.fig .ctlrow{position:absolute;display:flex;gap:22px;align-items:center}
+.fig .ctl-lab{font:600 22px/1 var(--f-text);color:var(--ink);white-space:nowrap}
+.fig .readout{font:500 24px/1 var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.fig .readout.sm{font-size:20px;color:var(--ink2)}
+.fig .legend{position:absolute;display:flex;gap:30px;align-items:center;flex-wrap:wrap;font:400 20px/1.2 var(--f-text);color:var(--ink2)}
+.fig .legend span{display:inline-flex;align-items:center;gap:10px;white-space:nowrap}
+.fig .lk{display:inline-block;width:38px;height:0;border-top:3.5px solid var(--ref)}
+.fig .lk.pinn{border-color:var(--pinn)}
+.fig .lk.fd{border-top-style:dashed;border-color:var(--fd)}
+.fig .lk.ref{border-top-width:2px}
+.fig .lk.trail{border-top-width:2px;border-color:rgba(var(--trail),.45)}
+.fig .lk.ghost{border-top-width:1.5px;opacity:.45}
+.fig .lk.ink{border-color:var(--ink);opacity:.75}
+.fig .halo{paint-order:stroke;stroke:var(--surface);stroke-width:6px;stroke-linejoin:round}
+.fig .sw{display:inline-block;width:26px;height:16px;border-radius:3px;background:var(--band)}
+.fig .sw.hist{background:var(--hist)}
+.fig .dotk{display:inline-block;width:16px;height:16px;border-radius:50%;background:var(--pinn)}
+.fig .btn{display:inline-flex;align-items:center;gap:10px;padding:12px 24px;border:2px solid var(--accent);border-radius:999px;background:transparent;color:var(--accent);font:600 22px/1 var(--f-text);cursor:pointer;white-space:nowrap;transition:background .2s}
+.fig .btn:hover{background:var(--accent-tint)}
+.fig .btn.solid{background:var(--accent);color:var(--on-accent);min-width:150px;justify-content:center}
+.fig .btn.solid:hover{filter:brightness(1.08)}
+.fig .btn[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.fig .btn:disabled{opacity:.35;cursor:default;background:transparent}
+.fig .btn.solid:disabled{background:var(--accent);color:var(--on-accent);opacity:.3}
+.fig .btn:focus-visible,.fig .seg button:focus-visible,.fig .chip:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.fig .seg{display:inline-flex;padding:4px;border:2px solid var(--line);border-radius:999px;background:var(--bg)}
+.fig .seg button{padding:11px 22px;border:0;border-radius:999px;background:transparent;color:var(--ink2);font:600 21px/1 var(--f-text);cursor:pointer;white-space:nowrap}
+.fig .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.fig .chips{display:inline-flex;gap:8px}
+.fig .chip{padding:9px 14px;border:1.5px solid var(--line);border-radius:999px;background:transparent;color:var(--ink2);font:500 18px/1 var(--f-mono);cursor:pointer}
+.fig .chip:hover{border-color:var(--ink2)}
+.fig .chip[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.fig input[type=range]{-webkit-appearance:none;appearance:none;display:block;height:34px;margin:0;background:transparent;cursor:pointer;--p:50%}
+.fig input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--accent) 0 var(--p),var(--grid) var(--p) 100%)}
+.fig input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;margin-top:-11px;border-radius:50%;background:var(--surface);border:3px solid var(--accent);box-shadow:0 1px 4px rgba(17,27,23,.25)}
+.fig input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--grid)}
+.fig input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--accent)}
+.fig input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--surface);border:3px solid var(--accent)}
+.fig input[type=range]:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:8px}
+.fig .tip{position:absolute;left:0;top:0;z-index:5;min-width:220px;padding:12px 16px;border-radius:10px;background:var(--tip-bg);color:var(--tip-fg);font:400 19px/1.45 var(--f-text);box-shadow:0 10px 30px rgba(0,0,0,.28);pointer-events:none;white-space:nowrap}
+.fig .tip p{margin:0;display:flex;align-items:center;gap:10px}
+.fig .tip .tt{display:block;font:600 16px/1.3 var(--f-mono);letter-spacing:.02em;color:var(--tip-mute);margin-bottom:5px}
+.fig .tip b{font:500 19px var(--f-mono);font-variant-numeric:tabular-nums}
+.fig .tip span{color:var(--tip-mute)}
+.fig .tip i.k{display:inline-block;width:26px;height:0;border-top:3.5px solid var(--tip-mute)}
+.fig .tip i.k.pinn{border-color:var(--pinn)}
+.fig .tip i.k.fd{border-top-style:dashed;border-color:var(--fd)}
+.fig .tip i.k.ref{border-top-width:2px;border-color:var(--ref)}
+
+/* loss figure */
+.fig .parts{display:flex;flex-direction:column;gap:16px}
+.fig .part{display:grid;grid-template-columns:44px minmax(0,1fr) auto;column-gap:14px;row-gap:3px;align-items:baseline}
+.fig .part .lk{grid-row:1;align-self:center}
+.fig .part b{font:600 23px/1.2 var(--f-text);color:var(--ink)}
+.fig .part .sh{font:500 24px/1 var(--f-mono);color:var(--ink);text-align:right}
+.fig .part .ds{grid-column:2 / 4;font:400 19px/1.3 var(--f-text);color:var(--ink2)}
+.fig .part .vs{grid-column:2 / 4;font:500 17px/1.3 var(--f-mono);color:var(--muted)}
+/* equilibrium figure */
+.fig .steps{display:flex;gap:10px}
+.fig .pst{display:inline-flex;align-items:center;gap:10px;padding:7px 16px 7px 7px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted);font:600 19px/1 var(--f-text);cursor:pointer;white-space:nowrap}
+.fig .pst .n{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--sunk);color:var(--ink2);font:600 15px/1 var(--f-mono)}
+.fig .pst.done{color:var(--ink)}
+.fig .pst.done .n{background:var(--pinn);color:#fff}
+.fig .pst[aria-current="step"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.fig .ledger{margin:0;display:flex;flex-direction:column}
+.fig .ledger div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:7px 0;border-bottom:1px solid var(--grid)}
+.fig .ledger dt{font:400 21px/1.25 var(--f-text);color:var(--ink2)}
+.fig .ledger dd{margin:0;font:500 22px/1.25 var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums;text-align:right}
+.fig .ledger dd.txt{font:600 21px/1.25 var(--f-text)}
+.fig .say{margin:0;font:400 21px/1.4 var(--f-text);color:var(--ink2);min-height:59px}
+.fig .say b{color:var(--ink);font-weight:600}
+.fig .result{display:flex;flex-direction:column;gap:8px;padding-top:16px;border-top:2px solid var(--ink)}
+.fig .result .rr{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font:400 21px/1.2 var(--f-text);color:var(--ink2)}
+.fig .result .rr span{display:inline-flex;align-items:center;gap:10px}
+.fig .result .rr b{font:600 30px/1 var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.fig .result .rr b.sm{font-size:22px;font-weight:500;color:var(--ink2)}
+/* penalty figure */
+.fig .kpis{position:absolute;display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.fig .kpi{position:relative;display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px 24px 12px}
+.fig .kpi .kl{margin:0;font:600 21px/1.2 var(--f-text);color:var(--ink2)}
+.fig .kpi .kv{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.fig .kpi .kv b{font:800 52px/1 var(--f-display);letter-spacing:-.02em;color:var(--ink)}
+.fig .kpi .kv span{font:500 18px/1.2 var(--f-mono);color:var(--muted)}
+.fig .kpi .kp{display:flex;align-items:center;gap:10px;font:500 19px/1.2 var(--f-mono);color:var(--ink2);min-height:24px}
+.fig .kpi svg{margin-top:2px}
+/* gap map figure */
+.fig .bins{display:flex;flex-direction:column;gap:10px}
+.fig .bin{display:flex;align-items:center;gap:14px;font:400 21px/1.2 var(--f-text);color:var(--ink2)}
+.fig .bin i{width:34px;height:24px;border-radius:4px}
+.fig .stats{margin:0;display:flex;flex-direction:column;gap:14px}
+.fig .stats div{display:flex;flex-direction:column;gap:2px}
+.fig .stats dt{font:400 19px/1.3 var(--f-text);color:var(--ink2)}
+.fig .stats dd{margin:0;font:600 28px/1.1 var(--f-mono);color:var(--ink)}
+/* scorecard figure */
+.fig .score{position:absolute;display:grid;grid-template-columns:560px 1fr 1fr;column-gap:40px;align-content:start}
+.fig .score > div{padding:15px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0}
+.fig .score .hd{padding:0 0 14px;border-bottom:2px solid var(--ink);flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;font:700 30px/1 var(--f-display);color:var(--ink)}
+.fig .score .hd small{font:400 20px/1 var(--f-text);color:var(--muted)}
+.fig .score .rl{font:600 24px/1.2 var(--f-text);color:var(--ink)}
+.fig .score .rs{font:400 19px/1.3 var(--f-text);color:var(--muted)}
+.fig .score .v{font:600 38px/1.05 var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.fig .score .v.big{font:800 64px/1 var(--f-display);letter-spacing:-.02em}
+.fig .score .v.txt{font:600 30px/1.15 var(--f-text)}
+.fig .score .vs{font:400 19px/1.3 var(--f-text);color:var(--muted)}
+.fig .mi-h{font-family:var(--f-math);font-style:italic;font-weight:400}
+.fig .mb-h{font-family:var(--f-math);font-style:italic;font-weight:400;text-decoration:overline}
+/* ================= end of shared slide styles ================= */
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <p class="kick">AMS 516 · Problem 21 · mean-field portfolio game</p>
+  <h1>Presentation figures</h1>
+  <p class="lead">Nine interactive figures for the talk, rebuilt from the results notebook. Each one is shown at slide size, with what it plots, what to say, and how to drive it live. The numbers come from the networks the notebook saved and from new finite-difference runs; nothing was retrained.</p>
+  <div class="keys" aria-label="How to read the figures">
+    <span><i class="p"></i>PINN, always the solid blue line</span>
+    <span><i class="f"></i>finite differences (FD), always dashed orange</span>
+    <span><i></i>grey: references (Merton, no penalty)</span>
+  </div>
+  <div class="bar">
+    <p class="meta" id="meta">Data: figure_data.js</p>
+    <div class="tone">Slide background
+      <div class="pseg" role="group" aria-label="Slide background">
+        <button type="button" id="tone-light" aria-pressed="true">Light</button>
+        <button type="button" id="tone-dark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="story-sec" aria-labelledby="story-h">
+  <h2 class="h-small" id="story-h">The story in nine figures, in talk order</h2>
+  <ol class="story">
+    <li><span class="n">1</span><a href="#loss">How the PINN learns</a><p>The loss falls part by part: conditions first, the equation last.</p><span class="tag">Method</span></li>
+    <li><span class="n">2</span><a href="#equilibrium">The equilibrium</a><p>One number that reproduces itself. PINN and FD agree to 1.5·10⁻⁴.</p><span class="tag">Results</span></li>
+    <li><span class="n">3</span><a href="#strategy">What investors do</a><p>Just below the average they cut back; near the end the cut becomes a cliff.</p><span class="tag">Results</span></li>
+    <li><span class="n">4</span><a href="#density">Where the wealth ends up</a><p>The crowd piles up just below the average and stops at a cliff.</p><span class="tag">Results</span></li>
+    <li><span class="n">5</span><a href="#investors">A thousand investors</a><p>Simulated investors following the strategy build the same crowd.</p><span class="tag">Extra</span></li>
+    <li><span class="n">6</span><a href="#penalty">The price of competing</a><p>A stronger penalty: lower average, more equal, more people just below.</p><span class="tag">Results</span></li>
+    <li><span class="n">7</span><a href="#gapmap">Where the PINN misses</a><p>Only at the cliff near the end and at the empty edge.</p><span class="tag">Backup</span></li>
+    <li><span class="n">8</span><a href="#accuracy">Accuracy for the time spent</a><p>In one dimension the grid is about 10⁴ times cheaper.</p><span class="tag">Results</span></li>
+    <li><span class="n">9</span><a href="#scorecard">Scorecard</a><p>Same equilibrium, very different cost.</p><span class="tag">Summary</span></li>
+  </ol>
+</section>
+
+<main>
+
+<section class="fig-sec" id="loss" aria-labelledby="loss-h">
+  <div class="sec-head"><span class="n">1</span><h2 id="loss-h">How the PINN learns</h2><span class="tag">Method</span></div>
+  <div class="frame-box"><div class="frame s-light"><div class="stage">
+    <div class="slide-head"><p class="eyebrow">Method · training the PINN</p><h3 class="slide-title">The network learns its conditions first, the equation last</h3></div>
+    <div class="fig-root fig" data-fig="loss"></div>
+  </div></div></div>
+  <div class="tools"><p class="hint">Hover the chart for every part at one step.</p><button type="button" class="tool" data-full>Full screen</button></div>
+  <div class="notes">
+    <div><h3>What it shows</h3><p>The parts of the loss during the first training of the equilibrium search (<span class="mb">m</span> = 1.110, from scratch), on a log scale: the four parts of the value network, or the two of the density network. White: 10,000 Adam steps. Shaded: 500 L-BFGS steps. The panel gives each part's start and end value and its share of the final loss.</p></div>
+    <div><h3>What to say</h3><ul>
+      <li>The network is trained by making each part small at random points: the equation inside, the final value, the final slopes and the edges.</li>
+      <li><b>The conditions come first:</b> the final value and the edges fall below 10⁻⁴ within 2,000 steps and stay there.</li>
+      <li><b>The final slopes are the hardest part</b>, about 90% of the loss until step 2,500. They fix the curvature of <span class="mt">v</span> at <span class="mt">T</span>, which sets π*. L-BFGS divides them by 20.</li>
+      <li>The density network's loss is almost all equation; the mass part stays far below it.</li>
+    </ul></div>
+    <div><h3>Live</h3><p>Switch network with the toggle. <b>Replay training</b> draws the curves step by step. Hover for the value and share of every part at one step.</p></div>
+    <div><h3>From the notebook</h3><p>Section 5. The stacked "share of the loss" panels are gone: each part's share is now in the tooltip at every step and in the panel at the end.</p></div>
+  </div>
+  <details class="nums"><summary>Numbers behind this figure</summary><div class="tbl" data-table="loss"></div></details>
+</section>
+
+<section class="fig-sec" id="equilibrium" aria-labelledby="equilibrium-h">
+  <div class="sec-head"><span class="n">2</span><h2 id="equilibrium-h">The equilibrium</h2><span class="tag">Results</span></div>
+  <div class="frame-box"><div class="frame s-light"><div class="stage">
+    <div class="slide-head"><p class="eyebrow">Results · the equilibrium · <span class="nm">λ = 2</span></p><h3 class="slide-title">The equilibrium is the average that reproduces itself</h3></div>
+    <div class="fig-root fig" data-fig="equilibrium"></div>
+  </div></div></div>
+  <div class="tools"><p class="hint">Start with Back to step 0, then Next once per evaluation.</p><button type="button" class="tool" data-full>Full screen</button></div>
+  <div class="notes">
+    <div><h3>What it shows</h3><p>Across: the average final wealth <span class="mb">m</span> the investors assume. Up: the average Φ(<span class="mb">m</span>) that results when they all play their best strategy against it. The equilibrium is where the dashed FD curve crosses the diagonal. Blue dots: the PINN's three evaluations, joined by the path of the search. Grey horizontal line: the answer without the penalty.</p></div>
+    <div><h3>What to say</h3><ul>
+      <li>Everyone reacts to one number, the final average, so the equilibrium is a fixed point of one function: Φ(<span class="mb">m</span>) = <span class="mb">m</span>.</li>
+      <li>Start from the no-penalty answer, 1.110. With the penalty everyone takes less risk, and the average comes out at 1.062.</li>
+      <li>The secant method closes the gap in three PINN evaluations: 5·10⁻², 3·10⁻³, 2·10⁻⁵.</li>
+      <li><b>Zoom:</b> the PINN lands at 1.06497, FD at 1.06513. The PINN's Φ is 2·10⁻⁴ below FD's at every point, and since Φ is almost flat, that offset passes straight into the answer.</li>
+    </ul></div>
+    <div><h3>Live</h3><p><b>Back</b> and <b>Next</b> step through the search, or click a step chip. <b>Zoom on the crossing</b> animates to the last 0.008 around the answer. Hover a dot for its numbers.</p></div>
+    <div><h3>From the notebook</h3><p>Section 1 (figure and both tables) merged with the "search gap" figure of section 4: the gap of each step is in the panel.</p></div>
+  </div>
+  <details class="nums"><summary>Numbers behind this figure</summary><div class="tbl" data-table="equilibrium"></div></details>
+</section>
+
+<section class="fig-sec" id="strategy" aria-labelledby="strategy-h">
+  <div class="sec-head"><span class="n">3</span><h2 id="strategy-h">What investors do</h2><span class="tag">Results</span></div>
+  <div class="frame-box"><div class="frame s-light"><div class="stage">
+    <div class="slide-head"><p class="eyebrow">Results · the strategy <span class="nm">π*(t, x)</span> · <span class="nm">λ = 2</span></p><h3 class="slide-title">Just below the average, investors play safe</h3></div>
+    <div class="fig-root fig" data-fig="strategy"></div>
+  </div></div></div>
+  <div class="tools"><p class="hint">Press Play to run time from 0 to 1; it slows down over the last tenth.</p><button type="button" class="tool" data-full>Full screen</button></div>
+  <div class="notes">
+    <div><h3>What it shows</h3><p>The equilibrium strategy π*(<span class="mt">t</span>, <span class="mt">x</span>): dollars in the stock against wealth <span class="mt">x</span>, at the time <span class="mt">t</span> on the slider. Grey line: Merton, what everyone holds without the penalty. Shaded: where the middle 98% of investors are at that time. Vertical line: the final average <span class="mb">m</span><sub>T</sub>.</p></div>
+    <div><h3>What to say</h3><ul>
+      <li><b>Far above the average</b>, investors hold Merton: the penalty does not reach them.</li>
+      <li><b>Just below it</b> they cut back to about a third of Merton, because a loss would push them further below.</li>
+      <li><b>Far below</b> they take more risk than Merton: they already pay the penalty and the stock is their chance to catch up. The switch is near <span class="mt">x</span> = <span class="mb">m</span><sub>T</sub> − 1/γ ≈ 0.065.</li>
+      <li><b>Play:</b> as time runs out the dip becomes a cliff right at <span class="mb">m</span><sub>T</sub>. The PINN follows FD wherever investors live; the two part only near <span class="mt">x</span> = −1, where nobody is.</li>
+    </ul></div>
+    <div><h3>Live</h3><p><b>Play</b> runs time from 0. Drag the slider, or use the chips for the notebook's snapshot times. <b>Reading guide</b> shows or hides the three grey notes. Hover for both values at one wealth.</p></div>
+    <div><h3>From the notebook</h3><p>Section 2, the four snapshot panels, now one chart with a time slider.</p></div>
+  </div>
+  <details class="nums"><summary>Numbers behind this figure</summary><div class="tbl" data-table="strategy"></div></details>
+</section>
+
+<section class="fig-sec" id="density" aria-labelledby="density-h">
+  <div class="sec-head"><span class="n">4</span><h2 id="density-h">Where the wealth ends up</h2><span class="tag">Results</span></div>
+  <div class="frame-box"><div class="frame s-light"><div class="stage">
+    <div class="slide-head"><p class="eyebrow">Results · the wealth distribution <span class="nm">m(t, x)</span> · <span class="nm">λ = 2</span></p><h3 class="slide-title">The crowd piles up just below the average</h3></div>
+    <div class="fig-root fig" data-fig="density"></div>
+  </div></div></div>
+  <div class="tools"><p class="hint">Play from t = 0, then Zoom on the cliff at t = 1.</p><button type="button" class="tool" data-full>Full screen</button></div>
+  <div class="notes">
+    <div><h3>What it shows</h3><p>The density of wealth <span class="mt">m</span>(<span class="mt">t</span>, <span class="mt">x</span>) at the slider's time: how many investors have wealth <span class="mt">x</span> (the area under each curve is 1). Grey: the bell curve without the penalty. Vertical line: <span class="mb">m</span><sub>T</sub>. Top right: the highest density and the share of investors below <span class="mb">m</span><sub>T</sub> at that time.</p></div>
+    <div><h3>What to say</h3><ul>
+      <li>Without the penalty, wealth spreads out as a bell curve.</li>
+      <li>With it, the population is squeezed against the average: many end just below it, few far away.</li>
+      <li><b>At the end the crowd stops at a cliff at <span class="mb">m</span><sub>T</sub>:</b> just below, investors hold little stock and their wealth barely moves; just above, they hold Merton and spread out.</li>
+      <li>The PINN follows FD until about <span class="mt">t</span> = 0.9, then rounds the cliff off: its peak is 3.5 instead of 4.3 and its total mass 0.998.</li>
+    </ul></div>
+    <div><h3>Live</h3><p><b>Play</b> runs time from 0. Drag the slider or use the chips. <b>Zoom on the cliff</b> narrows wealth to [<span class="mb">m</span><sub>T</sub> − 0.25, <span class="mb">m</span><sub>T</sub> + 0.1]. Hover for the three densities at one wealth.</p></div>
+    <div><h3>From the notebook</h3><p>Section 3 (three snapshots and a zoom), now one chart with a time slider and an animated zoom.</p></div>
+  </div>
+  <details class="nums"><summary>Numbers behind this figure</summary><div class="tbl" data-table="density"></div></details>
+</section>
+
+<section class="fig-sec" id="investors" aria-labelledby="investors-h">
+  <div class="sec-head"><span class="n">5</span><h2 id="investors-h">A thousand investors</h2><span class="tag">Extra</span></div>
+  <div class="frame-box"><div class="frame s-light"><div class="stage">
+    <div class="slide-head"><p class="eyebrow">Results · Monte Carlo · 1,000 investors · <span class="nm">λ = 2</span></p><h3 class="slide-title">A thousand investors, one strategy</h3></div>
+    <div class="fig-root fig" data-fig="investors"></div>
+  </div></div></div>
+  <div class="tools"><p class="hint">Hover a line to follow one investor and see how much stock they hold.</p><button type="button" class="tool" data-full>Full screen</button></div>
+  <div class="notes">
+    <div><h3>What it shows</h3><p>1,000 simulated investors who all follow the FD equilibrium strategy (Euler steps of 0.001 in time, starting from the initial bell curve). Left: each line is one investor's wealth over time, drawn up to the slider's time. Right: the histogram of their wealth at that time, with the PINN and FD densities on top.</p></div>
+    <div><h3>What to say</h3><ul>
+      <li>Each line is an investor. They start around 1 and all follow the same rule.</li>
+      <li><b>Watch the end:</b> the lines just below the average go flat, because those investors hold almost no stock. The ones above keep moving.</li>
+      <li>Their histogram builds the same cliff as the Fokker–Planck density.</li>
+      <li>Check with 100,000 investors: their mean at <span class="mt">T</span> matches FD's <span class="mb">m</span><sub>T</sub> within the sampling error (numbers below).</li>
+    </ul></div>
+    <div><h3>Live</h3><p><b>Play</b> runs time from 0. Drag the slider. Hover any line to pick out one investor: the tooltip gives their wealth and the dollars they hold at that time.</p></div>
+    <div><h3>From the notebook</h3><p>New: the notebook has no Monte Carlo. The share ending below <span class="mb">m</span><sub>T</sub> is the most grid-sensitive number, because the crowd sits right at the cliff: FD gives 67.2% on its default grid and 67.6% on a 4× finer one, moving toward the simulation's 67.8%.</p></div>
+  </div>
+  <details class="nums"><summary>Numbers behind this figure</summary><div class="tbl" data-table="investors"></div></details>
+</section>
+
+<section class="fig-sec" id="penalty" aria-labelledby="penalty-h">
+  <div class="sec-head"><span class="n">6</span><h2 id="penalty-h">The price of competing</h2><span class="tag">Results</span></div>
+  <div class="frame-box"><div class="frame s-light"><div class="stage">
+    <div class="slide-head"><p class="eyebrow">Results · penalty strength <span class="nm">λ</span> · FD equilibria</p><h3 class="slide-title">Competing costs money and crowds people below the average</h3></div>
+    <div class="fig-root fig" data-fig="penalty"></div>
+  </div></div></div>
+  <div class="tools"><p class="hint">Drag λ, or press Sweep to run it from 0 to 10.</p><button type="button" class="tool" data-full>Full screen</button></div>
+  <div class="notes">
+    <div><h3>What it shows</h3><p>FD equilibria for penalty strengths λ from 0 to 10. Top: three numbers about the final population, against λ; the large dot follows the slider and the blue dot is the PINN. Bottom left: the strategy at the start, π*(0, <span class="mt">x</span>). Bottom right: the final density <span class="mt">m</span>(<span class="mt">T</span>, <span class="mt">x</span>). Faint lines: the other λ values.</p></div>
+    <div><h3>What to say</h3><ul>
+      <li><b>Competing costs money:</b> the average final wealth falls from 1.110 to 1.054, most of it by λ = 2. Investors hold less stock and earn less of its premium.</li>
+      <li><b>Wealth becomes more equal:</b> the spread falls from 0.36 to 0.27.</li>
+      <li><b>Yet more investors end below the average</b>, 70% instead of 50%: the penalty makes them end only just below it, in a taller and thinner crowd.</li>
+      <li>The PINN at λ = 2 agrees on the average; its thinner tails and rounded cliff give a smaller spread and fewer investors below.</li>
+    </ul></div>
+    <div><h3>Live</h3><p>Drag λ (it snaps to the eleven values computed) or press <b>Sweep</b>. Hover a top chart for its value at each λ, or a bottom chart for the curves at one wealth.</p></div>
+    <div><h3>From the notebook</h3><p>Section 6: the three-number figure and the five-λ curves, merged into one figure driven by λ. PINN equilibria at λ = 1 and 5 are pending; add them to <code>PINN_RUNS</code> in the export script and they appear as more blue dots and curves.</p></div>
+  </div>
+  <details class="nums"><summary>Numbers behind this figure</summary><div class="tbl" data-table="penalty"></div></details>
+</section>
+
+<section class="fig-sec" id="gapmap" aria-labelledby="gapmap-h">
+  <div class="sec-head"><span class="n">7</span><h2 id="gapmap-h">Where the PINN misses</h2><span class="tag">Backup</span></div>
+  <div class="frame-box"><div class="frame s-light"><div class="stage">
+    <div class="slide-head"><p class="eyebrow">Backup · PINN against FD over the whole domain · <span class="nm">λ = 2</span></p><h3 class="slide-title">The PINN only misses at the cliff and at the empty edge</h3></div>
+    <div class="fig-root fig" data-fig="gapmap"></div>
+  </div></div></div>
+  <div class="tools"><p class="hint">Hover any cell for the gap and its sign.</p><button type="button" class="tool" data-full>Full screen</button></div>
+  <div class="notes">
+    <div><h3>What it shows</h3><p>Time across, wealth up. Each cell is the gap between the PINN's strategy and FD's, |π*<sub>PINN</sub> − π*<sub>FD</sub>|, in cents, grouped in four bands. Black curves: where investors live (FD density above 0.05). Grey line: <span class="mb">m</span><sub>T</sub>.</p></div>
+    <div><h3>What to say</h3><ul>
+      <li>Inside the investors' zone, up to <span class="mt">t</span> = 0.9, the PINN is within 7 cents of FD.</li>
+      <li>Two spots differ: <b>the cliff</b> just above <span class="mb">m</span><sub>T</sub> in the last tenth, where π* jumps and a smooth network rounds it off, and <b>the edge</b> <span class="mt">x</span> = −1, where nobody lives.</li>
+      <li>The value <span class="mt">V</span> agrees within half a percent everywhere. A small error in <span class="mt">V</span> can still be a large one in π*, which depends on its curvature.</li>
+    </ul></div>
+    <div><h3>Live</h3><p>Hover any cell: the tooltip gives the gap, whether the PINN is above or below FD, and whether investors live there.</p></div>
+    <div><h3>From the notebook</h3><p>Section 2, the π* difference map with a diverging colour scale, now four bands of size; the sign moved to the tooltip. The <span class="mt">V</span> map became one number in the panel.</p></div>
+  </div>
+  <details class="nums"><summary>Numbers behind this figure</summary><div class="tbl" data-table="gapmap"></div></details>
+</section>
+
+<section class="fig-sec" id="accuracy" aria-labelledby="accuracy-h">
+  <div class="sec-head"><span class="n">8</span><h2 id="accuracy-h">Accuracy for the time spent</h2><span class="tag">Results</span></div>
+  <div class="frame-box"><div class="frame s-light"><div class="stage">
+    <div class="slide-head"><p class="eyebrow">Results · accuracy and cost · HJB at <span class="nm">m̄ = 1.1</span></p><h3 class="slide-title">In one dimension, the grid is 10⁴ times cheaper</h3></div>
+    <div class="fig-root fig" data-fig="accuracy"></div>
+  </div></div></div>
+  <div class="tools"><p class="hint">Hover a dot for its run.</p><button type="button" class="tool" data-full>Full screen</button></div>
+  <div class="notes">
+    <div><h3>What it shows</h3><p>Both methods solve only the HJB, for a fixed <span class="mb">m</span> = 1.1. Across: computing time; up: the largest error of π* where investors live (0 ≤ <span class="mt">x</span> ≤ 2.2, <span class="mt">t</span> ≤ 0.9), both on log scales. FD: finer and finer grids. PINN: longer and longer training. Left: no penalty, against the exact answer. Right: λ = 2, against FD on a 6,400 × 3,200 grid.</p></div>
+    <div><h3>What to say</h3><ul>
+      <li>FD improves steadily: each doubling of the grid divides the error by 2 to 4.</li>
+      <li>The PINN does not: without the penalty its error stays between 0.003 and 0.012 whatever the training length.</li>
+      <li><b>At equal accuracy FD is about 10⁴ times faster</b> here (the dotted line).</li>
+      <li>That is expected in one dimension. A grid needs <span class="mt">n</span><sup><span class="mt">d</span></sup> points for <span class="mt">d</span> state variables; a PINN samples random points. That is why the PINN is the method for the game with <span class="mt">N</span> investors, where the grid is out of reach.</li>
+    </ul></div>
+    <div><h3>Live</h3><p>Hover a dot for the grid or training length, the time and the error.</p></div>
+    <div><h3>From the notebook</h3><p>Section 4. FD times were measured again on this machine, so they differ slightly from the notebook's; PINN times are the saved training times. The errors are identical.</p></div>
+  </div>
+  <details class="nums"><summary>Numbers behind this figure</summary><div class="tbl" data-table="accuracy"></div></details>
+</section>
+
+<section class="fig-sec" id="scorecard" aria-labelledby="scorecard-h">
+  <div class="sec-head"><span class="n">9</span><h2 id="scorecard-h">Scorecard</h2><span class="tag">Summary</span></div>
+  <div class="frame-box"><div class="frame s-light"><div class="stage">
+    <div class="slide-head"><p class="eyebrow">Summary · PINN against FD · <span class="nm">λ = 2</span></p><h3 class="slide-title">Same equilibrium, very different cost</h3></div>
+    <div class="fig-root fig" data-fig="scorecard"></div>
+  </div></div></div>
+  <div class="tools"><p class="hint">A static slide: the numbers are the figure.</p><button type="button" class="tool" data-full>Full screen</button></div>
+  <div class="notes">
+    <div><h3>What it shows</h3><p>The two methods side by side at λ = 2. Errors are against FD on a 3,200 × 1,600 grid (four times finer in each direction); the π* error is the largest gap where investors live, up to <span class="mt">t</span> = 0.9.</p></div>
+    <div><h3>What to say</h3><ul>
+      <li>Both methods find the same equilibrium, 1.065 against 1.110 without the penalty, within 1.5·10⁻⁴ of each other.</li>
+      <li>The PINN gets there from the equations alone: no grid and no scheme to design.</li>
+      <li>Its weak spot is the end of the horizon at the average, where π* jumps.</li>
+      <li>FD is far cheaper in one dimension; the PINN is the one that carries over to richer games.</li>
+    </ul></div>
+    <div><h3>Live</h3><p>Nothing to drive.</p></div>
+    <div><h3>From the notebook</h3><p>Section 7, the summary table.</p></div>
+  </div>
+</section>
+
+</main>
+
+<div class="after">
+  <section aria-labelledby="dropped-h">
+    <h2 id="dropped-h">Left out of the talk</h2>
+    <ul>
+      <li><b>The search-gap figure</b> (section 4 of the notebook): the gap of each step is now in the panel of figure 2.</li>
+      <li><b>The stacked shares of the loss</b> (section 5): hard to read, and noisy; the share of each part is in figure 1's tooltip and panel.</li>
+      <li><b>The map of the value gap</b> (section 2): <span class="mt">V</span> agrees within 0.48% everywhere, so it is one number in figure 7.</li>
+      <li><b>The tables</b>: their numbers are in the tooltips, the panels and the "Numbers behind this figure" boxes.</li>
+    </ul>
+  </section>
+  <section aria-labelledby="rebuild-h">
+    <h2 id="rebuild-h">Rebuilding the data</h2>
+    <p>Every number on this page is in <code>figure_data.js</code>, written by Ander's script <code>exportar_datos_graficos.py</code>, which is kept in his private folder, not in the repo. The script loads the networks that the results notebook saved in <code>results/results_notebook/</code>, runs the FD solves again (they take seconds), simulates the investors, and checks nothing by hand. It takes about a minute:</p>
+    <p>When the PINN equilibria at λ = 1 and 5 exist, Ander adds them to the script and runs it again: figure 6 then shows them.</p>
+  </section>
+  <section aria-labelledby="move-h">
+    <h2 id="move-h">Moving a figure into the slides</h2>
+    <ol>
+      <li>Copy the fonts <code>&lt;link&gt;</code> and the CSS between the markers <code>figures: shared slide styles</code> and <code>end of shared slide styles</code>.</li>
+      <li>Include <code>figure_data.js</code>, then the script block marked <code>figures</code> (helpers and one builder per figure).</li>
+      <li>On the slide (a <code>.s-light</code> or <code>.s-dark</code> section of the 1920 × 1080 stage), add <code>&lt;div class="fig-root fig" data-fig="strategy"&gt;&lt;/div&gt;</code>: it sits at 112 px from the left and 250 px from the top, 1,696 × 740 px, under the slide title. Then call <code>Figures.build(element)</code>.</li>
+      <li>Each figure carries its own controls and tooltip, and reads its colours from the slide, so it works on light and dark slides.</li>
+    </ol>
+  </section>
+</div>
+
+</div>
+
+<script src="figure_data.js"></script>
+<script>
+/* ================= figures: helpers and one builder per figure ================= */
+const Figures = (function(){
+'use strict';
+const D = window.FIGDATA;
+const NS = 'http://www.w3.org/2000/svg';
+const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const MINUS = '−';
+
+/* ---------- small DOM helpers ---------- */
+function S(tag, attrs, parent){ const e = document.createElementNS(NS, tag); if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function T(parent, x, y, txt, attrs){ const t = S('text', Object.assign({x: x, y: y}, attrs || {}), parent); if (txt != null) t.textContent = txt; return t; }
+function H(tag, attrs, parent, txt){ const e = document.createElement(tag); if (attrs) for (const k in attrs){ if (k === 'class') e.className = attrs[k]; else e.setAttribute(k, attrs[k]); } if (txt != null) e.textContent = txt; if (parent) parent.appendChild(e); return e; }
+function clear(e){ while (e.firstChild) e.removeChild(e.firstChild); }
+function place(el, left, top, width, height){ el.style.position = 'absolute'; el.style.left = left + 'px'; el.style.top = top + 'px'; if (width != null) el.style.width = width + 'px'; if (height != null) el.style.height = height + 'px'; return el; }
+function svgBox(root, left, top, w, h, label){ const s = S('svg', {viewBox: '0 0 ' + w + ' ' + h, width: w, height: h, role: 'img', 'aria-label': label}, root); place(s, left, top); return s; }
+let uidCount = 0;
+function uid(p){ uidCount += 1; return p + '-' + uidCount; }
+/* Text with math pieces: strings stay as they are; {i: 'm', bar: true, sub: 'T'} is an italic m with
+   an overline and a subscript T; {i: 'π', sup: '*'} an italic pi with a raised star. */
+function rich(parent, x, y, parts, attrs){
+  const t = S('text', Object.assign({x: x, y: y}, attrs || {}), parent);
+  parts.forEach(p => {
+    if (typeof p === 'string'){ S('tspan', null, t).textContent = p; return; }
+    S('tspan', {class: 'mi' + (p.bar ? ' ov' : '')}, t).textContent = p.i;
+    // A small tspan shifted by dy, then a hair space shifted back (the em of each tspan is its own size).
+    if (p.sub){ S('tspan', {class: 'ms', dy: '0.3em'}, t).textContent = p.sub; S('tspan', {dy: '-0.204em'}, t).textContent = ' '; }
+    if (p.sup){ S('tspan', {class: 'ms', dy: '-0.55em'}, t).textContent = p.sup; S('tspan', {dy: '0.374em'}, t).textContent = ' '; }
+  });
+  return t;
+}
+const MBT = {i: 'm', bar: true, sub: 'T'}, MB = {i: 'm', bar: true}, PIS = {i: 'π', sup: '*'};
+
+/* ---------- numbers ---------- */
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function fixed(v, d){ const s = (+v).toFixed(d); if (s[0] !== '-') return s; return Number(s) === 0 ? s.slice(1) : MINUS + s.slice(1); }
+function signed(v, d){ const s = fixed(v, d); return (s[0] === MINUS || Number(s) === 0) ? s : '+' + s; }
+const SUPS = {'0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '-': '⁻'};
+function sup(e){ return String(e).split('').map(c => SUPS[c]).join(''); }
+function sci(v, d){
+  if (d == null) d = 1;
+  if (v === 0) return '0';
+  const neg = v < 0; let a = Math.abs(v), e = Math.floor(Math.log10(a)), m = a / Math.pow(10, e);
+  if (+m.toFixed(d) >= 10){ m /= 10; e += 1; }
+  return (neg ? MINUS : '') + m.toFixed(d) + '·10' + sup(e);
+}
+function sciSigned(v, d){ return (v > 0 ? '+' : '') + sci(v, d); }
+function thousands(n){ return Math.round(n).toLocaleString('en-US'); }
+function pct(v, d){ return fixed(100 * v, d == null ? 0 : d) + '%'; }
+function cents(v){ const c = 100 * v; return (c < 1 ? fixed(c, 2) : c < 10 ? fixed(c, 1) : fixed(c, 0)) + '¢'; }
+function duration(s){ return s >= 60 ? fixed(s / 60, 1) + ' min' : s >= 1 ? fixed(s, 1) + ' s' : fixed(s, 3) + ' s'; }
+
+/* ---------- scales, ticks, interpolation ---------- */
+function lin(d0, d1, r0, r1){ const f = v => r0 + (v - d0) / (d1 - d0) * (r1 - r0); f.inv = q => d0 + (q - r0) / (r1 - r0) * (d1 - d0); return f; }
+function logS(d0, d1, r0, r1){ const a = Math.log10(d0), b = Math.log10(d1); const f = v => r0 + (Math.log10(v) - a) / (b - a) * (r1 - r0); f.inv = q => Math.pow(10, a + (q - r0) / (r1 - r0) * (b - a)); return f; }
+function niceStep(a, b, n){ const s0 = (b - a) / Math.max(1, n), mag = Math.pow(10, Math.floor(Math.log10(s0))), e = s0 / mag; return (e >= 7.5 ? 10 : e >= 3.5 ? 5 : e >= 1.5 ? 2 : 1) * mag; }
+function niceTicks(a, b, n){ const st = niceStep(a, b, n), out = []; for (let v = Math.ceil(a / st - 1e-9) * st; v <= b + 1e-9; v += st) out.push(+v.toFixed(10)); return out; }
+function decimalsOf(step){ return Math.max(0, -Math.floor(Math.log10(step) + 1e-9)); }
+function linePath(xs, ys){ let d = ''; for (let i = 0; i < xs.length; i++) d += (i ? 'L' : 'M') + xs[i].toFixed(1) + ',' + ys[i].toFixed(1); return d; }
+function bracket(xs, v){ let lo = 0, hi = xs.length - 1; if (v <= xs[0]) return [0, 1, 0]; if (v >= xs[hi]) return [hi - 1, hi, 1]; while (hi - lo > 1){ const m = (lo + hi) >> 1; if (xs[m] <= v) lo = m; else hi = m; } return [lo, hi, (v - xs[lo]) / (xs[hi] - xs[lo])]; }
+function nearest(xs, v){ const b = bracket(xs, v); return b[2] < 0.5 ? b[0] : b[1]; }
+function interp(xs, ys, v){ const b = bracket(xs, v); return ys[b[0]] + (ys[b[1]] - ys[b[0]]) * b[2]; }
+/* The row of a table of slices (one row per time in ts) at time t, mixing the two rows around it. */
+function blend(ts, rows, t){ const b = bracket(ts, t), a = rows[b[0]], c = rows[b[1]], w = b[2], out = new Array(a.length); for (let i = 0; i < a.length; i++) out[i] = a[i] + (c[i] - a[i]) * w; return out; }
+/* Share of a density (values ys on the points xs) that lies below m, by the trapezoid rule. */
+function shareBelow(xs, ys, m){ let total = 0, below = 0; for (let i = 1; i < xs.length; i++){ const area = 0.5 * (ys[i] + ys[i - 1]) * (xs[i] - xs[i - 1]); total += area; if (xs[i] <= m) below += area; else if (xs[i - 1] < m){ const w = (m - xs[i - 1]) / (xs[i] - xs[i - 1]), ym = ys[i - 1] + w * (ys[i] - ys[i - 1]); below += 0.5 * (ys[i - 1] + ym) * (m - xs[i - 1]); } } return below / total; }
+function gauss(x, mu, sd){ const z = (x - mu) / sd; return Math.exp(-0.5 * z * z) / (sd * Math.sqrt(2 * Math.PI)); }
+const easeInOut = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+/* Run step(k) for k from 0 to 1 over ms milliseconds; returns a function that cancels it. */
+function animate(ms, step, done){
+  if (reduceMotion || ms <= 0){ step(1); if (done) done(); return () => {}; }
+  const t0 = performance.now(); let raf = 0, live = true;
+  function tick(now){ if (!live) return; const k = Math.min(1, (now - t0) / ms); step(k); if (k < 1) raf = requestAnimationFrame(tick); else if (done) done(); }
+  raf = requestAnimationFrame(tick);
+  return () => { live = false; cancelAnimationFrame(raf); };
+}
+function cssVar(el, name){ return getComputedStyle(el).getPropertyValue(name).trim(); }
+function hexRGB(h){ h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+/* Pointer position in an element's own (unscaled) pixels; the stage is scaled with a CSS transform. */
+function local(el, ev){ const r = el.getBoundingClientRect(), w = el.offsetWidth || el.getBoundingClientRect().width; const k = r.width / w || 1; return {x: (ev.clientX - r.left) / k, y: (ev.clientY - r.top) / k}; }
+function svgPoint(svg, ev){ const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY; const m = svg.getScreenCTM(); if (!m) return {x: 0, y: 0}; const q = pt.matrixTransform(m.inverse()); return {x: q.x, y: q.y}; }
+
+/* ---------- shared pieces: tooltip, legend, buttons, sliders, player ---------- */
+function Tip(root){
+  const el = H('div', {class: 'tip', role: 'status'}, root); el.hidden = true;
+  return {
+    show(px, py, title, rows){
+      clear(el);
+      H('p', {class: 'tt'}, el, title);
+      rows.forEach(r => {
+        const p = H('p', null, el);
+        if (r.key){ const k = H('i', {class: 'k ' + r.key}, p); if (r.color) k.style.borderColor = r.color; }
+        H('b', null, p, r.value);
+        if (r.label) H('span', null, p, r.label);
+      });
+      el.hidden = false;
+      const w = el.offsetWidth, h = el.offsetHeight, W = root.offsetWidth, HH = root.offsetHeight;
+      let x = px + 26; if (x + w > W) x = px - 26 - w;
+      el.style.transform = 'translate(' + clamp(x, 0, W - w) + 'px,' + clamp(py - h / 2, 0, HH - h) + 'px)';
+    },
+    hide(){ el.hidden = true; }
+  };
+}
+/* A legend row; items are [kind, html]. The html strings are written in this file, never data. */
+function Legend(parent, items){
+  const el = H('div', {class: 'legend'}, parent);
+  items.forEach(([kind, html]) => { const s = H('span', null, el); if (kind === 'band' || kind === 'hist') H('i', {class: 'sw ' + kind}, s); else if (kind === 'dot') H('i', {class: 'dotk'}, s); else H('i', {class: 'lk ' + kind}, s); const t = H('span', null, s); t.innerHTML = html; });
+  return el;
+}
+function Btn(parent, text, onClick, cls){ const b = H('button', {type: 'button', class: 'btn' + (cls ? ' ' + cls : '')}, parent, text); b.addEventListener('click', onClick); return b; }
+function Toggle(parent, text, on, onChange){ const b = Btn(parent, text, () => { const v = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(v)); onChange(v); }); b.setAttribute('aria-pressed', String(on)); return b; }
+function Seg(parent, options, value, onChange){
+  const el = H('div', {class: 'seg', role: 'group'}, parent);
+  const bs = options.map(([v, text]) => { const b = H('button', {type: 'button'}, el, text); b.setAttribute('aria-pressed', String(v === value)); b.addEventListener('click', () => { bs.forEach(x => x.setAttribute('aria-pressed', String(x === b))); onChange(v); }); return b; });
+  return el;
+}
+function Slider(parent, id, min, max, step, value, label, onInput){
+  const s = H('input', {type: 'range', id: id, min: min, max: max, step: step, value: value, 'aria-label': label}, parent);
+  const fill = () => s.style.setProperty('--p', ((s.value - min) / (max - min) * 100) + '%');
+  s.addEventListener('input', () => { fill(); onInput(+s.value); });
+  s.setValue = v => { s.value = v; fill(); };
+  fill();
+  return s;
+}
+function Chips(parent, values, onPick){
+  const el = H('div', {class: 'chips', role: 'group', 'aria-label': 'Jump to a time'}, parent);
+  const bs = values.map(v => { const b = H('button', {type: 'button', class: 'chip'}, el, 't = ' + v); b.addEventListener('click', () => onPick(v)); return b; });
+  el.mark = t => bs.forEach((b, i) => b.setAttribute('aria-current', String(Math.abs(values[i] - t) < 5e-4)));
+  return el;
+}
+/* Moves a value from 0 to 1 at speed(value) per second. Play restarts from 0 unless it was paused mid-way. */
+function Player(get, set, speed, button){
+  let raf = 0, last = 0, playing = false, resumable = false;
+  function label(){ button.textContent = playing ? '❚❚ Pause' : '▶ Play'; }
+  function frame(now){
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const v = Math.min(1, get() + speed(get()) * dt); set(v);
+    if (v >= 1){ playing = false; resumable = false; label(); return; }
+    raf = requestAnimationFrame(frame);
+  }
+  function play(){ if (!resumable || get() >= 1) set(0); playing = true; last = performance.now(); raf = requestAnimationFrame(frame); label(); }
+  function pause(){ cancelAnimationFrame(raf); playing = false; label(); }
+  button.addEventListener('click', () => { if (playing){ pause(); resumable = true; } else play(); });
+  label();
+  return {stop(){ if (playing) pause(); resumable = false; }};
+}
+/* Grid lines and tick labels of a linear axis pair; returns nothing, draws into g. */
+function axesLinear(g, X, Y, xt, yt, box, fmtX, fmtY){
+  yt.forEach(v => { S('line', {x1: box.x0, x2: box.x1, y1: Y(v), y2: Y(v), class: 'gridl'}, g); T(g, box.x0 - 14, Y(v) + 6, fmtY(v), {class: 'ax', 'text-anchor': 'end'}); });
+  xt.forEach(v => { S('line', {x1: X(v), x2: X(v), y1: box.y1, y2: box.y1 + 8, class: 'base'}, g); T(g, X(v), box.y1 + 33, fmtX(v), {class: 'ax', 'text-anchor': 'middle'}); });
+  S('line', {x1: box.x0, x2: box.x1, y1: box.y1, y2: box.y1, class: 'base'}, g);
+}
+function clipRect(svg, box){ const id = uid('clip'); const defs = S('defs', null, svg); const cp = S('clipPath', {id: id}, defs); S('rect', {x: box.x0, y: box.y0 - 2, width: box.x1 - box.x0, height: box.y1 - box.y0 + 4}, cp); return 'url(#' + id + ')'; }
+/* End labels at the right of lines; labels too close together are spread and joined by leaders. */
+function endLabels(g, items, x, minGap){
+  items.sort((a, b) => a.y - b.y);
+  const ys = items.map(it => it.y);
+  for (let pass = 0; pass < 30; pass++){ let moved = false; for (let i = 1; i < ys.length; i++){ const gap = ys[i] - ys[i - 1]; if (gap < minGap){ const push = (minGap - gap) / 2; ys[i - 1] -= push; ys[i] += push; moved = true; } } if (!moved) break; }
+  items.forEach((it, i) => { if (Math.abs(ys[i] - it.y) > 2) S('line', {x1: x + 2, y1: it.y, x2: x + 14, y2: ys[i], class: 'lead-l'}, g); T(g, x + 18, ys[i] + 7, it.text, {class: 'labb'}); });
+}
+
+/* ================= figure 1: the parts of the loss ================= */
+function figLoss(root){
+  const L = D.loss;
+  const META = {
+    value: {equation: ['equation', 'HJB residual at 5,000 random points inside', '--loss-eq'],
+            terminal: ['terminal', 'final value v(T, x), at 1,000 points', '--loss-term'],
+            slopes: ['slopes', 'slopes of v at t = T, away from m̄', '--loss-slopes'],
+            edges: ['edges', 'values at x = −1 and x = 3, shared with FD', '--loss-edges']},
+    density: {equation: ['equation', 'Fokker–Planck residual at 6,000 points', '--loss-eq'],
+              mass: ['mass', 'total mass minus one', '--loss-mass']}
+  };
+  const W = 1150, HH = 740, box = {x0: 128, x1: 960, y0: 44, y1: 640};
+  const svg = svgBox(root, 0, 0, W, HH, 'Each part of the PINN loss against the training step, on a log scale');
+  const panel = place(H('div', {class: 'panel'}, root), 1196, 0, 500, 740);
+  const tip = Tip(root);
+  let net = 'value', cancel = () => {};
+  Seg(panel, [['value', 'Value network'], ['density', 'Density network']], 'value', v => { net = v; cancel(); draw(); });
+  const list = H('div', {class: 'parts'}, panel);
+  const ctl = H('div', {class: 'row'}, panel);
+  Btn(ctl, '▶ Replay training', replay);
+  const foot = H('p', {class: 'fnote'}, panel);
+  let clip = null, counter = null, ends = null, X = null;
+
+  function draw(){
+    const h = L[net], meta = META[net], names = Object.keys(h.parts), steps = h.step, last = steps.length - 1;
+    const all = [].concat(...names.map(n => h.parts[n]));
+    const lo = Math.pow(10, Math.floor(Math.log10(Math.min(...all)))), hi = Math.pow(10, Math.ceil(Math.log10(Math.max(...all))));
+    X = lin(0, steps[last], box.x0, box.x1);
+    const Y = logS(lo, hi, box.y1, box.y0);
+    clear(svg);
+    const defs = S('defs', null, svg), cid = uid('clip'), cp = S('clipPath', {id: cid}, defs);
+    clip = S('rect', {x: 0, y: 0, width: W, height: HH}, cp);
+    const xa = X(h.adam_steps);
+    S('rect', {x: xa, y: box.y0, width: box.x1 - xa, height: box.y1 - box.y0, class: 'band'}, svg);
+    T(svg, (xa + box.x1) / 2, box.y0 - 14, 'L-BFGS', {class: 'labm', 'text-anchor': 'middle'});
+    T(svg, box.x0, box.y0 - 14, 'Adam, ' + thousands(h.adam_steps) + ' steps', {class: 'labm'});
+    for (let e = Math.round(Math.log10(lo)); e <= Math.round(Math.log10(hi)); e++){
+      const y = Y(Math.pow(10, e));
+      S('line', {x1: box.x0, x2: box.x1, y1: y, y2: y, class: 'gridl'}, svg);
+      T(svg, box.x0 - 14, y + 6, '10' + sup(e), {class: 'ax', 'text-anchor': 'end'});
+    }
+    for (let s = 0; s <= steps[last]; s += 2000){ S('line', {x1: X(s), x2: X(s), y1: box.y1, y2: box.y1 + 8, class: 'base'}, svg); T(svg, X(s), box.y1 + 33, thousands(s), {class: 'ax', 'text-anchor': 'middle'}); }
+    S('line', {x1: box.x0, x2: box.x1, y1: box.y1, y2: box.y1, class: 'base'}, svg);
+    T(svg, (box.x0 + box.x1) / 2, box.y1 + 76, 'training step', {class: 'axt', 'text-anchor': 'middle'});
+    T(svg, 0, 0, 'part of the loss (mean square)', {class: 'axt', 'text-anchor': 'middle', transform: 'translate(34 ' + (box.y0 + box.y1) / 2 + ') rotate(-90)'});
+    const g = S('g', {'clip-path': 'url(#' + cid + ')'}, svg);
+    const xs = steps.map(X);
+    names.forEach(n => S('path', {d: linePath(xs, h.parts[n].map(Y)), class: 'ln', style: 'stroke:var(' + meta[n][2] + ')'}, g));
+    ends = S('g', null, svg);
+    endLabels(ends, names.map(n => ({y: Y(h.parts[n][last]), text: meta[n][0]})), box.x1, 28);
+    counter = T(svg, box.x1 - 14, box.y0 + 36, '', {class: 'num', 'text-anchor': 'end'});
+    counter.style.display = 'none';
+    // hover: a crosshair that snaps to the recorded steps
+    const hov = S('g', null, svg), cross = S('line', {y1: box.y0, y2: box.y1, class: 'cross'}, hov); cross.style.display = 'none';
+    const dots = names.map(n => { const c = S('circle', {r: 6, class: 'dot-pinn', style: 'fill:var(' + meta[n][2] + ')'}, hov); c.style.display = 'none'; return c; });
+    const hit = S('rect', {x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, class: 'hit'}, svg);
+    hit.addEventListener('pointermove', ev => {
+      const p = svgPoint(svg, ev), i = nearest(xs, p.x), xi = xs[i];
+      cross.setAttribute('x1', xi); cross.setAttribute('x2', xi); cross.style.display = '';
+      names.forEach((n, k) => { dots[k].setAttribute('cx', xi); dots[k].setAttribute('cy', Y(h.parts[n][i])); dots[k].style.display = ''; });
+      const order = names.slice().sort((a, b) => h.parts[b][i] - h.parts[a][i]);
+      const phase = steps[i] > h.adam_steps ? 'after L-BFGS' : 'Adam';
+      const q = local(root, ev);
+      tip.show(q.x, q.y, 'step ' + thousands(steps[i]) + ' · ' + phase, order.map(n => ({key: 'x', color: cssVar(root, meta[n][2]), value: sci(h.parts[n][i]), label: meta[n][0] + ' · ' + pct(h.parts[n][i] / h.total[i]) + ' of the loss'})));
+    });
+    hit.addEventListener('pointerleave', () => { cross.style.display = 'none'; dots.forEach(d => d.style.display = 'none'); tip.hide(); });
+    // panel: one row per part
+    clear(list);
+    names.forEach(n => {
+      const row = H('div', {class: 'part'}, list);
+      H('i', {class: 'lk', style: 'border-color:var(' + meta[n][2] + ')'}, row);
+      H('b', null, row, meta[n][0]);
+      H('span', {class: 'sh'}, row, pct(h.parts[n][last] / h.total[last]));
+      H('span', {class: 'ds'}, row, meta[n][1]);
+      H('span', {class: 'vs'}, row, sci(h.parts[n][0]) + ' → ' + sci(h.parts[n][last]) + '  (start → end)');
+    });
+    foot.textContent = 'First evaluation of the search, m̄ = ' + fixed(h.mbar, 3) + ', trained from scratch. The percentages are shares of the final loss. Points are drawn again at every step, hence the spikes.';
+  }
+  function replay(){
+    cancel();
+    counter.style.display = ''; ends.style.display = 'none';
+    cancel = animate(4500, k => {
+      const x = box.x0 + (box.x1 - box.x0) * k;
+      clip.setAttribute('width', x + 1);
+      counter.textContent = 'step ' + thousands(X.inv(x));
+    }, () => { clip.setAttribute('width', W); counter.style.display = 'none'; ends.style.display = ''; });
+  }
+  draw();
+}
+
+/* ================= figure 2: the equilibrium search ================= */
+function figEquilibrium(root){
+  const E = D.equilibrium, st = E.pinn_steps, pts = st.map(s => [s.mbar, s.phi]);
+  const W = 1080, HH = 740, box = {x0: 150, x1: 770, y0: 24, y1: 644};
+  const svg = svgBox(root, 0, 0, W, HH, 'The map Phi of the assumed average to the resulting average, with the PINN search steps');
+  const panel = place(H('div', {class: 'panel'}, root), 1116, 0, 580, 740);
+  panel.style.gap = '16px';
+  const tip = Tip(root);
+  const FULL = [1.03, 1.13], c = E.mbar_fd, ZOOM = [c - 0.004, c + 0.004];
+  let dom = FULL.slice(), zoomed = false, k = st.length, reveal = 1, cancelZoom = () => {}, cancelReveal = () => {};
+  const clipUrl = clipRect(svg, box);
+  const gAxes = S('g', null, svg), gPlot = S('g', {'clip-path': clipUrl}, svg), gTop = S('g', null, svg);
+  // The pieces of the search path, each with the step that draws it.
+  const m3 = pts[2] ? pts[2][0] : null;
+  const pieces = [
+    {k: 1, a: [pts[0][0], pts[0][0]], b: pts[0]},                 // from the diagonal down to dot 1
+    {k: 2, a: pts[0], b: [pts[0][1], pts[0][1]]},                 // across to the diagonal: the next guess is Phi(m1)
+    {k: 2, a: [pts[1][0], pts[0][1]], b: pts[1]},                 // up to dot 2
+  ];
+  if (pts[2]) pieces.push({k: 3, a: pts[1], b: pts[0]}, {k: 3, a: [m3, m3], b: pts[2]});  // the secant line, then down to dot 3
+
+  // panel
+  H('p', {class: 'ph'}, panel, 'The search, one evaluation at a time');
+  const stepsEl = H('div', {class: 'steps'}, panel);
+  const chips = st.map((s, i) => { const b = H('button', {type: 'button', class: 'pst'}, stepsEl); H('span', {class: 'n'}, b, String(i + 1)); b.appendChild(document.createTextNode(i === 0 ? 'from scratch' : 'warm start')); b.addEventListener('click', () => setStep(i + 1)); return b; });
+  const say = H('p', {class: 'say'}, panel);
+  const ledger = H('dl', {class: 'ledger'}, panel);
+  const result = H('div', {class: 'result'}, panel);
+  const rr = (key, label, value, cls) => { const r = H('div', {class: 'rr'}, result); const s = H('span', null, r); if (key) H('i', {class: 'lk ' + key}, s); s.appendChild(document.createTextNode(label)); H('b', {class: cls || ''}, r, value); };
+  rr('pinn', 'PINN equilibrium', fixed(E.mbar_pinn, 5));
+  rr('fd', 'FD equilibrium', fixed(E.mbar_fd, 5));
+  rr(null, 'no penalty (exact)', fixed(E.mbar_free, 5), 'sm');
+  const ctl = H('div', {class: 'row'}, panel);
+  const back = Btn(ctl, '◀ Back', () => setStep(k - 1));
+  const next = Btn(ctl, 'Next ▶', () => setStep(k + 1), 'solid');
+  next.style.minWidth = '0';
+  Toggle(ctl, 'Zoom in', false, on => setZoom(on));
+
+  function ledgerRows(rows, cls){ clear(ledger); rows.forEach(([a, b]) => { const d = H('div', null, ledger); H('dt', null, d, a); H('dd', cls ? {class: cls} : null, d, b); }); }
+  function setStep(n){
+    n = clamp(n, 0, st.length);
+    const forward = n > k; k = n;
+    cancelReveal();
+    if (forward){ reveal = 0; cancelReveal = animate(700, q => { reveal = easeInOut(q); draw(); }); } else { reveal = 1; draw(); }
+    back.disabled = k === 0; next.disabled = k === st.length;
+    chips.forEach((b, i) => { b.classList.toggle('done', i < k); if (i === k - 1) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    if (k === 0){
+      say.innerHTML = 'Press <b>Next</b>. The search starts from the answer without the penalty, <span class="mb-h">m</span> = ' + fixed(E.mbar_free, 3) + '.';
+      ledgerRows([['dashed orange curve', 'Φ computed by FD'], ['grey diagonal', 'where Φ(m̄) = m̄'], ['grey horizontal line', 'the game without penalty']], 'txt');
+      return;
+    }
+    const s = st[k - 1], gap = Math.abs(s.phi - s.mbar);
+    const how = ['the no-penalty answer', 'Φ of the first guess', 'the secant through dots 1 and 2'][k - 1] || 'the secant';
+    say.innerHTML = k === 1 ? 'Assume the no-penalty average. Everyone best-responds, and the average comes out <b>lower</b>.'
+      : k === 2 ? 'Next guess: the average that came out. Again it overshoots, now upwards.'
+      : 'The secant through dots 1 and 2 meets the diagonal. The gap is now below the tolerance: <b>stop</b>.';
+    ledgerRows([
+      ['assumed m̄ (' + how + ')', fixed(s.mbar, 5)],
+      ['Φ by the PINN', fixed(s.phi, 5)],
+      ['Φ by FD, same m̄', fixed(s.phi_fd, 5)],
+      ['PINN − FD', sciSigned(s.phi - s.phi_fd)],
+      ['gap |Φ − m̄|  (tolerance ' + sci(E.tol, 0) + ')', sci(gap)],
+      ['training', duration(s.seconds) + (s.warm ? ', warm start' : ', from scratch')],
+    ]);
+  }
+  function setZoom(on){
+    zoomed = on; cancelZoom();
+    const from = dom.slice(), to = on ? ZOOM : FULL;
+    cancelZoom = animate(900, q => { const e = easeInOut(q); dom = [from[0] + (to[0] - from[0]) * e, from[1] + (to[1] - from[1]) * e]; draw(); });
+  }
+  function draw(){
+    const X = lin(dom[0], dom[1], box.x0, box.x1), Y = lin(dom[0], dom[1], box.y1, box.y0);
+    clear(gAxes); clear(gPlot); clear(gTop);
+    const ticks = niceTicks(dom[0], dom[1], 5), dec = decimalsOf(niceStep(dom[0], dom[1], 5));
+    ticks.forEach(v => { S('line', {x1: box.x0, x2: box.x1, y1: Y(v), y2: Y(v), class: 'gridl'}, gAxes); S('line', {x1: X(v), x2: X(v), y1: box.y0, y2: box.y1, class: 'gridl'}, gAxes); T(gAxes, box.x0 - 14, Y(v) + 6, fixed(v, dec), {class: 'ax', 'text-anchor': 'end'}); T(gAxes, X(v), box.y1 + 33, fixed(v, dec), {class: 'ax', 'text-anchor': 'middle'}); });
+    S('rect', {x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, fill: 'none', class: 'base'}, gAxes);
+    rich(gAxes, (box.x0 + box.x1) / 2, box.y1 + 78, ['assumed average final wealth ', MB], {class: 'axt', 'text-anchor': 'middle'});
+    rich(gAxes, 0, 0, ['resulting average Φ(', MB, ')'], {class: 'axt', 'text-anchor': 'middle', transform: 'translate(46 ' + (box.y0 + box.y1) / 2 + ') rotate(-90)'});
+    // the diagonal, the no-penalty line and the FD curve
+    S('line', {x1: X(dom[0]), y1: Y(dom[0]), x2: X(dom[1]), y2: Y(dom[1]), class: 'ln-ref'}, gPlot);
+    S('line', {x1: box.x0, x2: box.x1, y1: Y(E.mbar_free), y2: Y(E.mbar_free), class: 'ln-ref'}, gPlot);
+    S('path', {d: linePath(E.phi_grid.map(X), E.phi_fd.map(Y)), class: 'ln-fd'}, gPlot);
+    if (Y(E.mbar_free) > box.y0 + 30) rich(gPlot, box.x0 + 14, Y(E.mbar_free) - 12, ['no penalty (', {i: 'λ'}, ' = 0): ' + fixed(E.mbar_free, 3)], {class: 'labm'});
+    const dx = dom[1] - dom[0];
+    rich(gTop, X(dom[1] - 0.05 * dx) + 14, Y(dom[1] - 0.05 * dx) + 30, ['Φ(', MB, ') = ', MB], {class: 'labm'});
+    const xl = dom[0] + 0.04 * dx; T(gTop, X(xl), Y(interp(E.phi_grid, E.phi_fd, xl)) - 16, 'Φ by FD', {class: 'lab'});
+    // the search path and the dots, up to step k (the newest piece grows with `reveal`)
+    pieces.forEach(pc => {
+      if (pc.k > k) return;
+      const f = pc.k === k ? reveal : 1;
+      const b = [pc.a[0] + (pc.b[0] - pc.a[0]) * f, pc.a[1] + (pc.b[1] - pc.a[1]) * f];
+      S('line', {x1: X(pc.a[0]), y1: Y(pc.a[1]), x2: X(b[0]), y2: Y(b[1]), class: 'ln-path'}, gPlot);
+    });
+    if (zoomed || dom[1] - dom[0] < 0.05){
+      // in the zoom: FD's crossing, and the PINN's offset below FD at each dot
+      S('circle', {cx: X(c), cy: Y(c), r: 9, class: 'ring-fd'}, gPlot);
+      T(gTop, X(c) + 16, Y(c) + 34, 'FD ' + fixed(c, 5), {class: 'labb'});
+      pts.slice(0, k).forEach((q, i) => S('line', {x1: X(q[0]), x2: X(q[0]), y1: Y(q[1]), y2: Y(st[i].phi_fd), class: 'mark'}, gPlot));
+    }
+    pts.slice(0, k).forEach((q, i) => {
+      const f = (i === k - 1) ? reveal : 1;
+      if (f < 0.6) return;
+      const cx = X(q[0]), cy = Y(q[1]);
+      if (cx < box.x0 - 5 || cx > box.x1 + 5 || cy < box.y0 - 5 || cy > box.y1 + 5) return;
+      const dot = S('circle', {cx: cx, cy: cy, r: 10 * Math.min(1, (f - 0.6) / 0.4), class: 'dot-pinn'}, gTop);
+      T(gTop, cx + (i === 2 ? -16 : 14), cy + (i === 2 ? -16 : 30), String(i + 1), {class: 'labb', 'text-anchor': i === 2 ? 'end' : 'start'});
+      const hitDot = S('circle', {cx: cx, cy: cy, r: 22, class: 'hit'}, gTop);
+      hitDot.addEventListener('pointermove', ev => { const p = local(root, ev), s = st[i]; tip.show(p.x, p.y, 'PINN evaluation ' + (i + 1), [{value: fixed(s.mbar, 5), label: 'assumed m̄'}, {key: 'pinn', value: fixed(s.phi, 5), label: 'Φ by the PINN'}, {key: 'fd', value: fixed(s.phi_fd, 5), label: 'Φ by FD'}, {value: duration(s.seconds), label: s.warm ? 'warm start' : 'from scratch'}]); });
+      hitDot.addEventListener('pointerleave', () => tip.hide());
+      void dot;
+    });
+    if ((zoomed || dom[1] - dom[0] < 0.05) && k >= st.length) T(gTop, X(pts[k - 1][0]) - 16, Y(pts[k - 1][1]) + 38, 'PINN ' + fixed(E.mbar_pinn, 5), {class: 'labb', 'text-anchor': 'end'});
+  }
+  setStep(st.length);
+}
+
+/* ================= figure 3: the strategy over time ================= */
+function figStrategy(root){
+  const P = D.strategy, mbar = D.equilibrium.mbar_fd;
+  place(Legend(root, [['pinn', 'PINN'], ['fd', 'FD'], ['ref', 'Merton (no penalty)'], ['band', 'middle 98% of investors']]), 0, 0);
+  const W = 1696, HH = 590, box = {x0: 104, x1: 1680, y0: 12, y1: 502};
+  const svg = svgBox(root, 0, 50, W, HH, 'Equilibrium strategy against wealth, PINN and FD, at the time set by the slider');
+  const tip = Tip(root);
+  const X = lin(-1, 3, box.x0, box.x1), Y = lin(0, 2.4, box.y1, box.y0), xs = P.x.map(X);
+  const gBand = S('g', null, svg), gAx = S('g', null, svg);
+  const band = S('rect', {y: box.y0, height: box.y1 - box.y0, class: 'band'}, gBand);
+  axesLinear(gAx, X, Y, [-1, 0, 1, 2, 3], niceTicks(0, 2.4, 6), box, v => fixed(v, 0), v => fixed(v, 1));
+  rich(gAx, (box.x0 + box.x1) / 2, box.y1 + 74, ['wealth ', {i: 'x'}], {class: 'axt', 'text-anchor': 'middle'});
+  rich(gAx, 0, 0, [PIS, '(', {i: 't'}, ', ', {i: 'x'}, '), dollars in the stock'], {class: 'axt', 'text-anchor': 'middle', transform: 'translate(30 ' + (box.y0 + box.y1) / 2 + ') rotate(-90)'});
+  S('line', {x1: X(mbar), x2: X(mbar), y1: box.y0, y2: box.y1, class: 'mark'}, gAx);
+  rich(gAx, X(mbar) + 10, box.y0 + 26, [MBT, ' = ' + fixed(mbar, 3)], {class: 'labm'});
+  const mer = S('line', {x1: box.x0, x2: box.x1, class: 'ln-ref'}, gAx);
+  const merLab = T(gAx, box.x1 - 4, 0, 'Merton', {class: 'labm', 'text-anchor': 'end'});
+  const gGuide = S('g', null, svg);
+  T(gGuide, X(-0.95), Y(1.2), 'more risk than Merton, to catch up', {class: 'guide'});
+  T(gGuide, X(0.86), Y(0.1), 'cut back just below the average', {class: 'guide', 'text-anchor': 'end'});
+  T(gGuide, X(2.96), Y(1.2), 'far above: Merton again', {class: 'guide', 'text-anchor': 'end'});
+  const gLines = S('g', {'clip-path': clipRect(svg, box)}, svg);
+  const fdPath = S('path', {class: 'ln-fd'}, gLines), pinnPath = S('path', {class: 'ln-pinn'}, gLines);
+  const hov = S('g', null, svg), cross = S('line', {y1: box.y0, y2: box.y1, class: 'cross'}, hov);
+  const dP = S('circle', {r: 7, class: 'dot-pinn'}, hov), dF = S('circle', {r: 7, class: 'dot-fd'}, hov);
+  hov.style.display = 'none';
+  const hit = S('rect', {x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, class: 'hit'}, svg);
+  const ctl = place(H('div', {class: 'ctlrow'}, root), 0, 658, 1696, 82);
+  const playB = Btn(ctl, '▶ Play', () => {}, 'solid');
+  const lab = H('label', {class: 'ctl-lab', for: 'strategy-t'}, ctl); lab.innerHTML = 'time <span class="mi-h">t</span>';
+  let t = 0.9, hoverI = null, cur = null;
+  const slider = Slider(ctl, 'strategy-t', 0, 1, 0.001, t, 'time t', v => { player.stop(); setT(v); });
+  slider.style.flex = '1';
+  const out = H('output', {class: 'readout', for: 'strategy-t'}, ctl);
+  const chips = Chips(ctl, [0, 0.5, 0.9, 0.99, 1], v => { player.stop(); setT(v); });
+  Toggle(ctl, 'Reading guide', true, on => { gGuide.style.display = on ? '' : 'none'; });
+  const player = Player(() => t, setT, v => v < 0.9 ? 0.2 : 0.045, playB);
+
+  function setT(v){ t = v; slider.setValue(v); render(); }
+  function render(){
+    const pinn = blend(P.t, P.pinn, t), fd = blend(P.t, P.fd, t), b = blend(P.t, P.band, t), m = interp(P.t, P.merton, t);
+    cur = {pinn: pinn, fd: fd, m: m};
+    band.setAttribute('x', X(b[0])); band.setAttribute('width', X(b[1]) - X(b[0]));
+    mer.setAttribute('y1', Y(m)); mer.setAttribute('y2', Y(m)); merLab.setAttribute('y', Y(m) - 10);
+    fdPath.setAttribute('d', linePath(xs, fd.map(Y)));
+    pinnPath.setAttribute('d', linePath(xs, pinn.map(Y)));
+    out.textContent = 't = ' + fixed(t, 3);
+    chips.mark(t);
+    if (hoverI != null) showHover();
+  }
+  let lastEv = null;
+  function showHover(){
+    const i = hoverI, xi = xs[i];
+    cross.setAttribute('x1', xi); cross.setAttribute('x2', xi);
+    dP.setAttribute('cx', xi); dP.setAttribute('cy', Y(cur.pinn[i])); dF.setAttribute('cx', xi); dF.setAttribute('cy', Y(cur.fd[i]));
+    hov.style.display = '';
+    const q = local(root, lastEv);
+    tip.show(q.x, q.y, 'wealth x = ' + fixed(P.x[i], 3) + ' · t = ' + fixed(t, 3), [
+      {key: 'pinn', value: fixed(cur.pinn[i], 3), label: 'PINN'},
+      {key: 'fd', value: fixed(cur.fd[i], 3), label: 'FD'},
+      {value: signed(cur.pinn[i] - cur.fd[i], 3), label: 'PINN − FD'},
+      {key: 'ref', value: fixed(cur.m, 3), label: 'Merton'}]);
+  }
+  hit.addEventListener('pointermove', ev => { lastEv = ev; hoverI = nearest(xs, svgPoint(svg, ev).x); showHover(); });
+  hit.addEventListener('pointerleave', () => { hoverI = null; hov.style.display = 'none'; tip.hide(); });
+  render();
+}
+
+/* ================= figure 4: the density over time ================= */
+function figDensity(root){
+  const M = D.density, ts = D.strategy.t, mbar = D.equilibrium.mbar_fd;
+  place(Legend(root, [['pinn', 'PINN'], ['fd', 'FD'], ['ref', 'no penalty (<span class="mi-h">λ</span> = 0): a bell curve']]), 0, 0);
+  const W = 1696, HH = 590, box = {x0: 104, x1: 1680, y0: 12, y1: 502};
+  const svg = svgBox(root, 0, 50, W, HH, 'Density of wealth, PINN and FD, at the time set by the slider');
+  const tip = Tip(root);
+  const FULL = [-0.3, 2.5], ZOOM = [mbar - 0.25, mbar + 0.1];
+  let dom = FULL.slice(), t = 1, cancelZoom = () => {}, hoverX = null, lastEv = null, cur = null;
+  const Y = lin(0, 4.6, box.y1, box.y0);
+  const gAx = S('g', null, svg), gPlot = S('g', {'clip-path': clipRect(svg, box)}, svg);
+  const area = S('path', {class: 'area-pinn'}, gPlot), free = S('path', {class: 'ln-ref'}, gPlot), fdP = S('path', {class: 'ln-fd'}, gPlot), pinnP = S('path', {class: 'ln-pinn'}, gPlot);
+  const mLine = S('line', {y1: box.y0, y2: box.y1, class: 'mark'}, svg);
+  const mLab = rich(svg, 0, box.y0 + 26, [MBT], {class: 'labm'});
+  // The numbers at the slider's time sit in the legend row, clear of the curves and of the zoom.
+  const reads = place(H('div', {class: 'readout sm'}, root), 0, 4);
+  reads.style.right = '0'; reads.style.left = 'auto';
+  const hov = S('g', null, svg), cross = S('line', {y1: box.y0, y2: box.y1, class: 'cross'}, hov);
+  const dP = S('circle', {r: 7, class: 'dot-pinn'}, hov), dF = S('circle', {r: 7, class: 'dot-fd'}, hov);
+  hov.style.display = 'none';
+  const hit = S('rect', {x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, class: 'hit'}, svg);
+  const ctl = place(H('div', {class: 'ctlrow'}, root), 0, 658, 1696, 82);
+  const playB = Btn(ctl, '▶ Play', () => {}, 'solid');
+  const lab = H('label', {class: 'ctl-lab', for: 'density-t'}, ctl); lab.innerHTML = 'time <span class="mi-h">t</span>';
+  const slider = Slider(ctl, 'density-t', 0, 1, 0.001, t, 'time t', v => { player.stop(); setT(v); });
+  slider.style.flex = '1';
+  const out = H('output', {class: 'readout', for: 'density-t'}, ctl);
+  const chips = Chips(ctl, [0, 0.5, 0.9, 1], v => { player.stop(); setT(v); });
+  Toggle(ctl, 'Zoom on the cliff', false, on => { cancelZoom(); const from = dom.slice(), to = on ? ZOOM : FULL; cancelZoom = animate(900, q => { const e = easeInOut(q); dom = [from[0] + (to[0] - from[0]) * e, from[1] + (to[1] - from[1]) * e]; render(); }); });
+  const player = Player(() => t, setT, v => v < 0.9 ? 0.2 : 0.045, playB);
+
+  function setT(v){ t = v; slider.setValue(v); render(); }
+  function render(){
+    const X = lin(dom[0], dom[1], box.x0, box.x1);
+    clear(gAx);
+    const st = niceStep(dom[0], dom[1], 8);
+    axesLinear(gAx, X, Y, niceTicks(dom[0], dom[1], 8), niceTicks(0, 4.6, 5), box, v => fixed(v, decimalsOf(st)), v => fixed(v, 0));
+    rich(gAx, (box.x0 + box.x1) / 2, box.y1 + 74, ['wealth ', {i: 'x'}], {class: 'axt', 'text-anchor': 'middle'});
+    rich(gAx, 0, 0, ['density ', {i: 'm'}, '(', {i: 't'}, ', ', {i: 'x'}, ')'], {class: 'axt', 'text-anchor': 'middle', transform: 'translate(30 ' + (box.y0 + box.y1) / 2 + ') rotate(-90)'});
+    const pinn = blend(ts, M.pinn, t), fd = blend(ts, M.fd, t), mu = interp(ts, M.free_mean, t), sd = interp(ts, M.free_sd, t);
+    const fr = M.x.map(x => gauss(x, mu, sd));
+    cur = {pinn: pinn, fd: fd, free: fr};
+    const xs = M.x.map(X);
+    pinnP.setAttribute('d', linePath(xs, pinn.map(Y)));
+    area.setAttribute('d', linePath(xs, pinn.map(Y)) + 'L' + xs[xs.length - 1].toFixed(1) + ',' + Y(0) + 'L' + xs[0].toFixed(1) + ',' + Y(0) + 'Z');
+    fdP.setAttribute('d', linePath(xs, fd.map(Y)));
+    free.setAttribute('d', linePath(xs, fr.map(Y)));
+    mLine.setAttribute('x1', X(mbar)); mLine.setAttribute('x2', X(mbar)); mLab.setAttribute('x', X(mbar) + 10);
+    // Written in this file (no data strings), so innerHTML is safe here.
+    reads.innerHTML = 'peak: FD ' + fixed(Math.max(...fd), 2) + ' · PINN ' + fixed(Math.max(...pinn), 2) +
+      '&emsp;&emsp;below <span class="mb-h">m</span><sub>T</sub>: FD ' + pct(shareBelow(M.x, fd, mbar)) + ' · PINN ' + pct(shareBelow(M.x, pinn, mbar));
+    out.textContent = 't = ' + fixed(t, 3);
+    chips.mark(t);
+    if (hoverX != null) showHover(X);
+  }
+  function showHover(X){
+    X = X || lin(dom[0], dom[1], box.x0, box.x1);
+    const xs = M.x, i = nearest(xs, hoverX), xi = X(xs[i]);
+    cross.setAttribute('x1', xi); cross.setAttribute('x2', xi);
+    dP.setAttribute('cx', xi); dP.setAttribute('cy', Y(cur.pinn[i])); dF.setAttribute('cx', xi); dF.setAttribute('cy', Y(cur.fd[i]));
+    hov.style.display = '';
+    const q = local(root, lastEv);
+    tip.show(q.x, q.y, 'wealth x = ' + fixed(xs[i], 3) + ' · t = ' + fixed(t, 3), [
+      {key: 'pinn', value: fixed(cur.pinn[i], 3), label: 'PINN'}, {key: 'fd', value: fixed(cur.fd[i], 3), label: 'FD'}, {key: 'ref', value: fixed(cur.free[i], 3), label: 'no penalty'}]);
+  }
+  hit.addEventListener('pointermove', ev => { lastEv = ev; hoverX = lin(dom[0], dom[1], box.x0, box.x1).inv(svgPoint(svg, ev).x); showHover(); });
+  hit.addEventListener('pointerleave', () => { hoverX = null; hov.style.display = 'none'; tip.hide(); });
+  render();
+}
+
+/* ================= figure 5: a thousand investors (Monte Carlo) ================= */
+function figInvestors(root){
+  const I = D.investors, M = D.density, ts = D.strategy.t, S5 = D.strategy, mbar = D.equilibrium.mbar_fd, ck = I.check;
+  const paths = I.paths_milli.map(r => Float32Array.from(r, v => v / 1000)), n = paths.length;
+  place(Legend(root, [['trail', 'one investor'], ['ink', 'three examples'], ['hist', 'histogram of these ' + thousands(n)], ['pinn', 'PINN density'], ['fd', 'FD density']]), 0, 0);
+  // Three example investors, picked by where they end: in the crowd just below the average, far above, far below.
+  const finals = paths.map(p => p[p.length - 1]);
+  function closest(v, ok){ let best = 0, bd = Infinity; finals.forEach((f, i) => { if (ok && !ok(i)) return; const d = Math.abs(f - v); if (d < bd){ bd = d; best = i; } }); return best; }
+  const crowd = closest(1.0, i => finals[i] < mbar - 0.002 && finals[i] > mbar - 0.012 && Math.abs(paths[i][0] - 1) < 0.1);
+  const EXAMPLES = [
+    {i: crowd, text: 'ends just below the average'},
+    {i: closest(1.62), text: 'ends far above'},
+    {i: closest(0.6), text: 'ends far below'},
+  ];
+  const W = 1196, HH = 590, box = {x0: 100, x1: 1170, y0: 12, y1: 502};
+  // Three layers: axes (SVG), the 1,000 paths (canvas), then the marks and the hover target (SVG on top).
+  const svgAx = svgBox(root, 0, 50, W, HH, 'Wealth paths of 1,000 simulated investors over time');
+  const canvas = place(H('canvas', null, root), box.x0, 50 + box.y0, box.x1 - box.x0, box.y1 - box.y0);
+  canvas.style.pointerEvents = 'none';
+  const svg = svgBox(root, 0, 50, W, HH, 'Three example investors and the investor under the pointer');
+  const hsvg = svgBox(root, 1236, 50, 460, HH, 'Histogram of the investors wealth at the chosen time, with the PINN and FD densities');
+  const tip = Tip(root);
+  const Xt = lin(0, 1, box.x0, box.x1), Yw = lin(0, 2.3, box.y1, box.y0);
+  const hb = {x0: 16, x1: 440}, Xd = lin(0, 5, hb.x0, hb.x1);
+  // axes of the paths chart
+  const gAx = S('g', null, svgAx);
+  axesLinear(gAx, Xt, Yw, [0, 0.2, 0.4, 0.6, 0.8, 1], [0, 0.5, 1, 1.5, 2], box, v => fixed(v, 1), v => fixed(v, 1));
+  rich(gAx, (box.x0 + box.x1) / 2, box.y1 + 74, ['time ', {i: 't'}], {class: 'axt', 'text-anchor': 'middle'});
+  rich(gAx, 0, 0, ['wealth ', {i: 'x'}], {class: 'axt', 'text-anchor': 'middle', transform: 'translate(34 ' + (box.y0 + box.y1) / 2 + ') rotate(-90)'});
+  const gTop = S('g', null, svg);
+  S('line', {x1: box.x0, x2: box.x1, y1: Yw(mbar), y2: Yw(mbar), class: 'mark'}, gTop);
+  const front = S('line', {y1: box.y0, y2: box.y1, class: 'cross'}, gTop);
+  const exLines = EXAMPLES.map(() => S('path', {class: 'ln-ink', style: 'opacity:.75'}, gTop));
+  const exLabels = EXAMPLES.map(ex => T(gTop, 0, 0, ex.text, {class: 'labb halo', 'text-anchor': 'end'}));
+  const pick = S('path', {class: 'ln-ink'}, gTop), pickDot = S('circle', {r: 7, class: 'dot-ink'}, gTop);
+  pick.style.display = pickDot.style.display = 'none';
+  // histogram chart: shared wealth axis, density across
+  const hAx = S('g', null, hsvg);
+  [0, 0.5, 1, 1.5, 2].forEach(v => S('line', {x1: hb.x0, x2: hb.x1, y1: Yw(v), y2: Yw(v), class: 'gridl'}, hAx));
+  [0, 1, 2, 3, 4, 5].forEach(v => { T(hAx, Xd(v), box.y1 + 33, String(v), {class: 'ax', 'text-anchor': 'middle'}); });
+  S('line', {x1: hb.x0, x2: hb.x0, y1: box.y0, y2: box.y1, class: 'base'}, hAx);
+  S('line', {x1: hb.x0, x2: hb.x1, y1: box.y1, y2: box.y1, class: 'base'}, hAx);
+  T(hAx, (hb.x0 + hb.x1) / 2, box.y1 + 74, 'density', {class: 'axt', 'text-anchor': 'middle'});
+  // the clip starts just right of the axis, so the zero-density stretches of the curves stay hidden
+  const gBars = S('g', null, hsvg), hLines = S('g', {'clip-path': clipRect(hsvg, {x0: hb.x0 + 3, x1: hb.x1 + 30, y0: box.y0, y1: box.y1})}, hsvg);
+  const fdH = S('path', {class: 'ln-fd'}, hLines), pinnH = S('path', {class: 'ln-pinn'}, hLines);
+  S('line', {x1: hb.x0, x2: hb.x1, y1: Yw(mbar), y2: Yw(mbar), class: 'mark'}, hsvg);
+  rich(hsvg, hb.x1, Yw(mbar) - 10, [MBT, ' = ' + fixed(mbar, 3)], {class: 'labm', 'text-anchor': 'end'});
+  const binW = 0.05, edges = [];
+  for (let e = mbar - 22 * binW; e <= 2.3 + 1e-9; e += binW) edges.push(e);
+  const bars = edges.slice(0, -1).map(() => S('rect', {x: hb.x0, height: Math.max(1, Yw(0) - Yw(binW) - 2), class: 'hbar'}, gBars));
+  // controls
+  const ctl = place(H('div', {class: 'ctlrow'}, root), 0, 658, 1696, 82);
+  const playB = Btn(ctl, '▶ Play', () => {}, 'solid');
+  const lab = H('label', {class: 'ctl-lab', for: 'investors-t'}, ctl); lab.innerHTML = 'time <span class="mi-h">t</span>';
+  let t = 1, picked = null, lastEv = null, scale = 1;
+  const slider = Slider(ctl, 'investors-t', 0, 1, 0.001, t, 'time t', v => { player.stop(); setT(v); });
+  slider.style.flex = '1';
+  const out = H('output', {class: 'readout', for: 'investors-t'}, ctl);
+  const below = H('output', {class: 'readout sm'}, ctl);
+  const check = H('p', {class: 'fnote'}, ctl);
+  check.style.maxWidth = '480px';
+  check.innerHTML = thousands(ck.n) + ' investors: mean at <span class="mi-h">T</span> ' + fixed(ck.mean, 4) + ' ± ' + fixed(ck.mean_se, 4) + ' (FD ' + fixed(ck.fd_mean, 4) + ')';
+  const player = Player(() => t, setT, v => v < 0.9 ? 0.16 : 0.04, playB);
+  const ctx = canvas.getContext('2d');
+
+  function wealthAt(p, b){ return p[b[0]] + (p[b[1]] - p[b[0]]) * b[2]; }
+  function sizeCanvas(){ const dpr = Math.min(2, window.devicePixelRatio || 1), w = box.x1 - box.x0, h = box.y1 - box.y0; const px = Math.max(1, Math.round(w * scale * dpr)); if (canvas.width !== px){ canvas.width = px; canvas.height = Math.round(h * scale * dpr); } ctx.setTransform(canvas.width / w, 0, 0, canvas.height / h, 0, 0); }
+  /* The points of one path up to time t: the saved times before t, then the wealth at t itself. */
+  function pathPoints(p, b){
+    const xs = [], ys = [];
+    for (let s = 0; s <= b[0]; s++){ xs.push(Xt(ts[s])); ys.push(Yw(p[s])); }
+    if (t > ts[b[0]]){ xs.push(Xt(t)); ys.push(Yw(wealthAt(p, b))); }
+    return [xs, ys];
+  }
+  function drawPaths(){
+    sizeCanvas();
+    const w = box.x1 - box.x0, h = box.y1 - box.y0, b = bracket(ts, t), trail = cssVar(root, '--trail');
+    ctx.clearRect(0, 0, w, h);
+    ctx.lineWidth = 1.2; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(' + trail + ',0.07)';
+    const xNow = Xt(t) - box.x0;
+    for (let i = 0; i < n; i++){
+      // Curves through the midpoints between saved times: straight segments would leave a faint
+      // vertical stripe at every saved time, where all 1,000 paths have a corner.
+      const pp = pathPoints(paths[i], b), xs = pp[0], ys = pp[1], m = xs.length;
+      ctx.beginPath(); ctx.moveTo(xs[0] - box.x0, ys[0] - box.y0);
+      for (let s = 1; s < m - 1; s++) ctx.quadraticCurveTo(xs[s] - box.x0, ys[s] - box.y0, (xs[s] + xs[s + 1]) / 2 - box.x0, (ys[s] + ys[s + 1]) / 2 - box.y0);
+      if (m > 1) ctx.lineTo(xs[m - 1] - box.x0, ys[m - 1] - box.y0);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(' + trail + ',0.4)';
+    for (let i = 0; i < n; i++){ ctx.beginPath(); ctx.arc(xNow, Yw(wealthAt(paths[i], b)) - box.y0, 2.2, 0, 2 * Math.PI); ctx.fill(); }
+  }
+  function drawExamples(){
+    const b = bracket(ts, t);
+    EXAMPLES.forEach((ex, k) => {
+      const pp = pathPoints(paths[ex.i], b);
+      exLines[k].setAttribute('d', linePath(pp[0], pp[1]));
+      // the labels appear near the end, left of each example's last point
+      const show = t >= 0.97;
+      exLabels[k].style.display = show ? '' : 'none';
+      if (show){ exLabels[k].setAttribute('x', Xt(t) - 16); exLabels[k].setAttribute('y', pp[1][pp[1].length - 1] + (k === 0 ? 30 : -14)); }
+    });
+  }
+  function render(){
+    drawPaths();
+    drawExamples();
+    const b = bracket(ts, t), now = paths.map(p => wealthAt(p, b));
+    front.setAttribute('x1', Xt(t)); front.setAttribute('x2', Xt(t));
+    // histogram of the shown investors at time t, in density units
+    const counts = new Array(edges.length - 1).fill(0);
+    now.forEach(x => { const j = Math.floor((x - edges[0]) / binW); if (j >= 0 && j < counts.length) counts[j]++; });
+    counts.forEach((cnt, j) => { const r = bars[j]; r.setAttribute('y', Yw(edges[j + 1]) + 1); r.setAttribute('width', Math.max(0, Xd(cnt / (n * binW)) - hb.x0)); });
+    const pinn = blend(ts, M.pinn, t), fd = blend(ts, M.fd, t);
+    const keep = M.x.map((x, i) => i).filter(i => M.x[i] >= 0 && M.x[i] <= 2.3);
+    pinnH.setAttribute('d', linePath(keep.map(i => Xd(pinn[i])), keep.map(i => Yw(M.x[i]))));
+    fdH.setAttribute('d', linePath(keep.map(i => Xd(fd[i])), keep.map(i => Yw(M.x[i]))));
+    out.textContent = 't = ' + fixed(t, 3);
+    below.textContent = 'below the average now: ' + pct(now.filter(x => x < mbar).length / n);
+    if (picked != null) showPick();
+  }
+  function showPick(){
+    const p = paths[picked], b = bracket(ts, t), pp = pathPoints(p, b), x = wealthAt(p, b);
+    pick.setAttribute('d', linePath(pp[0], pp[1])); pick.style.display = '';
+    pickDot.setAttribute('cx', Xt(t)); pickDot.setAttribute('cy', Yw(x)); pickDot.style.display = '';
+    const pos = interp(S5.x, blend(S5.t, S5.fd, t), x);
+    const q = local(root, lastEv);
+    tip.show(q.x, q.y, 'investor ' + (picked + 1) + ' · t = ' + fixed(t, 3), [{value: fixed(p[0], 3), label: 'wealth at the start'}, {value: fixed(x, 3), label: 'wealth now'}, {value: '$' + fixed(pos, 2), label: 'in the stock now (FD strategy)'}]);
+  }
+  // hover: pick the investor whose path passes closest to the pointer, at the pointer's time
+  const hit = S('rect', {x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, class: 'hit'}, svg);
+  hit.addEventListener('pointermove', ev => {
+    lastEv = ev;
+    const p = svgPoint(svg, ev), tau = clamp(Xt.inv(p.x), 0, t), b = bracket(ts, tau), y = Yw.inv(p.y);
+    let best = 0, bestD = Infinity;
+    for (let i = 0; i < n; i++){ const d = Math.abs(wealthAt(paths[i], b) - y); if (d < bestD){ bestD = d; best = i; } }
+    picked = best; showPick();
+  });
+  hit.addEventListener('pointerleave', () => { picked = null; pick.style.display = pickDot.style.display = 'none'; tip.hide(); });
+  function setT(v){ t = v; slider.setValue(v); render(); }
+  render();
+  return {onScale(k){ scale = k; drawPaths(); }, onTone(){ drawPaths(); }};
+}
+
+/* ================= figure 6: the strength of the penalty ================= */
+function figPenalty(root){
+  const P = D.penalty, lams = P.lambda, fd = P.fd, runs = P.pinn;
+  let idx = lams.indexOf(2);
+  const tip = Tip(root);
+  const KPIS = [
+    {key: 'mbar', label: 'Average final wealth', fmt: v => fixed(v, 3), delta: v => signed(v, 3)},
+    {key: 'spread', label: 'Spread of final wealth (std)', fmt: v => fixed(v, 3), delta: v => signed(v, 3)},
+    {key: 'below', label: 'Share ending below the average', fmt: v => pct(v), delta: v => signed(100 * v, 0) + ' pts'},
+  ];
+  const tiles = place(H('div', {class: 'kpis'}, root), 0, 0, 1696, 236);
+  const mini = KPIS.map(K => {
+    const tile = H('div', {class: 'kpi'}, tiles);
+    H('p', {class: 'kl'}, tile, K.label);
+    const kv = H('div', {class: 'kv'}, tile), big = H('b', null, kv), dl = H('span', null, kv);
+    const kp = H('div', {class: 'kp'}, tile);
+    const W = 496, HH = 74, s = S('svg', {viewBox: '0 0 ' + W + ' ' + HH, width: W, height: HH, role: 'img', 'aria-label': K.label + ' against the penalty strength'}, tile);
+    const vals = fd.map(r => r[K.key]), lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo) * 0.12;
+    const X = lin(0, 10, 18, W - 18), Y = lin(lo - pad, hi + pad, HH - 22, 8);
+    S('path', {d: linePath(lams.map(X), vals.map(Y)), class: 'ln-fd', style: 'stroke-width:2.5'}, s);
+    lams.forEach((l, i) => S('circle', {cx: X(l), cy: Y(vals[i]), r: 3.5, style: 'fill:var(--fd)'}, s));
+    [0, 5, 10].forEach(l => T(s, X(l), HH - 2, (l === 0 ? 'λ = 0' : String(l)), {class: 'ax', style: 'font-size:15px', 'text-anchor': l === 0 ? 'start' : l === 10 ? 'end' : 'middle'}));
+    // the slider's marker is an orange ring, so a PINN dot at the same lambda shows inside it
+    const vline = S('line', {y1: 6, y2: HH - 20, class: 'cross'}, s), cur = S('circle', {r: 10, class: 'ring-fd'}, s);
+    Object.keys(runs).forEach(l => S('circle', {cx: X(+l), cy: Y(runs[l][K.key]), r: 6, class: 'dot-pinn', style: 'stroke-width:2'}, s));
+    const hitR = S('rect', {x: 0, y: 0, width: W, height: HH, class: 'hit'}, s);
+    hitR.addEventListener('pointermove', ev => { const i = nearest(lams, X.inv(svgPoint(s, ev).x)), q = local(root, ev); const rows = [{key: 'fd', value: K.fmt(vals[i]), label: 'FD'}]; if (runs[String(lams[i])]) rows.push({key: 'pinn', value: K.fmt(runs[String(lams[i])][K.key]), label: 'PINN'}); tip.show(q.x, q.y, K.label + ' · λ = ' + lams[i], rows); });
+    hitR.addEventListener('pointerleave', () => tip.hide());
+    return {K: K, big: big, dl: dl, kp: kp, X: X, Y: Y, vals: vals, vline: vline, cur: cur};
+  });
+  // controls
+  const ctl = place(H('div', {class: 'ctlrow'}, root), 0, 256, 1696, 64);
+  const playB = Btn(ctl, '▶ Sweep', sweep, 'solid');
+  const lab = H('label', {class: 'ctl-lab', for: 'penalty-lam'}, ctl); lab.innerHTML = 'penalty strength <span class="mi-h">λ</span>';
+  const slider = Slider(ctl, 'penalty-lam', 0, lams.length - 1, 1, idx, 'penalty strength lambda (index of the computed values)', v => { stopSweep(); setIdx(v); });
+  slider.style.width = '520px';
+  const out = H('output', {class: 'readout', for: 'penalty-lam'}, ctl);
+  place(Legend(ctl, [['fd', 'FD at this <span class="mi-h">λ</span>'], ['pinn', 'PINN'], ['ref', '<span class="mi-h">λ</span> = 0'], ['ghost', 'other <span class="mi-h">λ</span>']]), 0, 0).style.position = 'static';
+  // two charts: strategy at the start and final density
+  const charts = [
+    {left: 0, title: ['Strategy at the start, ', PIS, '(0, ', {i: 'x'}, ')'], xd: [-0.5, 2.7], yd: [0, 2.1], xs: P.x_pi, key: 'pi0', xt: [-0.5, 0, 0.5, 1, 1.5, 2, 2.5], yt: [0, 0.5, 1, 1.5, 2], fy: v => fixed(v, 1)},
+    {left: 876, title: ['Final wealth distribution, ', {i: 'm'}, '(', {i: 'T'}, ', ', {i: 'x'}, ')'], xd: [0.2, 2.2], yd: [0, 12.5], xs: P.x_m, key: 'mT', xt: [0.5, 1, 1.5, 2], yt: [0, 4, 8, 12], fy: v => fixed(v, 0)},
+  ].map(C => {
+    const W = 820, HH = 410, box = {x0: 96, x1: 806, y0: 46, y1: 340};
+    const s = svgBox(root, C.left, 330, W, HH, 'Penalty figure chart');
+    const X = lin(C.xd[0], C.xd[1], box.x0, box.x1), Y = lin(C.yd[0], C.yd[1], box.y1, box.y0), xs = C.xs.map(X);
+    axesLinear(S('g', null, s), X, Y, C.xt, C.yt, box, v => fixed(v, 1), C.fy);
+    rich(s, box.x0, 22, C.title, {class: 'labb'});
+    rich(s, (box.x0 + box.x1) / 2, box.y1 + 66, ['wealth ', {i: 'x'}], {class: 'axt', 'text-anchor': 'middle'});
+    const g = S('g', {'clip-path': clipRect(s, box)}, s);
+    fd.forEach(r => S('path', {d: linePath(xs, r[C.key].map(Y)), class: 'ln-ghost'}, g));
+    S('path', {d: linePath(xs, fd[0][C.key].map(Y)), class: 'ln-ref'}, g);
+    const mk = S('line', {y1: box.y0, y2: box.y1, class: 'mark'}, s);
+    const fdL = S('path', {class: 'ln-fd'}, g), pinnL = S('path', {class: 'ln-pinn'}, g);
+    const hov = S('g', null, s), cross = S('line', {y1: box.y0, y2: box.y1, class: 'cross'}, hov); hov.style.display = 'none';
+    const hitR = S('rect', {x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, class: 'hit'}, s);
+    hitR.addEventListener('pointermove', ev => {
+      const i = nearest(xs, svgPoint(s, ev).x), r = fd[idx], run = runs[String(lams[idx])], q = local(root, ev);
+      cross.setAttribute('x1', xs[i]); cross.setAttribute('x2', xs[i]); hov.style.display = '';
+      const rows = [{key: 'fd', value: fixed(r[C.key][i], 3), label: 'FD, λ = ' + lams[idx]}];
+      if (run) rows.push({key: 'pinn', value: fixed(run[C.key][i], 3), label: 'PINN'});
+      rows.push({key: 'ref', value: fixed(fd[0][C.key][i], 3), label: 'λ = 0'});
+      tip.show(q.x, q.y, 'wealth x = ' + fixed(C.xs[i], 3), rows);
+    });
+    hitR.addEventListener('pointerleave', () => { hov.style.display = 'none'; tip.hide(); });
+    return {C: C, X: X, Y: Y, xs: xs, mk: mk, fdL: fdL, pinnL: pinnL, box: box};
+  });
+  let sweepCancel = () => {};
+  function stopSweep(){ sweepCancel(); sweepCancel = () => {}; playB.textContent = '▶ Sweep'; }
+  function sweep(){
+    if (playB.textContent.indexOf('Pause') >= 0){ stopSweep(); return; }
+    let i = 0; setIdx(0); playB.textContent = '❚❚ Pause';
+    const timer = setInterval(() => { i += 1; if (i >= lams.length){ stopSweep(); return; } setIdx(i); }, 650);
+    sweepCancel = () => clearInterval(timer);
+  }
+  function setIdx(i){
+    idx = i; slider.setValue(i);
+    const r = fd[i], run = runs[String(lams[i])];
+    out.textContent = 'λ = ' + lams[i];
+    mini.forEach(m => {
+      const v = r[m.K.key];
+      m.big.textContent = m.K.fmt(v);
+      m.dl.textContent = i === 0 ? 'no penalty' : m.K.delta(v - fd[0][m.K.key]) + ' vs λ = 0';
+      clear(m.kp);
+      if (run){ H('i', {class: 'lk pinn'}, m.kp); m.kp.appendChild(document.createTextNode('PINN ' + m.K.fmt(run[m.K.key]))); }
+      m.vline.setAttribute('x1', m.X(lams[i])); m.vline.setAttribute('x2', m.X(lams[i]));
+      m.cur.setAttribute('cx', m.X(lams[i])); m.cur.setAttribute('cy', m.Y(m.vals[i]));
+    });
+    charts.forEach(ch => {
+      ch.fdL.setAttribute('d', linePath(ch.xs, r[ch.C.key].map(ch.Y)));
+      ch.pinnL.setAttribute('d', run ? linePath(ch.xs, run[ch.C.key].map(ch.Y)) : '');
+      ch.mk.setAttribute('x1', ch.X(r.mbar)); ch.mk.setAttribute('x2', ch.X(r.mbar));
+    });
+  }
+  setIdx(idx);
+}
+
+/* ================= figure 7: where the PINN's strategy differs from FD's ================= */
+function figGapmap(root){
+  const G = D.gap_map, nt = G.t.length, nx = G.x.length, mbar = D.equilibrium.mbar_fd;
+  const W = 1150, HH = 740, box = {x0: 110, x1: 1110, y0: 16, y1: 640};
+  const X = lin(0, 1, box.x0, box.x1), Y = lin(-1, 3, box.y1, box.y0);
+  const dt = G.t[1] - G.t[0], dxs = G.x[1] - G.x[0];
+  // the cells: a canvas with one pixel per cell, stretched over the plot and clipped to it
+  const clipBox = place(H('div', null, root), box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0);
+  clipBox.style.overflow = 'hidden';
+  const cv = H('canvas', null, clipBox); cv.width = nt; cv.height = nx;
+  const l = X(-dt / 2) - box.x0, r = X(1 + dt / 2) - box.x0, tp = Y(3 + dxs / 2) - box.y0, bt = Y(-1 - dxs / 2) - box.y0;
+  cv.style.cssText = 'position:absolute;left:' + l + 'px;top:' + tp + 'px;width:' + (r - l) + 'px;height:' + (bt - tp) + 'px;image-rendering:pixelated';
+  const svg = svgBox(root, 0, 0, W, HH, 'Map of the gap between the PINN and FD strategies over time and wealth');
+  const tip = Tip(root);
+  const LIMITS = [10, 30, 100];  // band edges in thousandths of a dollar: 1, 3 and 10 cents
+  const band = g => g < LIMITS[0] ? 0 : g < LIMITS[1] ? 1 : g < LIMITS[2] ? 2 : 3;
+  function paint(){
+    const ctx = cv.getContext('2d'), img = ctx.createImageData(nt, nx), cols = [1, 2, 3, 4].map(i => hexRGB(cssVar(root, '--seq' + i)));
+    for (let i = 0; i < nt; i++) for (let j = 0; j < nx; j++){
+      const c = cols[band(Math.abs(G.gap_milli[i][j]))], o = ((nx - 1 - j) * nt + i) * 4;
+      img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  const gAx = S('g', null, svg);
+  [-1, 0, 1, 2, 3].forEach(v => T(gAx, box.x0 - 14, Y(v) + 6, fixed(v, 0), {class: 'ax', 'text-anchor': 'end'}));
+  [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(v => { S('line', {x1: X(v), x2: X(v), y1: box.y1, y2: box.y1 + 8, class: 'base'}, gAx); T(gAx, X(v), box.y1 + 33, fixed(v, 1), {class: 'ax', 'text-anchor': 'middle'}); });
+  rich(gAx, (box.x0 + box.x1) / 2, box.y1 + 76, ['time ', {i: 't'}], {class: 'axt', 'text-anchor': 'middle'});
+  rich(gAx, 0, 0, ['wealth ', {i: 'x'}], {class: 'axt', 'text-anchor': 'middle', transform: 'translate(34 ' + (box.y0 + box.y1) / 2 + ') rotate(-90)'});
+  S('line', {x1: box.x0, x2: box.x1, y1: Y(mbar), y2: Y(mbar), class: 'mark', style: 'stroke:var(--surface);stroke-width:2.5'}, svg);
+  S('line', {x1: box.x0, x2: box.x1, y1: Y(mbar), y2: Y(mbar), class: 'mark'}, svg);
+  S('path', {d: linePath(G.t.map(X), G.lives_low.map(Y)), class: 'ln-ink'}, svg);
+  S('path', {d: linePath(G.t.map(X), G.lives_high.map(Y)), class: 'ln-ink'}, svg);
+  T(svg, X(0.03), Y(G.lives_high[3]) - 14, 'where investors live', {class: 'labb halo'});
+  rich(svg, X(0.03), Y(mbar) - 12, [MBT], {class: 'labb halo'});
+  const cell = S('rect', {width: X(dt) - X(0), height: Y(0) - Y(dxs), class: 'cell'}, svg); cell.style.display = 'none';
+  const hit = S('rect', {x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, class: 'hit'}, svg);
+  hit.addEventListener('pointermove', ev => {
+    const p = svgPoint(svg, ev), i = clamp(Math.round(X.inv(p.x) / dt), 0, nt - 1), j = clamp(Math.round((Y.inv(p.y) - G.x[0]) / dxs), 0, nx - 1);
+    const g = G.gap_milli[i][j] / 1000, tt = G.t[i], xx = G.x[j], lives = xx >= G.lives_low[i] && xx <= G.lives_high[i];
+    cell.setAttribute('x', X(tt - dt / 2)); cell.setAttribute('y', Y(xx + dxs / 2)); cell.style.display = '';
+    const q = local(root, ev);
+    tip.show(q.x, q.y, 't = ' + fixed(tt, 2) + ' · x = ' + fixed(xx, 2), [{value: cents(Math.abs(g)), label: g >= 0 ? 'PINN above FD' : 'PINN below FD'}, {value: lives ? 'yes' : 'no', label: 'investors live here'}]);
+  });
+  hit.addEventListener('pointerleave', () => { cell.style.display = 'none'; tip.hide(); });
+  // panel
+  const panel = place(H('div', {class: 'panel'}, root), 1196, 0, 500, 740);
+  H('p', {class: 'ph'}, panel, 'PINN against FD, in cents');
+  const bins = H('div', {class: 'bins'}, panel);
+  ['under 1¢', '1 to 3¢', '3 to 10¢', 'over 10¢'].forEach((txt, i) => { const b = H('div', {class: 'bin'}, bins); H('i', {style: 'background:var(--seq' + (i + 1) + ')'}, b); b.appendChild(document.createTextNode(txt)); });
+  const stats = H('dl', {class: 'stats'}, panel);
+  [['where investors live, up to t = 0.9', 'at most ' + cents(G.max_gap_people_t09)],
+   ['at the cliff, just above m̄ near the end', 'up to ' + cents(G.max_gap_people)],
+   ['the value V, anywhere (where investors live)', pct(G.max_v_gap, 2) + '  (' + pct(G.max_v_gap_people, 2) + ')']].forEach(([a, b]) => { const d = H('div', null, stats); H('dt', null, d, a); H('dd', null, d, b); });
+  H('p', {class: 'fnote'}, panel, 'Near x = −1 nobody lives: there the strategy is set by the edge condition, which the network and the grid handle differently.');
+  paint();
+  return {onTone: paint};
+}
+
+/* ================= figure 8: accuracy against computing time ================= */
+function figAccuracy(root){
+  const A = D.accuracy;
+  place(Legend(root, [['pinn', 'PINN: longer training (Adam steps, then 500 L-BFGS)'], ['fd', 'FD: finer grids (steps in wealth)']]), 0, 0);
+  const tip = Tip(root);
+  [['0', 0, ['No penalty (', {i: 'λ'}, ' = 0)'], 'error against the exact Merton strategy'],
+   ['2', 876, ['With the penalty (', {i: 'λ'}, ' = 2, ', MB, ' = 1.1)'], 'error against FD on a 6,400 × 3,200 grid']].forEach(([lam, left, title, sub]) => {
+    const W = 820, HH = 690, box = {x0: 110, x1: 800, y0: 78, y1: 600};
+    const s = svgBox(root, left, 50, W, HH, 'Largest strategy error against computing time');
+    const X = logS(0.004, 600, box.x0, box.x1), Y = logS(1e-6, 1, box.y1, box.y0);
+    for (let e = -6; e <= 0; e++){ S('line', {x1: box.x0, x2: box.x1, y1: Y(Math.pow(10, e)), y2: Y(Math.pow(10, e)), class: 'gridl'}, s); T(s, box.x0 - 14, Y(Math.pow(10, e)) + 6, '10' + sup(e), {class: 'ax', 'text-anchor': 'end'}); }
+    [0.01, 0.1, 1, 10, 100].forEach(v => { S('line', {x1: X(v), x2: X(v), y1: box.y0, y2: box.y1, class: 'gridl'}, s); T(s, X(v), box.y1 + 33, (v < 1 ? String(v) : thousands(v)) + ' s', {class: 'ax', 'text-anchor': 'middle'}); });
+    S('line', {x1: box.x0, x2: box.x1, y1: box.y1, y2: box.y1, class: 'base'}, s);
+    rich(s, box.x0, 26, title, {class: 'labb'});
+    T(s, box.x0, 56, sub, {class: 'labm'});
+    T(s, (box.x0 + box.x1) / 2, box.y1 + 74, 'computing time (log scale)', {class: 'axt', 'text-anchor': 'middle'});
+    if (left === 0) rich(s, 0, 0, ['largest error of ', PIS, ' (dollars)'], {class: 'axt', 'text-anchor': 'middle', transform: 'translate(30 ' + (box.y0 + box.y1) / 2 + ') rotate(-90)'});
+    const fdR = A[lam].fd, pR = A[lam].pinn;
+    if (lam === '2'){
+      // the dotted line: where FD reaches the error of the longest PINN training
+      const target = pR[pR.length - 1].error, tPinn = pR[pR.length - 1].seconds;
+      let tFd = null;
+      for (let i = 1; i < fdR.length; i++) if (fdR[i - 1].error >= target && fdR[i].error <= target){ const a = fdR[i - 1], b = fdR[i], w = (Math.log(target) - Math.log(a.error)) / (Math.log(b.error) - Math.log(a.error)); tFd = Math.exp(Math.log(a.seconds) + w * (Math.log(b.seconds) - Math.log(a.seconds))); }
+      if (tFd){
+        S('line', {x1: X(tFd), x2: X(tPinn), y1: Y(target), y2: Y(target), class: 'ln-guide'}, s);
+        T(s, (X(tFd) + X(tPinn)) / 2, Y(target) + 38, 'same error: FD ' + fixed(tFd, 2) + ' s, PINN ' + thousands(tPinn) + ' s', {class: 'lab', 'text-anchor': 'middle'});
+        // FD's times on such small grids are a few milliseconds and vary from run to run: one significant digit.
+        const ratio = tPinn / tFd, mag = Math.pow(10, Math.floor(Math.log10(ratio)));
+        T(s, (X(tFd) + X(tPinn)) / 2, Y(target) + 64, 'FD about ' + thousands(Math.round(ratio / mag) * mag) + ' times faster', {class: 'labb', 'text-anchor': 'middle'});
+      }
+    }
+    [['fd', fdR, 'ln-fd', 'dot-fd', 'grid steps'], ['pinn', pR, 'ln-pinn', 'dot-pinn', 'Adam steps']].forEach(([m, rows, lc, dc, unit]) => {
+      S('path', {d: linePath(rows.map(r => X(r.seconds)), rows.map(r => Y(r.error))), class: lc}, s);
+      rows.forEach((r, i) => {
+        S('circle', {cx: X(r.seconds), cy: Y(r.error), r: 7, class: dc}, s);
+        if (i === 0 || i === rows.length - 1){
+          const leftSide = m === 'pinn' && i === 0;
+          T(s, X(r.seconds) + (leftSide ? -14 : 14), Y(r.error) + (m === 'fd' && i === 0 ? -14 : m === 'pinn' ? -16 : 26), thousands(r.steps) + ' ' + (m === 'fd' ? 'steps' : 'steps'), {class: 'lab', 'text-anchor': leftSide ? 'end' : 'start'});
+        }
+        const h = S('circle', {cx: X(r.seconds), cy: Y(r.error), r: 18, class: 'hit'}, s);
+        h.addEventListener('pointermove', ev => { const q = local(root, ev); tip.show(q.x, q.y, (m === 'fd' ? 'FD · ' : 'PINN · ') + 'λ = ' + lam, [{key: m, value: thousands(r.steps), label: unit}, {value: duration(r.seconds), label: 'computing time'}, {value: sci(r.error), label: 'largest error of π* ($)'}]); });
+        h.addEventListener('pointerleave', () => tip.hide());
+      });
+    });
+  });
+}
+
+/* ================= figure 9: the scorecard ================= */
+function figScorecard(root){
+  const s = D.summary, E = D.equilibrium;
+  const g = place(H('div', {class: 'score'}, root), 0, 0, 1696, 740);
+  const cell = (cls, html) => { const d = H('div', {class: cls || ''}, g); d.innerHTML = html; return d; };
+  cell('hd', '');
+  cell('hd', '<i class="lk pinn"></i>PINN <small>3 networks</small>');
+  cell('hd', '<i class="lk fd"></i>FD <small>800 × 400 grid</small>');
+  const row = (label, sub, a, b, cls, subA, subB) => {
+    cell('', '<span class="rl">' + label + '</span><span class="rs">' + sub + '</span>');
+    cell('', '<span class="v ' + (cls || '') + '">' + a + '</span>' + (subA ? '<span class="vs">' + subA + '</span>' : ''));
+    cell('', '<span class="v ' + (cls || '') + '">' + b + '</span>' + (subB ? '<span class="vs">' + subB + '</span>' : ''));
+  };
+  row('Equilibrium average <span class="mb-h">m</span><sub>T</sub>', 'no penalty: ' + fixed(E.mbar_free, 3), fixed(E.mbar_pinn, 5), fixed(E.mbar_fd, 5), 'big');
+  row('Error of <span class="mb-h">m</span><sub>T</sub>', 'against FD on a 3,200 × 1,600 grid', sciSigned(s.pinn.mbar_error), sciSigned(s.fd.mbar_error, 0));
+  row('Largest error of π*', 'where investors live, up to <span class="mi-h">t</span> = 0.9', cents(s.pinn.pi_error), cents(s.fd.pi_error));
+  row('Largest error of <span class="mi-h">V</span>', 'anywhere in the domain', pct(s.pinn.v_error, 2), pct(s.fd.v_error, 3));
+  row('Time for the equilibrium', 'on a laptop (GPU for the PINN, CPU for FD)', fixed(s.pinn.seconds / 60, 0) + ' min', fixed(s.fd.seconds, 1) + ' s', 'big',
+      s.pinn.evaluations + ' evaluations: ' + duration(s.pinn.cold_seconds) + ', then ' + duration(s.pinn.warm_seconds) + ' each', s.fd.evaluations + ' evaluations');
+  row('What the solution is', 'what is stored and evaluated', '3 × ' + thousands(s.pinn.weights) + ' weights', s.fd.grid[0] + ' × ' + s.fd.grid[1] + ' values', 'txt');
+}
+
+const BUILDERS = {loss: figLoss, equilibrium: figEquilibrium, strategy: figStrategy, density: figDensity, investors: figInvestors, penalty: figPenalty, gapmap: figGapmap, accuracy: figAccuracy, scorecard: figScorecard};
+function build(el){ el.classList.add('fig'); return BUILDERS[el.dataset.fig](el) || {}; }
+return {build: build, fixed: fixed, sci: sci, pct: pct, cents: cents, duration: duration, signed: signed};
+})();
+/* ================= end of figures ================= */
+
+/* ================= page: frames, slide background, full screen, number tables ================= */
+(function(){
+'use strict';
+const D = window.FIGDATA, F = Figures;
+const frames = [];
+document.querySelectorAll('.frame').forEach(frame => {
+  const stage = frame.querySelector('.stage'), root = frame.querySelector('.fig-root');
+  let fig = {};
+  try { fig = F.build(root); } catch (err) { console.error('figure ' + root.dataset.fig, err); }
+  const fit = () => { const k = frame.clientWidth / 1920; stage.style.transform = 'scale(' + k + ')'; if (fig.onScale) fig.onScale(k); };
+  new ResizeObserver(fit).observe(frame);
+  fit();
+  frames.push({frame: frame, fig: fig});
+});
+// slide background: light or dark slides, remembered in this browser when possible
+const bLight = document.getElementById('tone-light'), bDark = document.getElementById('tone-dark');
+function setTone(dark){
+  bLight.setAttribute('aria-pressed', String(!dark)); bDark.setAttribute('aria-pressed', String(dark));
+  frames.forEach(f => { f.frame.classList.toggle('s-dark', dark); f.frame.classList.toggle('s-light', !dark); if (f.fig.onTone) f.fig.onTone(); });
+  try { localStorage.setItem('p21-figures-tone', dark ? 'dark' : 'light'); } catch (e) { /* storage blocked: keep the choice for this visit only */ }
+}
+bLight.addEventListener('click', () => setTone(false));
+bDark.addEventListener('click', () => setTone(true));
+try { if (localStorage.getItem('p21-figures-tone') === 'dark') setTone(true); } catch (e) { /* no storage */ }
+// full screen: the frame fills the screen, letterboxed
+document.querySelectorAll('[data-full]').forEach(btn => {
+  const box = btn.closest('.fig-sec').querySelector('.frame-box');
+  btn.addEventListener('click', () => {
+    if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); return; }
+    if (box.requestFullscreen) box.requestFullscreen().catch(() => { btn.textContent = 'Full screen is not available here'; });
+  });
+});
+document.getElementById('meta').textContent = 'Data: figure_data.js, made ' + D.made + ' · λ = 2 and the base parameters (r = ' + D.params.r + ', μ = ' + D.params.mu + ', σ = ' + D.params.sigma + ', γ = ' + D.params.gamma + ', T = ' + D.params.T + ') unless a figure says otherwise';
+
+// "Numbers behind this figure": one small table per figure, read from the same data
+function table(name, header, rows){
+  const box = document.querySelector('[data-table="' + name + '"]'); if (!box) return;
+  const t = document.createElement('table'), thead = t.createTHead().insertRow();
+  header.forEach(h => { const th = document.createElement('th'); th.textContent = h; thead.appendChild(th); });
+  const body = t.createTBody();
+  rows.forEach(r => { const tr = body.insertRow(); r.forEach((v, i) => { const td = tr.insertCell(); td.textContent = v; if (i > 0) td.className = 'v'; }); });
+  box.appendChild(t);
+}
+const L = D.loss;
+table('loss', ['network', 'part', 'at the start', 'at the end', 'share at the end'],
+  [].concat(...['value', 'density'].map(net => Object.keys(L[net].parts).map(p => { const v = L[net].parts[p], n = v.length - 1; return [net + ' network', p, F.sci(v[0]), F.sci(v[n]), F.pct(v[n] / L[net].total[n])]; }))));
+const E = D.equilibrium;
+table('equilibrium', ['evaluation', 'assumed m̄', 'Φ, PINN', 'Φ, FD', 'PINN − FD', '|Φ − m̄|', 'training'],
+  E.pinn_steps.map((s, i) => ['PINN ' + (i + 1), F.fixed(s.mbar, 6), F.fixed(s.phi, 6), F.fixed(s.phi_fd, 6), F.sci(s.phi - s.phi_fd), F.sci(Math.abs(s.phi - s.mbar)), F.duration(s.seconds) + (s.warm ? ', warm' : ', from scratch')])
+  .concat(E.fd_history.map((h, i) => ['FD ' + (i + 1), F.fixed(h[0], 6), '', F.fixed(h[1], 6), '', F.sci(Math.max(Math.abs(h[1] - h[0]), 1e-16)), ''])));
+const P = D.strategy;
+function idxOf(arr, v){ let b = 0; arr.forEach((a, i) => { if (Math.abs(a - v) < Math.abs(arr[b] - v)) b = i; }); return b; }
+table('strategy', ['time t', 'Merton', 'lowest π*, PINN', 'lowest π*, FD', 'largest |PINN − FD| for 0 ≤ x ≤ 2.2, on the plotted points'],
+  [0, 0.5, 0.9, 0.99, 1].map(t => { const k = idxOf(P.t, t), pinn = P.pinn[k], fd = P.fd[k]; let gap = 0; P.x.forEach((x, i) => { if (x >= 0 && x <= 2.2) gap = Math.max(gap, Math.abs(pinn[i] - fd[i])); }); return [String(t), F.fixed(P.merton[k], 3), F.fixed(Math.min(...pinn), 3), F.fixed(Math.min(...fd), 3), F.fixed(gap, 3)]; }));
+const M = D.density, mb = E.mbar_fd;
+function below(xs, ys, m){ let tot = 0, bel = 0; for (let i = 1; i < xs.length; i++){ const a = 0.5 * (ys[i] + ys[i - 1]) * (xs[i] - xs[i - 1]); tot += a; if (xs[i] <= m) bel += a; } return bel / tot; }
+table('density', ['time t', 'highest density, FD', 'highest density, PINN', 'share below the final average, FD', 'the same, PINN'],
+  [0.5, 0.9, 1].map(t => { const k = idxOf(P.t, t); return [String(t), F.fixed(Math.max(...M.fd[k]), 2), F.fixed(Math.max(...M.pinn[k]), 2), F.pct(below(M.x, M.fd[k], mb), 1), F.pct(below(M.x, M.pinn[k], mb), 1)]; }));
+const C = D.investors.check;
+table('investors', ['', 'Monte Carlo (' + C.n.toLocaleString('en-US') + ' investors)', 'FD, 800 × 400', 'FD, 3,200 × 1,600'],
+  [['mean wealth at T', F.fixed(C.mean, 4) + ' ± ' + F.fixed(C.mean_se, 4), F.fixed(C.fd_mean, 4), ''],
+   ['spread (std) at T', F.fixed(C.spread, 4), F.fixed(C.fd_spread, 4), ''],
+   ['share ending below the average', F.pct(C.below, 1) + ' ± ' + F.pct(C.below_se, 1), F.pct(C.fd_below, 1), F.pct(C.fd_below_fine, 1)]]);
+const Pn = D.penalty;
+table('penalty', ['λ', 'average at T', 'spread', 'share below the average', 'highest density at T'],
+  Pn.fd.map((r, i) => [String(Pn.lambda[i]), F.fixed(r.mbar, 4), F.fixed(r.spread, 3), F.pct(r.below), F.fixed(r.peak, 1)])
+  .concat(Object.keys(Pn.pinn).map(l => { const r = Pn.pinn[l]; return [l + ' (PINN)', F.fixed(r.mbar, 4), F.fixed(r.spread, 3), F.pct(r.below), F.fixed(r.peak, 1)]; })));
+const G = D.gap_map;
+table('gapmap', ['measure', 'value'],
+  [['largest |π* gap| where investors live (0 ≤ x ≤ 2.2), t ≤ 0.9', F.cents(G.max_gap_people_t09)],
+   ['the same, all t (the cliff near T)', F.cents(G.max_gap_people)],
+   ['largest relative gap of V, anywhere', F.pct(G.max_v_gap, 2)],
+   ['largest relative gap of V, 0 ≤ x ≤ 2.2', F.pct(G.max_v_gap_people, 2)]]);
+const A = D.accuracy;
+table('accuracy', ['λ', 'method', 'grid steps / Adam steps', 'seconds', 'largest π* error ($)'],
+  [].concat(...['0', '2'].map(l => [].concat(...['fd', 'pinn'].map(m => A[l][m].map(r => [l, m.toUpperCase(), r.steps.toLocaleString('en-US'), F.fixed(r.seconds, 3), F.sci(r.error)]))))));
+})();
+</script>
+</body>
+</html>

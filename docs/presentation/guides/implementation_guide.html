@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Equilibrium from the Inside</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Same look as the study guides (v2 and the value-network guide), plus the few pieces this one needs.
+   Layout: one reading column of 44rem; figures and diagrams use the same column.
+   Five colors carry meaning everywhere: time, the predictable drift, luck, the decision, the crowd. */
+:root {
+  --bg: #f4f5f8;
+  --surface: #ffffff;
+  --ink: #141820;
+  --ink-2: #454d5e;
+  --muted: #6f788a;
+  --rule: #dce0e8;
+  --grid: #e9ecf1;
+  --axis: #b4bbc8;
+  --wash: #eceff4;
+  --k-time: #5f6b7d;
+  --k-drift: #256abf;
+  --k-risk: #c2410c;
+  --k-ctrl: #a12f9a;
+  --k-crowd: #0f7a55;
+  --m-drift: #256abf;
+  --m-risk: #c2410c;
+  --m-ctrl: #a12f9a;
+  --m-crowd: #0f7a55;
+  --bad: #c62828;
+  --shadow: 0 8px 24px rgba(20, 24, 32, 0.12);
+  --f-display: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1116; --surface: #171a21; --ink: #e7eaf0; --ink-2: #b2bac8; --muted: #8790a1;
+    --rule: #2a2f39; --grid: #222731; --axis: #3b4250; --wash: #1c2028;
+    --k-time: #a7b1c2; --k-drift: #6ca9f0; --k-risk: #f0875a; --k-ctrl: #e07fc4; --k-crowd: #3cc796;
+    --m-drift: #3987e5; --m-risk: #e0622e; --m-ctrl: #cc4f9e; --m-crowd: #199e70;
+    --bad: #ef6b6b;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1116; --surface: #171a21; --ink: #e7eaf0; --ink-2: #b2bac8; --muted: #8790a1;
+  --rule: #2a2f39; --grid: #222731; --axis: #3b4250; --wash: #1c2028;
+  --k-time: #a7b1c2; --k-drift: #6ca9f0; --k-risk: #f0875a; --k-ctrl: #e07fc4; --k-crowd: #3cc796;
+  --m-drift: #3987e5; --m-risk: #e0622e; --m-ctrl: #cc4f9e; --m-crowd: #199e70;
+  --bad: #ef6b6b;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 max(72px, env(safe-area-inset-bottom, 0px));
+}
+.col { max-width: 44rem; margin-inline: auto; }
+p, li { text-wrap: pretty; }
+a { color: inherit; text-decoration-color: var(--axis); text-underline-offset: 3px; }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--m-drift); outline-offset: 2px; border-radius: 4px; }
+b, strong { font-weight: 600; }
+figure { margin-inline: 0; }
+
+/* Hero */
+.hero { padding-block: 56px 8px; display: grid; gap: 18px; }
+.eyebrow { margin: 0; font: 500 0.78rem var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font: 700 clamp(2.1rem, 1.3rem + 3.4vw, 3.3rem)/1.06 var(--f-display); letter-spacing: -0.02em; text-wrap: balance; }
+.lede { margin: 0; font-size: 1.2rem; line-height: 1.55; color: var(--ink-2); }
+.legendbox { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; display: grid; gap: 10px; }
+.lab { margin: 0; font: 600 0.72rem var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.keys { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 10px 22px; }
+.keys li { display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: 8px; align-items: baseline; font-size: 0.95rem; line-height: 1.4; margin: 0; }
+.keys b { font-family: var(--f-display); font-weight: 600; }
+.keys li > span:last-child { grid-column: 2; color: var(--ink-2); }
+.sw { display: inline-block; width: 22px; height: 4px; border-radius: 2px; transform: translateY(-3px); }
+.sw.time { background: var(--k-time); } .sw.drift { background: var(--k-drift); } .sw.risk { background: var(--k-risk); }
+.sw.ctrl { background: var(--k-ctrl); } .sw.crowd { background: var(--k-crowd); }
+.toc { font-family: var(--f-display); }
+.toc ol { margin: 0; padding: 0; list-style: none; counter-reset: toc; columns: 2 15rem; column-gap: 28px; }
+.toc li { counter-increment: toc; padding: 3px 0; break-inside: avoid; font-size: 0.95rem; margin: 0; }
+.toc li::before { content: counter(toc); display: inline-block; width: 1.6em; font: 500 0.8rem var(--f-mono); color: var(--muted); }
+
+/* Sections */
+section { padding-block: 44px 8px; border-top: 1px solid var(--rule); margin-top: 36px; scroll-margin-top: 12px; }
+h2 { margin: 0 0 14px; font: 650 clamp(1.5rem, 1.2rem + 1.2vw, 2rem)/1.15 var(--f-display); letter-spacing: -0.012em; text-wrap: balance; display: flex; gap: 14px; align-items: baseline; }
+h2 .num { font: 500 0.95rem var(--f-mono); color: var(--muted); flex: none; }
+h3 { margin: 30px 0 8px; font: 600 1.15rem/1.3 var(--f-display); text-wrap: balance; }
+p { margin: 0 0 14px; }
+ul, ol { padding-left: 1.3em; margin: 0 0 14px; }
+li { margin-bottom: 6px; }
+.purpose { border-left: 3px solid var(--ink); padding: 2px 0 2px 14px; font-size: 1.08rem; }
+.note { background: var(--wash); border-radius: 10px; padding: 14px 18px; margin: 20px 0; }
+.note > :last-child { margin-bottom: 0; }
+.note .lab { margin-bottom: 6px; }
+.files { font: 500 0.82rem var(--f-mono); color: var(--muted); margin: -6px 0 16px; }
+code { font-family: var(--f-mono); font-size: 0.86em; background: var(--wash); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+
+mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding-block: 4px; min-width: 0 !important; }
+mjx-container { color: inherit; }
+.k-time { color: var(--k-time); fill: var(--k-time); stroke: var(--k-time); }
+.k-drift { color: var(--k-drift); fill: var(--k-drift); stroke: var(--k-drift); }
+.k-risk { color: var(--k-risk); fill: var(--k-risk); stroke: var(--k-risk); }
+.k-ctrl { color: var(--k-ctrl); fill: var(--k-ctrl); stroke: var(--k-ctrl); }
+.k-crowd { color: var(--k-crowd); fill: var(--k-crowd); stroke: var(--k-crowd); }
+
+/* m-bar outside the formulas: the display and mono faces don't place the combining macron, so the
+   bar is drawn as an overline instead. */
+.mb { text-decoration-line: overline; text-decoration-thickness: 0.07em; text-decoration-skip-ink: none; }
+.ov { text-decoration: overline; }
+
+/* Recipe (the map) */
+.recipe { list-style: none; padding: 0; margin: 0 0 10px; counter-reset: rs; }
+.recipe > li { counter-increment: rs; position: relative; padding-left: 2.7rem; margin-bottom: 14px; }
+.recipe > li::before { content: counter(rs); position: absolute; left: 0; top: 0; width: 1.85rem; height: 1.85rem; border-radius: 50%; border: 1.5px solid var(--ink-2); background: var(--surface); font: 600 0.85rem/1.7rem var(--f-mono); text-align: center; color: var(--ink); }
+.recipe .what { display: block; font: 600 1.02rem/1.45 var(--f-display); }
+.recipe .why { display: block; font-size: 0.97rem; color: var(--ink-2); }
+.go { font: 600 0.72rem/1.5 var(--f-mono); padding: 0 7px; border: 1px solid var(--axis); border-radius: 999px; color: var(--ink-2); text-decoration: none; white-space: nowrap; margin-left: 4px; }
+.go:hover { border-color: var(--ink); color: var(--ink); }
+
+/* Pseudocode */
+pre.pseudo { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; margin: 16px 0 20px; overflow-x: auto; font: 0.84rem/1.6 var(--f-mono); color: var(--ink); }
+pre.pseudo .cm { color: var(--muted); }
+pre.pseudo .kw { font-weight: 500; color: var(--k-time); }
+
+/* Decisions: what was chosen, and why */
+.decs { margin: 14px 0 22px; border-top: 1px solid var(--rule); }
+.dec { display: grid; grid-template-columns: minmax(0, 13rem) minmax(0, 1fr); gap: 4px 22px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.dec dt { font: 600 0.98rem/1.4 var(--f-display); }
+.dec dd { margin: 0; font-size: 0.98rem; min-width: 0; }
+.dec dd p:last-child { margin-bottom: 0; }
+.decs-lab { margin: 26px 0 6px; }
+@media (max-width: 640px) { .dec { grid-template-columns: minmax(0, 1fr); } }
+.hand { background: var(--surface); border: 1px dashed var(--axis); border-radius: 10px; padding: 12px 16px; margin: 16px 0 20px; font-size: 0.97rem; }
+.hand > :last-child { margin-bottom: 0; }
+.hand .lab { margin-bottom: 6px; }
+.src { font: 600 0.68rem var(--f-display); letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--axis); border-radius: 999px; padding: 0 6px; white-space: nowrap; vertical-align: 0.1em; }
+
+/* Networks */
+.nets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: 12px; margin: 14px 0 22px; }
+.net { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; }
+.net p { margin: 0; font-size: 0.96rem; }
+.net-n { font: 600 1.02rem var(--f-display); }
+
+/* Tables */
+.tbl { overflow-x: auto; margin: 18px 0 22px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 600 0.78rem var(--f-display); letter-spacing: 0.03em; color: var(--ink-2); background: var(--wash); }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.rowh { font: 600 0.85rem var(--f-display); color: var(--ink-2); white-space: nowrap; }
+.wide-tbl table { min-width: 560px; table-layout: fixed; }
+.wide-tbl th:first-child, .wide-tbl td:first-child { width: 6.5rem; }
+
+/* Figures and controls */
+.fig { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 20px; margin-block: 28px; }
+.fig-head { display: grid; gap: 4px; margin-bottom: 10px; }
+.fig-title { margin: 0; font: 650 1.08rem/1.3 var(--f-display); }
+.fig-sub { margin: 0; font-size: 0.97rem; color: var(--ink-2); }
+.controls { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-end; margin: 14px 0 10px; }
+.ctl { display: grid; gap: 4px; min-width: 0; }
+.ctl > label, .ctl > .ctl-l { font: 500 0.8rem var(--f-display); color: var(--ink-2); display: flex; justify-content: space-between; gap: 12px; }
+.ctl output { font: 500 0.82rem var(--f-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 210px; max-width: 100%; accent-color: var(--ink); margin: 0; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--axis); border-radius: 999px; padding: 2px; gap: 2px; }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.seg label { font: 500 0.82rem var(--f-display); padding: 3px 11px; border-radius: 999px; cursor: pointer; color: var(--ink-2); }
+.seg input:checked + label { background: var(--ink); color: var(--surface); }
+.seg input:focus-visible + label { outline: 2px solid var(--m-drift); outline-offset: 1px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { font: 600 0.85rem var(--f-display); padding: 7px 16px; border-radius: 999px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.plots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.ptitle { margin: 0 0 4px; font: 600 0.84rem/1.4 var(--f-display); color: var(--ink-2); }
+.plotwrap { position: relative; min-width: 0; }
+.plotwrap svg { display: block; width: 100%; height: auto; }
+.status { font: 500 0.95rem/1.5 var(--f-display); color: var(--ink); margin: 10px 0 0; min-height: 3em; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 12px 20px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule); }
+.stat { min-width: 0; }
+.stat .k { display: block; font: 500 0.78rem/1.35 var(--f-display); color: var(--muted); }
+.stat .v { font: 500 1rem var(--f-mono); font-variant-numeric: tabular-nums; margin-top: 2px; overflow-wrap: anywhere; }
+.v.good { color: var(--k-crowd); } .v.bad { color: var(--bad); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font: 500 0.8rem var(--f-display); color: var(--ink-2); margin: 4px 0 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.lkey { display: inline-block; width: 16px; height: 10px; border-radius: 2px; flex: none; }
+.lkey.risk { background: var(--m-risk); opacity: 0.75; } .lkey.drift { background: var(--m-drift); opacity: 0.75; }
+.lkey.bad { background: var(--bad); opacity: 0.18; border: 1px solid var(--bad); }
+.lkey.ctrl { background: var(--m-ctrl); } .lkey.crowd { background: var(--m-crowd); }
+.lkey.ink2 { background: var(--ink-2); } .lkey.hollow { background: var(--surface); border: 1.5px solid var(--axis); }
+.lkey.wash { background: var(--wash); border: 1px solid var(--axis); }
+.lkey.line { height: 0; border-top: 2.5px solid var(--ink); border-radius: 0; background: none; }
+.lkey.line.ctrl { border-top-color: var(--m-ctrl); }
+.lkey.line.crowd { border-top-color: var(--m-crowd); }
+.lkey.line.muted { border-top: 2px dashed var(--muted); }
+.lkey.thick { border-top-width: 4px; } .lkey.dots { border-top-style: dotted; } .lkey.dashk { border-top-style: dashed; }
+.ldot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.ldot.a { background: var(--ink-2); opacity: 0.55; } .ldot.b { background: var(--m-ctrl); }
+.ldot.c { background: var(--m-crowd); } .ldot.d { background: var(--m-risk); }
+
+/* SVG parts */
+.grid { stroke: var(--grid); stroke-width: 1; }
+.axis, .zero { stroke: var(--axis); stroke-width: 1; }
+.tick { font: 11.5px var(--f-mono); fill: var(--muted); }
+.alabel { font: 500 12.5px var(--f-display); fill: var(--ink-2); }
+.lbl { font: 500 12.5px var(--f-display); fill: var(--ink-2); }
+.lbl.strong { fill: var(--ink); font-weight: 600; }
+.lbl.small { font-size: 11.5px; }
+.lbl.crowd { fill: var(--k-crowd); }
+.ln { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ln.ink { stroke: var(--ink); } .ln.ctrl { stroke: var(--m-ctrl); } .ln.muted { stroke: var(--muted); }
+.ln.drift { stroke: var(--m-drift); } .ln.crowd { stroke: var(--m-crowd); }
+.ln.dash { stroke-dasharray: 6 5; } .ln.thin { stroke-width: 1.25; }
+.dot { stroke: var(--surface); stroke-width: 2; }
+.dot.ink { fill: var(--ink); } .dot.ctrl { fill: var(--m-ctrl); } .dot.crowd { fill: var(--m-crowd); }
+.dot.muted { fill: var(--muted); }
+.band { fill: var(--wash); stroke: none; }
+.domain { fill: none; stroke: var(--axis); stroke-width: 1.25; }
+.boxline { fill: none; stroke: var(--ink-2); stroke-width: 1.1; stroke-dasharray: 4 3; }
+.mbarline { stroke: var(--m-crowd); stroke-width: 1.2; stroke-dasharray: 5 4; }
+.mline { stroke: var(--m-crowd); stroke-width: 1.2; stroke-opacity: 0.55; stroke-dasharray: 2 3; }
+.pt { stroke: none; }
+.pt.a { fill: var(--ink-2); fill-opacity: 0.4; }
+.pt.b { fill: var(--m-ctrl); fill-opacity: 0.9; }
+.pt.c { fill: var(--m-crowd); fill-opacity: 0.8; }
+.pt.d { fill: var(--m-risk); fill-opacity: 0.9; }
+/* the grid sweep */
+.nd { stroke-width: 1.5; }
+.nd.todo { fill: var(--surface); stroke: var(--axis); }
+.nd.done { fill: var(--ink-2); stroke: var(--ink-2); }
+.nd.known { fill: var(--ink); stroke: var(--ink); }
+.nd.cur.hjb { fill: var(--m-ctrl); stroke: var(--m-ctrl); }
+.nd.cur.fp { fill: var(--m-crowd); stroke: var(--m-crowd); }
+.stc { stroke-width: 2.25; fill: none; }
+.stc.hjb { stroke: var(--m-ctrl); } .stc.fp { stroke: var(--m-crowd); }
+.colbox { fill: none; stroke-width: 1.5; stroke-dasharray: 5 4; }
+.colbox.hjb { stroke: var(--m-ctrl); } .colbox.fp { stroke: var(--m-crowd); }
+.wall { stroke: var(--ink); stroke-width: 4; stroke-linecap: square; }
+.sweep { fill: none; stroke: var(--k-time); stroke-width: 1.5; }
+.sweephead { fill: var(--k-time); }
+/* the rates */
+.rb.dif { fill: var(--m-risk); fill-opacity: 0.75; }
+.rb.der { fill: var(--m-drift); fill-opacity: 0.75; }
+.rb.neg { fill: var(--bad); fill-opacity: 0.12; }
+.rtick { stroke: var(--ink); stroke-width: 2; }
+/* diagram */
+.diagram { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 18px; margin-block: 26px; }
+.dscroll { overflow-x: auto; }
+.dscroll svg { display: block; width: 100%; min-width: 620px; height: auto; }
+.dg-box { fill: var(--surface); stroke: var(--axis); stroke-width: 1.25; }
+.dg-t { font: 600 14px var(--f-display); fill: var(--ink); }
+.dg-s { font: 500 12.5px var(--f-display); fill: var(--ink-2); }
+.dg-line { fill: none; stroke: var(--ink-2); stroke-width: 1.5; }
+.dg-line.crowd { stroke: var(--m-crowd); stroke-width: 2; }
+.dg-head { fill: var(--ink-2); } .dg-head.crowd { fill: var(--m-crowd); }
+
+/* Known sides of the domain and the list under the points figure */
+.side { stroke-width: 4; stroke-linecap: square; }
+.side.ctrl { stroke: var(--m-ctrl); } .side.crowd { stroke: var(--m-crowd); }
+/* The density formula in pictures: stacked panels, the gap t·psi, and the choice that would fail */
+.stack { display: grid; gap: 8px; }
+.gapfill { fill: var(--m-crowd); fill-opacity: 0.14; stroke: none; }
+.lkey.gap { background: var(--m-crowd); opacity: 0.3; }
+.ln.fail { stroke: var(--bad); } .dot.fail { fill: var(--bad); }
+.lkey.line.fail { border-top-color: var(--bad); }
+/* A legend label with several formulas: one inline run, so the flex gap does not split it */
+.legend .lt { display: inline; }
+ul.marks { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 9px; }
+ul.marks li { display: grid; grid-template-columns: 18px minmax(0, 1fr); column-gap: 10px; align-items: baseline; font-size: 0.95rem; line-height: 1.45; margin: 0; }
+ul.marks li > i { justify-self: center; }
+
+/* Folded extras (the finite-difference check) */
+details.more { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 2px 18px; margin: 14px 0; }
+details.more > summary { cursor: pointer; font: 600 0.98rem/1.4 var(--f-display); padding: 11px 0; }
+details.more > summary:hover { color: var(--k-drift); }
+details.more[open] > summary { border-bottom: 1px solid var(--rule); margin-bottom: 14px; }
+details.more .fig { border: none; padding: 0; margin-block: 8px 18px; }
+
+footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule); font: 0.85rem/1.5 var(--f-display); color: var(--muted); }
+@media (max-width: 520px) {
+  body { font-size: 1rem; }
+  .fig, .diagram { padding: 14px; border-radius: 12px; }
+  details.more { padding: 2px 12px; }
+  input[type="range"] { width: 100%; }
+  .ctl { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+<script>
+window.MathJax = {
+  loader: { load: ['[tex]/html'] },
+  tex: {
+    packages: { '[+]': ['html'] },
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['\\[', '\\]']],
+    macros: {
+      cT: ['\\class{k-time}{#1}', 1],
+      cB: ['\\class{k-drift}{#1}', 1],
+      cR: ['\\class{k-risk}{#1}', 1],
+      cP: ['\\class{k-ctrl}{#1}', 1],
+      cM: ['\\class{k-crowd}{#1}', 1]
+    }
+  },
+  svg: { fontCache: 'global' },
+  options: { enableMenu: false }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" defer></script>
+</head>
+<body>
+
+<div class="col">
+
+<header class="hero">
+  <p class="eyebrow">AMS 516 · Problem 21 · how the PINNs of the equilibrium are built</p>
+  <h1>The equilibrium from the inside</h1>
+  <p class="lede">How the equilibrium with neural networks has been programmed in practice: what each of the three networks learns, with which points and which loss, how they are chained together, how the final mean is read and how the loop over \(\bar m\) is closed. Finite differences only serve as a check, and they are summarised at the end.</p>
+  <div class="legendbox">
+    <p class="lab">Colours: each one always means the same thing</p>
+    <ul class="keys">
+      <li><span class="sw time"></span><b>Time</b><span>what changes because the clock runs: \(\partial_t\)</span></li>
+      <li><span class="sw drift"></span><b>The predictable part</b><span>the drift of wealth: \(rx + \pi(\mu - r)\)</span></li>
+      <li><span class="sw risk"></span><b>Luck</b><span>the noise, \((\sigma\pi)^2\), and the curvature</span></li>
+      <li><span class="sw ctrl"></span><b>The decision</b><span>how much to invest: \(\pi^*\)</span></li>
+      <li><span class="sw crowd"></span><b>The crowd</b><span>the density \(m\) and its mean \(\bar m\)</span></li>
+    </ul>
+  </div>
+  <div class="note">
+    <p class="lab">Where the numbers come from</p>
+    <p>The settings (points, steps, step sizes) are the defaults of the code. The formulas and the calculations in the boxes can be redone by hand. Results that only the code gives carry the mark <span class="src">docstring</span>. The interactives are illustrations: they draw the points with their own random draw, use the exact solution for \(\lambda = 0\) or a toy function, and say so.</p>
+  </div>
+  <nav class="toc" aria-label="Contents">
+    <ol>
+      <li><a href="#mapa">The map</a></li>
+      <li><a href="#aprende">How a network learns</a></li>
+      <li><a href="#redes">The three networks at a glance</a></li>
+      <li><a href="#redv">The V network, seen from the equilibrium</a></li>
+      <li><a href="#copia">The network that copies π*</a></li>
+      <li><a href="#densidad">The density network</a></li>
+      <li><a href="#media">The final mean</a></li>
+      <li><a href="#bucle">The loop over <span class="mb">m</span></a></li>
+      <li><a href="#fd">The check with finite differences</a></li>
+      <li><a href="#chuleta">Cheat sheet of decisions</a></li>
+    </ol>
+  </nav>
+</header>
+
+<!-- ============================================================ 1 -->
+<section id="mapa">
+  <h2><span class="num">1</span>The map</h2>
+  <p>The equilibrium fits in one number: the final mean \(\cM{\bar m}\) that everyone assumes has to be the one that really comes out. With networks, checking one \(\bar m\) costs three trainings in a row. The recipe:</p>
+  <ol class="recipe">
+    <li><span class="what">Assume a final mean \(\cM{\bar m}\).</span>
+      <span class="why">With \(\bar m\) fixed, each network solves a problem that no longer depends on the others.<a class="go" href="#bucle">§8</a></span></li>
+    <li><span class="what">Train the V network.</span>
+      <span class="why">It solves the HJB and gives how much each person invests: \(\cP{\pi^*(t,x)}\).<a class="go" href="#redv">§4</a></span></li>
+    <li><span class="what">Copy \(\pi^*\) into a small network.</span>
+      <span class="why">To have a smooth \(\pi^*\) that can be differentiated twice.<a class="go" href="#copia">§5</a></span></li>
+    <li><span class="what">Train the density network with that copy.</span>
+      <span class="why">It solves Fokker–Planck: where people are at each instant, \(\cM{m(t,x)}\).<a class="go" href="#densidad">§6</a></span></li>
+    <li><span class="what">Read the final mean, \(\Phi(\bar m)\), with the mean equation.</span>
+      <span class="why">It is the mean that comes out if everyone assumes \(\bar m\).<a class="go" href="#media">§7</a></span></li>
+    <li><span class="what">Correct \(\bar m\) with the secant and go back to step 2, starting from the previous networks.</span>
+      <span class="why">Until \(\Phi(\bar m) = \bar m\).<a class="go" href="#bucle">§8</a></span></li>
+  </ol>
+  <p>The V network is Ander's; the copy network, the density network and the loop are Deepak's. Finite differences do steps 2 to 5 on a grid and serve to check the results of the networks (section 9).</p>
+
+  <figure class="diagram" aria-labelledby="map-cap">
+    <div class="controls" style="margin-top:0">
+      <div class="seg" role="radiogroup" aria-label="How Φ is evaluated">
+        <input type="radio" id="map-pinn" name="mapmode" value="pinn" checked><label for="map-pinn">With networks</label>
+        <input type="radio" id="map-fd" name="mapmode" value="fd"><label for="map-fd">With a grid (check)</label>
+      </div>
+    </div>
+    <div class="dscroll">
+      <svg viewBox="0 0 760 236" role="img" aria-label="One evaluation of Φ: assumed mean, HJB, Fokker–Planck, final mean; if it does not match, the secant gives a new mean">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="dg-head"></path></marker>
+          <marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="dg-head crowd"></path></marker>
+        </defs>
+        <rect class="dg-box" x="8" y="34" width="128" height="72" rx="10"></rect>
+        <text class="dg-t" x="72" y="66" text-anchor="middle">assumed <tspan class="ov">m</tspan></text>
+        <text class="dg-s" x="72" y="86" text-anchor="middle">a number</text>
+        <rect class="dg-box" x="172" y="34" width="190" height="72" rx="10"></rect>
+        <text class="dg-t" x="267" y="66" text-anchor="middle" id="mb2a">V network + copy network</text>
+        <text class="dg-s" x="267" y="86" text-anchor="middle" id="mb2b">π*, and a smooth copy</text>
+        <rect class="dg-box" x="398" y="34" width="190" height="72" rx="10"></rect>
+        <text class="dg-t" x="493" y="66" text-anchor="middle" id="mb3a">Density network</text>
+        <text class="dg-s" x="493" y="86" text-anchor="middle" id="mb3b">with the copy of π*</text>
+        <rect class="dg-box" x="624" y="34" width="128" height="72" rx="10"></rect>
+        <text class="dg-t" x="688" y="66" text-anchor="middle" id="mb4a">Φ(<tspan class="ov">m</tspan>) = M(T)</text>
+        <text class="dg-s" x="688" y="86" text-anchor="middle" id="mb4b">mean equation</text>
+        <path class="dg-line" d="M138 70 H168" marker-end="url(#ah)"></path>
+        <path class="dg-line" d="M364 70 H394" marker-end="url(#ah)"></path>
+        <path class="dg-line" d="M590 70 H620" marker-end="url(#ah)"></path>
+        <rect class="dg-box" x="398" y="160" width="190" height="48" rx="10"></rect>
+        <text class="dg-t" x="493" y="189" text-anchor="middle">|Φ(<tspan class="ov">m</tspan>) − <tspan class="ov">m</tspan>| &lt; tol?</text>
+        <path class="dg-line" d="M688 108 C688 140 640 150 592 176" marker-end="url(#ah)"></path>
+        <path class="dg-line" d="M590 196 H612" marker-end="url(#ah)"></path>
+        <text class="dg-t" x="618" y="201">yes: equilibrium</text>
+        <path class="dg-line crowd" d="M396 184 C250 184 80 170 72 110" marker-end="url(#ahc)"></path>
+        <text class="dg-s" x="200" y="214" text-anchor="middle" style="fill: var(--k-crowd)">no: the secant gives a new <tspan class="ov">m</tspan></text>
+      </svg>
+    </div>
+    <figcaption id="map-cap" class="fig-sub" style="margin-top:10px">One evaluation of Φ and the loop. With the grid only the three middle boxes change; the loop is the same code.</figcaption>
+  </figure>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="aprende">
+  <h2><span class="num">2</span>How a network learns</h2>
+  <p class="files">src/mfg/pinn/nets.py · the training loops of hjb.py and fokker_planck.py</p>
+  <p class="purpose">The minimum needed to read the rest. It holds for all three networks.</p>
+  <ol class="recipe">
+    <li><span class="what">A network is a formula with weights.</span>
+      <span class="why">\(t\) and \(x\) go in and a number comes out. The weights \(\theta\) are about 12 700 adjustable numbers (4 layers of 64 neurons with tanh), and training is choosing them. The derivatives of the network in \(t\) and \(x\) come out exact, by automatic differentiation.</span></li>
+    <li><span class="what">The loss measures how much it fails, at random points.</span>
+      <span class="why">Inside the rectangle \([0, 1] \times [-1, 3]\), whether the network satisfies its equation; on the known sides, whether it gives the known value. It is zero if it satisfies everything.</span></li>
+    <li><span class="what">Adam lowers it, step by step.</span>
+      <span class="why">Each step draws new points and moves the weights a little in the direction in which the loss goes down. With new points every time, the network has to satisfy the equation everywhere, not only at a few places. After thousands of steps, L-BFGS polishes with a fixed draw.</span></li>
+    <li><span class="what">Without stepping through time.</span>
+      <span class="why">Each step adjusts the whole rectangle at once. The direction of time is only in which side is known: the end for the HJB, the start for Fokker–Planck.</span></li>
+    <li><span class="what">One network at a time.</span>
+      <span class="why">Each network is trained with the others frozen. The HJB and Fokker–Planck only pass \(\bar m\) and \(\pi^*\) to each other; the back and forth between them is the secant loop.<a class="go" href="#bucle">§8</a></span></li>
+  </ol>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="redes">
+  <h2><span class="num">3</span>The three networks at a glance</h2>
+  <p class="files">src/mfg/pinn/nets.py · hjb.py · fokker_planck.py</p>
+  <p class="purpose">All three follow the recipe of section 2. What changes is what they learn, where they are asked and what is asked of them.</p>
+
+  <div class="tbl wide-tbl"><table>
+    <thead><tr><th></th><th>V network <span class="src">Ander's</span></th><th>Copy network of π*</th><th>Density network</th></tr></thead>
+    <tbody>
+      <tr><td class="rowh">Learns</td><td>\(v_{\theta_V} \approx \log(-V)\), with the HJB</td><td>\(p_{\theta_\pi} \approx \pi^*\), copying data</td><td>\(\psi_{\theta_m}\), with Fokker–Planck; \(m = m_0\,e^{t\psi}\)</td></tr>
+      <tr><td class="rowh">Points</td><td>New at every step: 4000 over the whole domain, 1000 in the area of the jump, 1000 at \(t = T\), 200 on each edge</td><td>200 000 fixed, drawn once; each step uses a batch of 4000</td><td>New at every step: 4000 over the whole domain, 2000 where the population lives, 16 instants for the mass</td></tr>
+      <tr><td class="rowh">Loss</td><td>Equation, final value, final slopes and edges</td><td>\((p_{\theta_\pi} - \pi^*)^2\)</td><td>Equation and mass</td></tr>
+      <tr><td class="rowh">Training</td><td>10 000 Adam steps and 500 of L-BFGS</td><td>30 000 Adam steps and 500 of L-BFGS</td><td>10 000 Adam steps and 500 of L-BFGS</td></tr>
+      <tr><td class="rowh">Afterwards</td><td>Gives \(\pi^*\) to the copy and to the final mean</td><td>Stays frozen</td><td>Gives \(m\), and with it the final mean</td></tr>
+    </tbody>
+  </table></div>
+
+  <figure class="fig" aria-labelledby="pt-title">
+    <div class="fig-head">
+      <p class="fig-title" id="pt-title">Where each network looks</p>
+      <p class="fig-sub">The rectangle of the domain and the points of one training step of the chosen network: the places where that step asks. Only part of them is drawn, with its own random draw. Each mark is explained below.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="radiogroup" aria-label="Network">
+        <input type="radio" id="pt-v" name="ptmode" value="v"><label for="pt-v">V network</label>
+        <input type="radio" id="pt-p" name="ptmode" value="p"><label for="pt-p">Copy network</label>
+        <input type="radio" id="pt-m" name="ptmode" value="m" checked><label for="pt-m">Density network</label>
+      </div>
+      <div class="btns"><button class="btn" id="pt-next" type="button">Next Adam step ▶</button></div>
+    </div>
+    <div class="plotwrap"><svg id="pt-svg" viewBox="0 0 660 320" role="img" aria-label="Training points of the chosen network on the time-wealth domain"></svg></div>
+    <div id="pt-explain"></div>
+  </figure>
+
+  <p class="decs-lab lab">Decisions, and why</p>
+  <dl class="decs">
+    <div class="dec"><dt>The same network for all three</dt>
+      <dd><p>A single piece of code (<code>nets.py</code>) with exact and smooth derivatives, tested once.</p></dd></div>
+    <div class="dec"><dt>New points at every step</dt>
+      <dd><p>The network cannot memorise a few particular points: it has to satisfy the equation over the whole domain. The copy network is different, because it learns from data and not from an equation (section 5).</p></dd></div>
+    <div class="dec"><dt>Adam first, L-BFGS at the end</dt>
+      <dd><p>Adam copes well with the start, with random weights and changing points. L-BFGS uses the curvature of the loss and goes down much faster once it is close to the minimum.</p></dd></div>
+    <div class="dec"><dt>Training in turns</dt>
+      <dd><p>Each network learns its own equation with the others fixed. That way each loss is that of a known problem, and no derivative goes through another network. Training all of them jointly at once is left out (README).</p></dd></div>
+  </dl>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="redv">
+  <h2><span class="num">4</span>The V network, seen from the equilibrium</h2>
+  <p class="files">src/mfg/pinn/hjb.py (Ander's; its guide is pinn_value_network_guide.html, in this folder)</p>
+  <p>For the equilibrium it is a box: it receives \(\bar m\) and gives \(\cP{\pi^*(t,x)}\), with formula (4) and the exact derivatives of \(v_{\theta_V}\). In the loop it is trained in full the first time and, afterwards, from a copy of the previous one (section 8). Its limit is inherited by the other two: near \((T, \bar m)\) it rounds off the jump of \(\pi^*\) from 1.5 to 0.214, and it is off by 0.1 at \(t = 0.95\) and by almost 1 at \(T\) <span class="src">docstring</span>.</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="copia">
+  <h2><span class="num">5</span>The network that copies π*</h2>
+  <p class="files">src/mfg/pinn/fokker_planck.py · fit_position_net</p>
+  <p class="purpose">To have a smooth \(\pi^*\) that can be differentiated twice without the noise shooting up.</p>
+
+  <h3>Why it is needed</h3>
+  <p>The Fokker–Planck equation (5) contains \(\partial_x[(rx + (\mu - r)\pi^*)\,m]\) and \(\tfrac12\partial_{xx}[\sigma^2(\pi^*)^2 m]\). Expanding those derivatives produces \(\partial_x \pi^*\) and \(\partial_{xx}\pi^*\). But \(\pi^*\) already uses the second derivative of \(v\). Differentiating it twice more would require the third and fourth derivatives of the V network.</p>
+  <p>The problem is that each derivative multiplies a wiggle by its frequency. Every trained network has small wiggles, and near the corner \((T, \bar m)\) they are not so small.</p>
+
+  <figure class="fig" aria-labelledby="wg-title">
+    <div class="fig-head">
+      <p class="fig-title" id="wg-title">Differentiating amplifies the wiggles</p>
+      <p class="fig-sub">A smooth function (dashed) and the same one with a small wiggle (solid line), for \(x\) between 0 and 2.2. Change the order of the derivative.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="radiogroup" aria-label="Order of the derivative">
+        <input type="radio" id="wg-0" name="wgn" value="0"><label for="wg-0">v</label>
+        <input type="radio" id="wg-1" name="wgn" value="1"><label for="wg-1">1st</label>
+        <input type="radio" id="wg-2" name="wgn" value="2" checked><label for="wg-2">2nd (π*)</label>
+        <input type="radio" id="wg-3" name="wgn" value="3"><label for="wg-3">3rd (∂ₓπ*)</label>
+        <input type="radio" id="wg-4" name="wgn" value="4"><label for="wg-4">4th (∂ₓₓπ*)</label>
+      </div>
+      <div class="ctl"><label for="wg-a">size of the wiggle <output id="wg-a-o"></output></label><input type="range" id="wg-a" min="-4" max="-2" step="0.1" value="-3"></div>
+      <div class="ctl"><label for="wg-c">waves per unit of x <output id="wg-c-o"></output></label><input type="range" id="wg-c" min="2" max="20" step="1" value="10"></div>
+    </div>
+    <div class="legend">
+      <span><i class="lkey line muted"></i>the smooth function</span>
+      <span><i class="lkey line"></i>with the wiggle</span>
+    </div>
+    <div class="plotwrap"><svg id="wg-svg" viewBox="0 0 640 260" role="img" aria-label="Derivative of a function with and without a wiggle"></svg></div>
+    <div class="stats" id="wg-stats"></div>
+  </figure>
+  <div class="hand">
+    <p class="lab">Calculation by hand</p>
+    <p>A wiggle \(a \sin(kx)\) has an \(n\)-th derivative of size \(a\,k^n\). With \(a = 0.001\) and 10 waves per unit (\(k = 2\pi \cdot 10 \approx 62.8\)):</p>
+    <ul>
+      <li>1st derivative: \(0.063\);</li>
+      <li>2nd: \(3.9\) (already more than the smooth part);</li>
+      <li>3rd: \(248\);</li>
+      <li>4th: \(15\,600\).</li>
+    </ul>
+  </div>
+
+  <h3>How it is done</h3>
+  <pre class="pseudo">points ← 200 000 (t, x), drawn only once:
+         20 % over the whole domain
+         40 % with x between 0 and 2.2                    <span class="cm"># where the population lives</span>
+         40 % with x between <span class="mb">m</span> − 0.3 and <span class="mb">m</span> + 0.3          <span class="cm"># the valley of π*</span>
+target ← π* of the V network at those points       <span class="cm"># with NumPy, 20 000 at a time</span>
+net ← new, or a copy of the previous copy network
+
+<span class="kw">repeat</span> 30 000 times:                              <span class="cm"># Adam</span>
+    batch ← 4000 of the 200 000 points
+    loss ← mean of (net(t, x) − target)²
+    one step; the step size falls from 10⁻³ to 10⁻⁵
+L-BFGS, up to 500 iterations, on 50 000 of the points
+
+freeze the net                                     <span class="cm"># its weights no longer change</span>
+rms ← typical error over the 200 000 points</pre>
+  \[ L_\pi(\theta_\pi) = \frac{1}{4000}\sum_{i=1}^{4000}{\Big(p_{\theta_\pi}(t_i, x_i) - \pi^*(t_i, x_i)\Big)^2} \]
+  <p>It is a regression: there is no equation, only values to copy. A tanh network fitted by least squares to many points does not follow fine wiggles that change from one point to another; it averages them. Its output is smooth, and so are its derivatives. The density network uses this copy and its exact derivatives.</p>
+
+  <p class="decs-lab lab">Decisions, and why</p>
+  <dl class="decs">
+    <div class="dec"><dt>A separate network, fitted by regression</dt>
+      <dd><p>It gives smooth derivatives of \(\pi^*\) without going through the third and fourth derivatives of the V network. What is lost is small: the error of the copy, weighted by the density, is about 0.002 with \(\lambda = 2\) and \(\bar m = 1.1\) <span class="src">docstring</span>.</p></dd></div>
+    <div class="dec"><dt>Points 20 / 40 / 40</dt>
+      <dd><p>Accuracy is put where people live and where \(\pi^*\) changes fastest (the valley around \(\bar m\)). 20 % spread over the whole domain is enough for the copy not to make anything up far away.</p></dd></div>
+    <div class="dec"><dt>Fixed points and batches</dt>
+      <dd><p>Since it learns from data and not from an equation, a fixed set is enough. Asking the V network for the 200 000 values of \(\pi^*\) only once is cheaper than asking at every step.</p></dd></div>
+    <div class="dec"><dt>Frozen afterwards</dt>
+      <dd><p>While the density is trained, the copy does not change: the density learns with a fixed \(\pi^*\), as Fokker–Planck requires.</p></dd></div>
+    <div class="dec"><dt>For the final mean, the π* of the V network</dt>
+      <dd><p>In the mean equation (section 7) \(\pi^*\) enters without derivatives, and there the V network's is the most faithful. The copy is only used where derivatives are needed.</p></dd></div>
+  </dl>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="densidad">
+  <h2><span class="num">6</span>The density network</h2>
+  <p class="files">src/mfg/pinn/fokker_planck.py · DensityNet, fp_residual, density_net_loss, train_density_net · tests/test_pinn_fokker_planck.py</p>
+  <p class="purpose">With the strategy \(\cP{\pi^*}\) already fixed, learn where the population is at each instant: the density \(\cM{m(t,x)}\) that satisfies Fokker–Planck (5) and starts at \(m_0 = N(1, 0.2^2)\).</p>
+  <p>It is the last of the three networks of each evaluation of \(\Phi\). It receives the copy of \(\pi^*\) (section 5), frozen, and hands over the density, with which the final mean is computed (section 7). It works in five steps:</p>
+  <ol class="recipe">
+    <li><span class="what">The formula.</span>
+      <span class="why">The network gives a number, \(\psi_{\theta_m}(t,x)\), and the density is built from it: \(m = m_0\,e^{t\psi}\).</span></li>
+    <li><span class="what">The equation, at 6000 points.</span>
+      <span class="why">At each step, 6000 new points: 4000 over the whole rectangle and 2000 where the population lives. At each one, does the network satisfy Fokker–Planck?</span></li>
+    <li><span class="what">The mass, at 16 instants.</span>
+      <span class="why">At each step, 16 new instants. At each one, does the density add up to 1?</span></li>
+    <li><span class="what">Train.</span>
+      <span class="why">The loss adds those two parts. The first time, 10 000 Adam steps and 500 of L-BFGS. Afterwards, inside the loop, it starts from the previous network and trains less.</span></li>
+    <li><span class="what">Read.</span>
+      <span class="why">The density, its mass and its mean at any \((t, x)\), and the final mean \(\Phi(\bar m)\).</span></li>
+  </ol>
+
+  <h3>1. The formula</h3>
+  \[ \cM{q_{\theta_m}(t,x)} = \underbrace{\log m_0(x)}_{\text{the start, fixed}} + \underbrace{\cT{t}}_{\text{the instant}} \cdot \underbrace{\psi_{\theta_m}(t,x)}_{\text{the network}}, \qquad \cM{m_{\theta_m}(t,x)} = e^{\,q_{\theta_m}(t,x)} \]
+  <ul>
+    <li>\(\psi_{\theta_m}\): the network. It is the same <code>TanhNet</code> as the other two: \(t\) and \(x\) go in, a number comes out.</li>
+    <li>\(\theta_m\): its weights, about 12 700. It is the only thing that is trained.</li>
+    <li>\(\log m_0(x) = -(x-1)^2/0.08 + 0.69\): the logarithm of the initial density, \(N(1, 0.2^2)\). It is a fixed parabola, with no weights.</li>
+    <li>\(q_{\theta_m}\): what comes out of the formula, the logarithm of the density.</li>
+    <li>\(m_{\theta_m} = e^{q_{\theta_m}}\): the density, which is what is used afterwards.</li>
+  </ul>
+
+  <p><b>What \(q\) is, and what \(\psi\) is.</b> \(q = \log m\) is the logarithm of the density: how many people there are near \(x\) at time \(t\), on a logarithmic scale. If \(q\) rises by 1, the density is multiplied by \(e \approx 2.7\); if it falls by 10, it is divided by 22 000. \(\psi = (q - \log m_0)/t\) is how much \(\log m\) has changed since the start, divided by the time that has passed: the average rate at which it has changed. The starting bell is already provided by \(\log m_0\), so the network only learns the change.</p>
+
+  <p><b>Why \(e^{q}\) is exactly \(m\).</b> It is not something that comes out of a calculation: it is how it is defined. The order is the opposite of what it seems. We do not compute \(m\) first and then its logarithm. The network gives \(\psi_{\theta_m}\); from it \(q_{\theta_m}\) is built, and the network's density is <i>defined</i> as \(m_{\theta_m} = e^{q_{\theta_m}}\). What makes that \(m_{\theta_m}\) resemble the true density is not the formula but the training: the loss forces it to satisfy Fokker–Planck and to add up to 1.</p>
+  <p>Writing it this way leaves no density out:</p>
+  <ul>
+    <li><b>Every positive number is \(e\) raised to something.</b> \(2 = e^{0.69}\) and \(4\cdot 10^{-22} = e^{-49.3}\). That "something" is its logarithm. So every positive density is \(m = e^{q}\) with \(q = \log m\).</li>
+    <li><b>Every \(q\) can be written as \(\log m_0 + t\cdot\psi\)</b>, for \(t > 0\): just take \(\psi = (q - \log m_0)/t\).</li>
+  </ul>
+  <p>It is a change of name, like giving a distance in miles instead of kilometres. The network looks for \(\psi\) instead of \(m\), and from \(\psi\) we get back to \(m\) without losing anything.</p>
+  <div class="hand">
+    <p class="lab">There and back, without the penalty</p>
+    <ul>
+      <li><b>From \(m\) to \(\psi\).</b> In the middle, \(x = 1\), at the end, \(t = 1\), the exact density is 1.05. Its logarithm is \(q = 0.049\). At the start, \(\log m_0(1) = 0.69\). So \(\psi = (0.049 - 0.69)/1 = -0.64\).</li>
+      <li><b>From \(\psi\) to \(m\).</b> \(q = 0.69 + 1\cdot(-0.64) = 0.049\), and \(e^{0.049} = 1.05\). The same density comes out.</li>
+    </ul>
+  </div>
+
+  <p><b>Why some carry \(\theta_m\) and others do not.</b> The subscript marks what depends on the weights, that is, what changes during training. Only \(\psi\) is a network, so only its weights are trained. \(q\) and \(m\) carry \(\theta_m\) because they are built from \(\psi_{\theta_m}\): moving the weights changes \(\psi\), and with it \(q\) and \(m\). \(\log m_0\) and \(t\) do not carry it. There are, therefore, three kinds of functions, as in the V network:</p>
+  <ul>
+    <li><b>The exact ones</b>, without a subscript: \(m\), \(q = \log m\) and \(\psi = (q - \log m_0)/t\). They are the true solution, which is not known, except with \(\lambda = 0\).</li>
+    <li><b>The network's</b>, with \(\theta_m\): \(\psi_{\theta_m}\), \(q_{\theta_m}\) and \(m_{\theta_m}\). Training is bringing them closer to the exact ones.</li>
+    <li><b>The known ones</b>: \(m_0\) and \(\log m_0\). They are fixed formulas.</li>
+  </ul>
+
+  <p><b>Why a logarithm.</b> There are three reasons:</p>
+  <ul>
+    <li><b>Always positive.</b> \(m = e^q\) is positive whatever the network gives. A network that gave \(m\) directly could give negative values, that is, negative people, and they would have to be punished in the loss.</li>
+    <li><b>Numbers of normal size.</b> At the start, the density is 2 in the middle and \(4\cdot 10^{-22}\) at the edges. A network makes errors of roughly the same size everywhere: an error of \(10^{-3}\), small in the middle, would wipe out those tiny values or make them negative. In logarithm they go from 0.69 to −49, ordinary numbers.</li>
+    <li><b>A simple shape.</b> The logarithm of a normal is a parabola. With \(\lambda = 0\) the density is a normal at every instant, so \(q\) is a parabola at every instant.</li>
+  </ul>
+
+  <p><b>What would go wrong if the network gave \(m\) directly.</b> Nothing stops us from writing \(m_{\theta_m} = \psi_{\theta_m}\) and training with the same loss. The problem is in the training, in three places:</p>
+  <ul>
+    <li><b>Zero also satisfies the equation.</b> Fokker–Planck has no term without \(m\), so \(m = 0\) everywhere gives zero residual. A network that gave \(m\) would have an easy shortcut: flatten itself towards zero. Only a part of the loss for the start and the mass part would hold it back, and the three parts would each pull their own way. With \(\log m_0 + t\,\psi\) the start is exact and \(m\) is never zero, so that shortcut does not exist.</li>
+    <li><b>The network's error is the same size everywhere.</b> If the network is off by 0.01, in the middle (\(m \approx 2\)) that is 0.5 %. But at the edge \(x = -1\) at the end, where \(m = 5\cdot 10^{-8}\), an error of 0.01 is 200 000 times the value. That error can go downwards and give negative people. If the network gives \(q = \log m\), an error of 0.01 in \(q\) is 1 % of \(m\) anywhere, in the middle and at the edge.</li>
+    <li><b>The shape.</b> The network would have to draw a narrow bell, which in the middle rises from almost 0 to 2 within a few tenths of \(x\). In logarithm it is a smooth parabola.</li>
+  </ul>
+
+  <figure class="fig" aria-labelledby="ps-title">
+    <div class="fig-head">
+      <p class="fig-title" id="ps-title">The formula as a picture, with λ = 0 (exact solution)</p>
+      <p class="fig-sub">From top to bottom: the density, its logarithm \(q\) and the \(\psi\) the network would have to give, at the chosen instant. The green gap between the two middle curves is \(t\,\psi\); the bottom curve is that gap divided by \(t\). In grey, \(m &lt; 10^{-4}\): almost nobody.</p>
+    </div>
+    <div class="controls">
+      <div class="ctl"><label for="ps-t">instant t <output id="ps-t-o"></output></label><input type="range" id="ps-t" min="0.05" max="1" step="0.01" value="1"></div>
+    </div>
+    <div class="legend">
+      <span><i class="lkey line muted"></i><span class="lt">\(m_0\) and \(\log m_0\), at the start</span></span>
+      <span><i class="lkey line crowd"></i><span class="lt">\(m\) and \(q = \log m\), at instant \(t\)</span></span>
+      <span><i class="lkey gap"></i><span class="lt">the gap, \(t\,\psi\)</span></span>
+      <span><i class="lkey line"></i><span class="lt">\(\psi\)</span></span>
+      <span><i class="lkey wash"></i><span class="lt">\(m &lt; 10^{-4}\)</span></span>
+    </div>
+    <div class="stack">
+      <div class="plotwrap"><p class="ptitle">1. The density, m</p><svg id="ps-m" viewBox="0 0 640 158" role="img" aria-label="Initial density and density at the chosen instant"></svg></div>
+      <div class="plotwrap"><p class="ptitle">2. Its logarithm, q = log m</p><svg id="ps-q" viewBox="0 0 640 158" role="img" aria-label="Logarithm of the initial density and at the chosen instant, with the gap between them"></svg></div>
+      <div class="plotwrap"><p class="ptitle">3. What the network gives, ψ = (q − log m₀) / t</p><svg id="ps-psi" viewBox="0 0 640 174" role="img" aria-label="The function psi the network would have to give"></svg></div>
+    </div>
+    <div class="stats" id="ps-stats"></div>
+  </figure>
+  <p>At the top, the edges are zeros you cannot see; in the middle they are ordinary numbers, and the two curves are parabolas. At the bottom, \(\psi\) is of size one in the middle and grows a lot towards the edges, where there is almost nobody.</p>
+
+  <p><b>Why multiply the network by \(t\), instead of leaving it free.</b> There are three ways of writing it, and the start is what sets them apart:</p>
+  <ul>
+    <li><b>\(q = \psi\), the network alone.</b> The network would have to learn the whole starting bell, with values of −49 at the edges, and also make exactly \(\log m_0\) come out at \(t = 0\).</li>
+    <li><b>\(q = \log m_0 + \psi\), without the factor \(t\).</b> The bell is already given, but at \(t = 0\) the network would have to give \(\psi = 0\) everywhere. Nothing forces it to: a freshly created network gives arbitrary values. A third part would be needed in the loss, "\(\psi(0, x)\) must be 0", and it would be only half met, pulling against the other two.</li>
+    <li><b>\(q = \log m_0 + t\,\psi\), the one in the code.</b> At \(t = 0\) the term \(t\,\psi\) is zero, whatever the weights. So \(m = m_0\) exactly, without asking the loss for it.</li>
+  </ul>
+  <p>The start matters so much because the equation alone is not enough. Fokker–Planck says how people move, but not where they start: each initial spread gives a different solution, and all of them have zero residual. The only thing that picks the right one is the start. And an error at the start is dragged along to the end. With \(\lambda = 0\), if the starting spread were shifted by 0.01, the final mean \(\bar m_T\) would shift by \(0.01 \cdot e^{rT} \approx 0.0102\).</p>
+  <p>Seen the other way round, \(\psi = (q - \log m_0)/t\): that is why it is sometimes said that we divide by \(t\). It is the same formula, solved for \(\psi\). The network does not learn how much \(\log m\) has changed, but that change divided by time, its average rate. And everything else is still in the network's hands: as soon as \(t > 0\), \(\psi\) can take whatever value is needed.</p>
+  <p>Two more things about this form:</p>
+  <ul>
+    <li><b>The edges too.</b> At \(x = -1\) and \(x = 3\) the initial density is \(4\cdot 10^{-22}\). For \(m\) to reach \(10^{-4}\) there, \(t\,\psi\) would have to be 40. People start 10 standard deviations from each edge and do not get there, so nobody escapes and nothing needs to be imposed at the edges. The grid, on the other hand, has to impose that nothing goes through them.</li>
+    <li><b>Why \(t\) and not \(t^2\).</b> At the start, \(\log m\) moves away from \(\log m_0\) in proportion to \(t\), because the equation gives it a finite rate of change. With the factor \(t\), \(\psi\) at \(t = 0\) is exactly that rate, an ordinary number. With \(t^2\), \(\psi\) would have to be the rate divided by \(t\): infinite at \(t = 0\), and a network cannot give that.</li>
+  </ul>
+
+  <figure class="fig" aria-labelledby="fx-title">
+    <div class="fig-head">
+      <p class="fig-title" id="fx-title">Why t and not t²</p>
+      <p class="fig-sub">The \(\psi\) that would be needed in the middle, \(x = 1\), over time, with \(\lambda = 0\), depending on what multiplies the network.</p>
+    </div>
+    <div class="legend">
+      <span><i class="lkey line"></i><span class="lt">\(\log m_0 + t\,\psi\), the one in the code: \(\psi\) is an ordinary number</span></span>
+      <span><i class="lkey line fail"></i><span class="lt">\(\log m_0 + t^2\psi\): \(\psi\) would have to be infinite at the start</span></span>
+    </div>
+    <div class="plotwrap"><svg id="fx-svg" viewBox="0 0 640 210" role="img" aria-label="The psi needed at x = 1 with the factor t and with the factor t squared"></svg></div>
+  </figure>
+  <div class="hand">
+    <p class="lab">Calculation by hand, without the penalty</p>
+    <ul>
+      <li><b>The rate in the middle.</b> The variance of the population is \(V(t) = 0.04\,e^{2rt} + \kappa^2\,t\,e^{-2r(T-t)}\), with \(\kappa^2 = 0.09\). At the start, \(x = 1\) is the middle of the bell, where the density is its height, \(1/\sqrt{2\pi V}\). So \(\log m = -\tfrac12 \log(2\pi V)\), which falls at the rate \(\tfrac12 V'/V\). Since \(V'(0) = 0.0016 + 0.0865 = 0.088\), the rate is \(\tfrac12 \cdot 0.088/0.04 = 1.10\): \(\psi\) is −1.10 at \(t = 0\).</li>
+      <li><b>The edge.</b> At \(x = -1\), at the end, \(t\,\psi = 32.5\): the density has been multiplied by \(e^{32.5} \approx 10^{14}\), and even so it is only \(5\cdot 10^{-8}\).</li>
+    </ul>
+  </div>
+  <p>The V network does not give its final condition the same form, and rightly so. \(U\) changes curvature suddenly at \(\bar m\), which is what makes \(\pi^*\) jump at \(T\). Adding it at every instant would make \(\pi^*\) jump over the whole rectangle, when it really only jumps at \(T\). That is why its final condition goes in the loss.</p>
+
+  <h3>2. The equation: the first part of the loss</h3>
+  \[ L_{\text{equation}}(\theta_m) = \frac{1}{6000}\sum_{i=1}^{6000}{R_{\mathrm{FP}}(t_i, x_i; \theta_m)^2} \]
+  \[ R_{\mathrm{FP}} = \cT{\partial_t m_{\theta_m}} + \partial_x\Big[\cB{\big(rx + (\mu - r)\,p_{\theta_\pi}\big)}\, \cM{m_{\theta_m}}\Big] - \tfrac12\,\partial_{xx}\Big[\cR{\sigma^2 p_{\theta_\pi}^2}\, \cM{m_{\theta_m}}\Big] \]
+  <p><b>What it measures.</b> Whether the network satisfies Fokker–Planck (5). \(R_{\mathrm{FP}}\) is equation (5) term by term, with \(m_{\theta_m}\) in place of \(m\) and the copy \(p_{\theta_\pi}\) in place of \(\pi^*\). Its three terms are the change in time, what the drift moves and what luck spreads. It is zero where the network satisfies the equation.</p>
+  <p><b>The points.</b> 6000, new at every step, all with \(t\) at random between 0 and 1: 4000 with \(x\) at random between −1 and 3, over the whole rectangle, and 2000 with \(x\) between 0 and 2.2, where the population lives.</p>
+  <p><b>Why 2000 more between 0 and 2.2.</b> Almost everyone is there: with \(\lambda = 0\), at the end, the mean is 1.11 and the standard deviation 0.36, and between 0 and 2.2 there is room for three standard deviations on each side. With uniform points only, 55 % would land there (2.2 of the 4 of width); with the 2000 extra, 70 %. The 4000 over the whole rectangle are still needed, so that the network does not make anything up outside.</p>
+  <p><b>Why it is measured in \(m\) and not in \(\log m\).</b> That way each point weighs according to how many people are there. Where \(m\) is tiny the residual is tiny too, whatever \(\psi\) is, and the loss asks nothing of the network. That is exactly where \(\psi\) would have to be huge: between 30 and 100 at \(x = -1\) with \(\lambda = 0\). Written for \(q\), dividing by \(m\), all points would weigh the same, and the network would also have to be right where nobody lives.</p>
+  <p><b>Why the copy of \(\pi^*\).</b> Taking the derivatives of (5) produces \(\partial_x \pi^*\) and \(\partial_{xx} \pi^*\). With the V network those would be its third and fourth derivatives, with a lot of noise; the copy is smooth (section 5). It is frozen, so while the density is trained the strategy does not change.</p>
+  <p><b>How it is computed.</b></p>
+  <pre class="pseudo">m            ← exp(q(t, x))                    <span class="cm"># density network</span>
+p            ← copy network(t, x)              <span class="cm"># π*, frozen</span>
+drift_flow   ← (r·x + (μ − r)·p) · m
+luck_flow    ← (σ·p)² · m
+R ← ∂t m + ∂x drift_flow − ½ ∂xx luck_flow     <span class="cm"># automatic differentiation</span></pre>
+  <p>There is no need to write the product rule by hand. When differentiating the two "flows", automatic differentiation produces \(\partial_x p\) and \(\partial_{xx} p\) from the copy by itself, and \(\partial_t q\), \(\partial_x q\) and \(\partial_{xx} q\) from the density network.</p>
+
+  <h3>3. The mass: the second part</h3>
+  \[ L_{\text{mass}}(\theta_m) = \frac{1}{16}\sum_{k=1}^{16}{\Big(\int_{-1}^{3}{m_{\theta_m}(t_k, x)\,dx} - 1\Big)^2} \]
+  <p><b>What it measures.</b> Whether the total population is still 1 at each instant: that nobody appears or disappears.</p>
+  <p><b>The points.</b> 16 instants \(t_k\) at random between 0 and 1, new at every step. At each one, the integral is done with the trapezoid rule over 401 points of \(x\) between −1 and 3, 0.01 apart. That is \(16 \cdot 401 = 6416\) evaluations of the network, as many as in the equation.</p>
+  <p><b>Why it is needed, if the equation already conserves mass.</b> Integrating (5) over \(x\), the drift and luck terms only leave what goes through the edges, which is almost nothing, and what is left is:</p>
+  \[ \frac{d}{dt}\int_{-1}^{3}{m_{\theta_m}\,dx} = \int_{-1}^{3}{R_{\mathrm{FP}}\,dx} \]
+  <p>With zero residual, the mass does not change. But some residual is always left, and the mass changes at that rate, building up over time. This part holds it at 1.</p>
+  <p><b>Why 16 instants and 401 points.</b> They are reasonable starting values, not tuned ones. With a step of 0.01, the trapezoid rule over a bell of width 0.2 or more has a negligible error. And since the 16 instants change at every step, over the training the mass is checked over the whole time interval.</p>
+  <p><b>The total loss</b> adds the two parts, each with coefficient 1 (not tuned either):</p>
+  \[ L_m(\theta_m) = L_{\text{equation}}(\theta_m) + L_{\text{mass}}(\theta_m) \]
+
+  <h3>4. The training</h3>
+  <pre class="pseudo">net ← new, with random weights; or a copy of the network of the previous evaluation
+<span class="kw">repeat</span> N times:                                     <span class="cm"># Adam</span>
+    6000 new points: 4000 over the whole rectangle, 2000 with x in [0, 2.2]
+    16 new instants, each with 401 points in x
+    loss ← mean of R² + mean of (mass − 1)²
+    one Adam step, with a step size that keeps falling
+fix one draw of points
+L-BFGS, up to K iterations, on that draw</pre>
+  <ul>
+    <li><b>The first time</b>, from random weights: \(N = 10\,000\) Adam steps, with the step size falling from \(10^{-3}\) to \(10^{-4}\), and \(K = 500\).</li>
+    <li><b>Inside the loop, afterwards</b>, from a copy of the network of the previous evaluation: \(N = 2000\), from \(3\cdot 10^{-4}\) to \(10^{-4}\), and \(K = 300\). Between two nearby \(\bar m\) the density hardly changes (section 8).</li>
+  </ul>
+  <p>The copy of \(\pi^*\) stays frozen all the time. The seed of the draw is fixed, so each training always gives the same result.</p>
+
+  <h3>5. What is read at the end</h3>
+  <p>The trained network gives the density at any \((t, x)\) and, adding over \(x\), its mass and its mean; also the residual, to see where it fails. The final mean \(\Phi(\bar m)\) is not taken from the mean of the density at \(T\), but from the mean equation, which is about ten times more accurate (section 7).</p>
+
+  <h3>Where it fails: the cliff near T</h3>
+  <p>Near \(T\) people pile up just below \(\bar m\) and the density drops suddenly when crossing it. The reason is luck. Just below, people invest little (\(\pi^* = 0.214\) at \(T\)), so the noise is small and people stay put. Just above, they invest like Merton (1.5): the noise is seven times larger and people spread out.</p>
+  <p>With the grid, the density goes from 4 to 0.6 within a hundredth. A smooth network cannot produce that step and rounds it off: the density is within 0.09 of the right one for \(t \le 0.75\), within 0.3 at \(t = 0.9\), and drifts up to 1.4 away at the cliff <span class="src">docstring</span>. It hardly affects the final mean, which is read another way (section 7).</p>
+
+  <h3>How it was checked</h3>
+  <ul>
+    <li><b>The residual, against exact answers</b> (tests). With \(\lambda = 0\), the exact normal and Merton's \(\pi^*\) give zero residual (less than \(10^{-10}\)). With a \(\pi\) that changes with \(x\), the residual matches the finite-difference one, so the derivatives of \(\pi\) enter correctly.</li>
+    <li><b>The form</b> (test). Untrained, the network already gives \(m_0\) at \(t = 0\).</li>
+    <li><b>A short training with λ = 0</b> (test: small network, on the CPU, about 25 s). It gives the exact normal: the mean within 0.006, the density within 0.007 and the residual below 0.04. The mass is required within \(2\cdot 10^{-4}\); on this computer it ends between \(3\cdot 10^{-4}\) and \(10^{-3}\) and that check fails. It is the minor point of the review: it does not change the solution.</li>
+    <li><b>With the default settings</b> <span class="src">docstring</span>, outside the tests:
+      <ul>
+        <li>with \(\lambda = 0\) and the exact \(\pi^*\), at \(T\): mass 0.9997, mean within \(4\cdot 10^{-4}\) of the exact one, variance within 0.7 % and density within \(1.2\cdot 10^{-3}\), with a peak of 1.10;</li>
+        <li>with \(\lambda = 2\) and \(\bar m = 1.1\), against the grid: the errors of the cliff above, and \(\Phi = 1.062745\) against 1.062810.</li>
+      </ul></li>
+  </ul>
+</section>
+
+<!-- ============================================================ 7 -->
+<section id="media">
+  <h2><span class="num">7</span>The final mean</h2>
+  <p class="files">src/mfg/pinn/fokker_planck.py · DensityNetSolution.mean_by_equation</p>
+  <p class="purpose">Read \(\Phi(\bar m)\) from the networks with the smallest possible error.</p>
+  <p><b>The direct way, and what goes wrong.</b> The natural thing would be to look at where people are at the end and average: \(\Phi = \int x\,m_{\theta_m}(T,x)\,dx\). With the exact density it would come out right. But the network does not satisfy Fokker–Planck exactly: at each point a residual \(R\) is left, which is people the network creates or loses by mistake at that point and that instant. Those errors add up until \(T\).</p>
+  <p>It can be seen with a calculation. The network's equation is \(m_t = R - (b\,m)_x + \tfrac12 (s^2 m)_{xx}\). Multiplying by \(x\) and integrating (by parts; there are no people at the edges), the network's mean changes like this:</p>
+  \[ \frac{d}{dt}\int x\,m\,dx = \underbrace{\int b\,m\,dx}_{\text{what moves people}} + \underbrace{\int x\,R\,dx}_{\text{the network's error}} \]
+  <p>The direct mean carries the second term inside, accumulated from 0 to \(T\): each person created or lost by mistake moves the mean according to where they are. The code's route keeps only the first. Since \(b = r\,x + (\mu - r)\,\pi^*\), that first term is \(r\,M + (\mu - r)\,\mathbb{E}_m[\pi^*]\), with \(M\) the mean: the equation below.</p>
+  <p><b>The code's route.</b> Taking averages in the wealth equation (1), the noise (the term with \(dW\)) has mean zero, and an equation for the mean \(M(t)\) of the population is left:</p>
+  \[ \frac{dM}{dt} = \cB{r\,M} + (\mu - r)\, \mathbb{E}_{m_t}\big[\cP{\pi^*}\big], \qquad M(0) = 1, \qquad \Phi(\bar m) = M(T) \]
+  <p>Solved, it says something very clear: the final mean is the interest on the initial capital plus what the population's average position earns over the year.</p>
+  \[ \Phi(\bar m) = e^{rT} + (\mu - r)\int_0^T{e^{r(T-s)}\, \bar\pi(s)\,ds}, \qquad \bar\pi(s) = \mathbb{E}_{m_s}[\pi^*(s,\cdot)] \]
+
+  <div class="hand">
+    <p class="lab">Calculation by hand</p>
+    <ul>
+      <li><b>With λ = 0</b>, \(\pi^* = 1.5\,e^{-r(T-s)}\) does not depend on \(x\), so \(\bar\pi\) equals that with any density. It gives \(\Phi = e^{0.02} + 0.06 \cdot 1.5\) \(= 1.0202 + 0.09 = 1.110\), Merton's mean, even if the density network were wrong. (That is why the equilibrium test with \(\lambda = 0\) does not test the density.)</li>
+      <li><b>With λ = 2</b>, the equilibrium is at 1.0651 <span class="src">docstring</span>. Then \(\int e^{r(T-s)}\bar\pi\,ds\) \(= (1.0651 - 1.0202)/0.06 \approx 0.75\): over the year, the population holds on average half as much in the stock as without the penalty.</li>
+    </ul>
+  </div>
+
+  <p>Why it is more accurate:</p>
+  <ul>
+    <li>The density only enters as weights for the average of \(\pi^*\). An error in the density changes the result only through how much \(\pi^*\) changes with \(x\), and multiplied by \(\mu - r = 0.06\).</li>
+    <li>\(\pi^*\) enters as it is, without derivatives.</li>
+  </ul>
+  <p>With \(\bar m = 1.1\), the direct mean gives 1.06356 and the mean equation 1.062745, against 1.062810 from the grid <span class="src">docstring</span>: errors of \(7.5\cdot 10^{-4}\) and \(6.5\cdot 10^{-5}\).</p>
+  <pre class="pseudo">t ← 401 instants in [0, 1];   x ← 2001 points in [−1, 3]
+m ← density network on that grid                 <span class="cm"># a 401 × 2001 table</span>
+<span class="kw">for</span> each instant t_i:
+    weights    ← m(t_i, ·) / ∫ m(t_i, x) dx      <span class="cm"># the density, with mass 1</span>
+    mean_π[i]  ← ∫ weights · π*(t_i, x) dx       <span class="cm"># π* of the V network</span>
+M ← 1
+<span class="kw">for</span> i = 0, …, 399:                              <span class="cm"># trapezoid rule in t</span>
+    M ← [M·(1 + r·h/2) + h·(μ − r)·(mean_π[i] + mean_π[i+1])/2] / (1 − r·h/2)
+Φ(<span class="mb">m</span>) ← M</pre>
+
+  <p class="decs-lab lab">Decisions, and why</p>
+  <dl class="decs">
+    <div class="dec"><dt>Φ by the mean equation</dt>
+      <dd><p>About ten times more accurate than the direct mean, because the density only weighs and \(\pi^*\) is not differentiated.</p></dd></div>
+    <div class="dec"><dt>The π* of the V network, not the copy's</dt>
+      <dd><p>No derivatives of \(\pi^*\) are needed here, and the V network's is the original.</p></dd></div>
+    <div class="dec"><dt>Weights divided by the mass</dt>
+      <dd><p>The network's mass is not exactly 1. Normalising at each instant keeps that error out of the mean.</p></dd></div>
+    <div class="dec"><dt>Trapezoid rule in time</dt>
+      <dd><p>The equation is linear in \(M\), and with 400 steps the integration error is negligible compared with that of the networks.</p></dd></div>
+  </dl>
+</section>
+
+<!-- ============================================================ 8 -->
+<section id="bucle">
+  <h2><span class="num">8</span>The loop over <span class="mb">m</span></h2>
+  <p class="files">src/mfg/pinn/equilibrium.py · src/mfg/equilibrium.py</p>
+  <p class="purpose">Find the \(\bar m\) with \(\Phi(\bar m) = \bar m\). Each evaluation of \(\Phi\) is three trainings, so few must be spent and the later ones made short.</p>
+  <pre class="pseudo">previous ← none
+<span class="kw">evaluate</span> Φ(<span class="mb">m</span>):
+    settings  ← full if previous = none; short otherwise
+    <span class="kw">if</span> there is a previous one: start from copies of its three networks
+    V network    ← train the HJB with <span class="mb">m</span>
+    copy network ← fit to the π* of the V network
+    m network    ← train Fokker–Planck with the copy network
+    Φ            ← M(T), by the mean equation
+    previous     ← this evaluation
+    <span class="kw">return</span> Φ
+
+<span class="mb">m</span> ← secant(evaluate Φ, from 1.110, tol = 2·10⁻⁴, at most 8 rounds)</pre>
+  <p>The secant draws the line through the last two points \((\bar m, g)\), with \(g = \Phi - \bar m\), and takes the point where it crosses zero. The first two points are 1.110 (the equilibrium without the penalty) and \(\Phi(1.110)\).</p>
+  \[ \cM{\bar m_{k+1}} = \cM{\bar m_k} - g(\bar m_k)\,\frac{\bar m_k - \bar m_{k-1}}{g(\bar m_k) - g(\bar m_{k-1})} \]
+
+  <figure class="fig" aria-labelledby="sc-title">
+    <div class="fig-head">
+      <p class="fig-title" id="sc-title">The secant, evaluation by evaluation</p>
+      <p class="fig-sub">A toy \(g\) with the shape of the real one: slope −1.065 and zero at 1.0651. With networks, a fixed bias of \(-1.5\cdot 10^{-4}\) and a small noise are added to each \(\Phi\). The times are those of the docstring.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="radiogroup" aria-label="How Φ is evaluated">
+        <input type="radio" id="sc-pinn" name="scmode" value="pinn" checked><label for="sc-pinn">Φ with networks</label>
+        <input type="radio" id="sc-fd" name="scmode" value="fd"><label for="sc-fd">exact Φ (grid)</label>
+      </div>
+      <div class="btns">
+        <button class="btn" id="sc-next" type="button">Evaluate Φ ▶</button>
+        <button class="btn ghost" id="sc-reset" type="button">Start</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="lkey line"></i>\(g(\bar m) = \Phi(\bar m) - \bar m\)</span>
+      <span><i class="lkey line ctrl"></i>the secant line</span>
+      <span><i class="ldot c"></i>evaluated points</span>
+    </div>
+    <div class="plotwrap"><svg id="sc-svg" viewBox="0 0 640 290" role="img" aria-label="Curve g and the points of the secant"></svg></div>
+    <div class="tbl"><table id="sc-table"><thead><tr><th>Evaluation</th><th><span class="mb">m</span></th><th>g(<span class="mb">m</span>) = Φ(<span class="mb">m</span>) − <span class="mb">m</span></th><th>|g| &lt; tol?</th><th>Cumulative time</th></tr></thead><tbody></tbody></table></div>
+    <p class="status" id="sc-status" aria-live="polite"></p>
+  </figure>
+
+  <h3>Warm start</h3>
+  <p>The first evaluation trains the three networks from scratch. The following ones start from copies of the networks of the previous evaluation and train little, with smaller steps: from one evaluation to the next \(\bar m\) changes by thousandths, and the networks hardly change. They are copied so that the earlier ones stay intact.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Network</th><th>First evaluation</th><th>The following ones</th></tr></thead>
+    <tbody>
+      <tr><td>V network</td><td class="num">10 000 Adam (10⁻³ → 10⁻⁴) + 500 L-BFGS</td><td class="num">2000 Adam (3·10⁻⁴ → 10⁻⁴) + 200 L-BFGS</td></tr>
+      <tr><td>Copy network of π*</td><td class="num">30 000 Adam (10⁻³ → 10⁻⁵) + 500 L-BFGS</td><td class="num">5000 Adam (3·10⁻⁴ → 10⁻⁵) + 200 L-BFGS</td></tr>
+      <tr><td>Density network</td><td class="num">10 000 Adam (10⁻³ → 10⁻⁴) + 500 L-BFGS</td><td class="num">2000 Adam (3·10⁻⁴ → 10⁻⁴) + 300 L-BFGS</td></tr>
+      <tr><td>Time <span class="src">docstring</span></td><td class="num">43 min</td><td class="num">about 9 min</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Tolerance and bias</h3>
+  <p>The networks' \(\Phi\) comes out a little low at every point visited, by 1.3 to \(1.8\cdot 10^{-4}\) <span class="src">docstring</span>: it is a bias rather than noise. That is why the secant stops at \(2\cdot 10^{-4}\), of the order of that error, and not at the grid's \(10^{-10}\).</p>
+  <p>A fixed bias \(\delta\) moves the fixed point by roughly \(\delta/(1 - \Phi')\), and \(\Phi\) changes little with \(\bar m\) (\(\Phi' \approx -0.065\) <span class="src">docstring</span>).</p>
+  <div class="hand">
+    <p class="lab">Calculation by hand</p>
+    <p>\(-1.5\cdot 10^{-4}/1.065 \approx -1.4\cdot 10^{-4}\). The docstring gives 1.064982 against the grid's 1.065128, a difference of \(-1.5\cdot 10^{-4}\), after 3 evaluations and 60 minutes. It is within the 0.001 we ask for \(\bar m_T\).</p>
+  </div>
+
+  <p class="decs-lab lab">Decisions, and why</p>
+  <dl class="decs">
+    <div class="dec"><dt>The shared secant</dt>
+      <dd><p>It only needs values of \(\Phi\), not its derivative. Since \(g\) is almost a straight line, it gets there almost at once. It is the same function the grid uses, so the only difference between the two equilibria is how \(\Phi\) is evaluated.</p></dd></div>
+    <div class="dec"><dt>Warm start from the previous evaluation</dt>
+      <dd><p>About 9 minutes per evaluation instead of 43. It always starts from the last evaluation, which is usually the one with the closest \(\bar m\).</p></dd></div>
+    <div class="dec"><dt>Copies, not the same networks</dt>
+      <dd><p>Each evaluation keeps its networks, which stay intact to be looked at later.</p></dd></div>
+    <div class="dec"><dt>Tolerance 2·10⁻⁴</dt>
+      <dd><p>Asking for more precision than the error of the networks is chasing noise.</p></dd></div>
+    <div class="dec"><dt>Starting from another equilibrium</dt>
+      <dd><p>With <code>previous=</code> it starts from the networks of a nearby equilibrium (for example, another \(\lambda\)), and then all evaluations, the first one included, use the short settings.</p></dd></div>
+  </dl>
+  <p>At the end it returns \(\bar m\), the three networks at that \(\bar m\) (with their \(\Phi\), the error of the copy and the seconds of each evaluation), the history of pairs \((\bar m, \Phi(\bar m))\) and the total time.</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section id="fd">
+  <h2><span class="num">9</span>The check with finite differences</h2>
+  <p class="files">src/mfg/fd/hjb.py · generator.py · fokker_planck.py · equilibrium.py</p>
+  <p class="purpose">Have a reference answer to measure the networks against: the same equations, the same edges and the same interface (<code>value</code>, <code>position</code>, <code>density</code>).</p>
+  <p>How it does it, in five ideas:</p>
+  <ol>
+    <li><b>A grid</b> of 801 wealths by 401 instants, with the derivatives replaced by differences between neighbours.</li>
+    <li><b>The grid as a chain of jumps</b>: each node goes down to the one below at rate \(\alpha_j\) and up to the one above at rate \(\beta_j\) ("luck ∓ drift"). A single piece serves both equations.</li>
+    <li><b>The HJB, backwards from \(T\)</b>, column by column. In each column it alternates between solving with \(\pi\) fixed and recomputing \(\pi\) with formula (4) (policy iteration).</li>
+    <li><b>Fokker–Planck, forwards from \(m_0\)</b>, with the transpose of the HJB matrix. The population follows exactly the computed strategy, the mass is 1 up to rounding and the density is never negative.</li>
+    <li><b>The same secant</b>, with tolerance \(10^{-10}\).</li>
+  </ol>
+  <p>The networks have been measured against it, according to the docstrings:</p>
+  <ul>
+    <li>the V network's \(\pi^*\), within 0.07 for \(t \le 0.9\);</li>
+    <li>the density, within 0.09 for \(t \le 0.75\);</li>
+    <li>\(\Phi(1.1)\): 1.062745 against 1.062810;</li>
+    <li>the equilibrium: 1.064982 against 1.065128.</li>
+  </ul>
+  <p>The details, folded:</p>
+
+  <details class="more">
+    <summary>The grid, step by step</summary>
+    <p>In each column all nodes are computed at once (implicit step): each node is tied to its two neighbours, so it is a tridiagonal system, almost free. It is stable with 400 steps; a step that only used the known column would need about 7700.</p>
+    <figure class="fig" aria-labelledby="sw-title">
+      <div class="fig-head">
+        <p class="fig-title" id="sw-title">Going through the grid</p>
+        <p class="fig-sub">A 9 × 9 grid so that it can be seen; in the code it is 401 × 801.</p>
+      </div>
+      <div class="controls">
+        <div class="seg" role="radiogroup" aria-label="Equation">
+          <input type="radio" id="sw-hjb" name="swmode" value="hjb" checked><label for="sw-hjb">HJB (backwards)</label>
+          <input type="radio" id="sw-fp" name="swmode" value="fp"><label for="sw-fp">Fokker–Planck (forwards)</label>
+        </div>
+        <div class="btns">
+          <button class="btn ghost" id="sw-prev" type="button">◀ Step</button>
+          <button class="btn" id="sw-next" type="button">Step ▶</button>
+          <button class="btn ghost" id="sw-reset" type="button">Start</button>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="lkey ink2"></i>known</span>
+        <span><i class="lkey ctrl" id="sw-curkey"></i>the column being computed now</span>
+        <span><i class="lkey hollow"></i>still to be computed</span>
+        <span id="sw-edgekey"><i class="lkey ink2" style="border-radius:0"></i>fixed edge (square)</span>
+      </div>
+      <div class="plotwrap"><svg id="sw-svg" viewBox="0 0 660 352" role="img" aria-label="Time-wealth grid with the column computed at each step"></svg></div>
+      <p class="status" id="sw-status" aria-live="polite"></p>
+    </figure>
+  </details>
+
+  <details class="more">
+    <summary>The jump rates of a node</summary>
+    \[ \alpha_j = \cR{\frac{(\sigma\pi_j)^2}{2\Delta x^2}} - \cB{\frac{b_j}{2\Delta x}}, \qquad \beta_j = \cR{\frac{(\sigma\pi_j)^2}{2\Delta x^2}} + \cB{\frac{b_j}{2\Delta x}}, \qquad \cB{b_j} = \cB{r x_j + \pi_j(\mu - r)} \]
+    <p>They have to be positive. With centred differences that requires \((\sigma\pi_j)^2 \ge |b_j|\,\Delta x\) (Péclet condition). If it does not hold, the code switches to "upwind". With \(\Delta x = 0.005\) it is never needed: at the worst node (\(x = 1.1\), \(\pi = 0.214\)) luck is ten times the drift.</p>
+    <figure class="fig" aria-labelledby="rt-title">
+      <div class="fig-head">
+        <p class="fig-title" id="rt-title">The rates of a node</p>
+        <p class="fig-sub">Orange: luck, the same for going down and up. Blue: what the drift takes away or adds.</p>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label for="rt-pi">position π <output id="rt-pi-o"></output></label><input type="range" id="rt-pi" min="0.05" max="2.5" step="0.001" value="0.214"></div>
+        <div class="ctl"><label for="rt-x">wealth x <output id="rt-x-o"></output></label><input type="range" id="rt-x" min="-1" max="3" step="0.05" value="1.1"></div>
+        <div class="ctl"><span class="ctl-l">Δx</span>
+          <div class="seg" role="radiogroup" aria-label="Δx">
+            <input type="radio" id="rt-dx1" name="rtdx" value="0.005" checked><label for="rt-dx1">0.005 (code)</label>
+            <input type="radio" id="rt-dx2" name="rtdx" value="0.05"><label for="rt-dx2">0.05</label>
+            <input type="radio" id="rt-dx3" name="rtdx" value="0.1"><label for="rt-dx3">0.1</label>
+            <input type="radio" id="rt-dx4" name="rtdx" value="0.2"><label for="rt-dx4">0.2</label>
+          </div></div>
+      </div>
+      <div class="legend">
+        <span><i class="lkey risk"></i>luck</span>
+        <span><i class="lkey drift"></i>drift</span>
+        <span><i class="lkey bad"></i>negative rate: impossible</span>
+      </div>
+      <div class="plotwrap"><svg id="rt-svg" viewBox="0 0 640 210" role="img" aria-label="Bars of the rates of going down and up"></svg></div>
+      <div class="stats" id="rt-stats"></div>
+    </figure>
+  </details>
+
+  <details class="more">
+    <summary>The sup of the HJB as a parabola</summary>
+    <p>Inside the sup there is a parabola in \(\pi\). If \(V\) is concave, its maximum is formula (4). With the grid, policy iteration takes exactly that maximum with the grid's differences.</p>
+    <figure class="fig" aria-labelledby="pb-title">
+      <div class="fig-head">
+        <p class="fig-title" id="pb-title">The sup is the maximum of a parabola</p>
+        <p class="fig-sub">Move the slope and the curvature of \(V\), or load two exact cases at \(T\).</p>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label for="pb-vx">slope ∂ₓV <output id="pb-vx-o"></output></label><input type="range" id="pb-vx" min="0.05" max="1.5" step="0.001" value="0.223"></div>
+        <div class="ctl"><label for="pb-vxx">curvature ∂ₓₓV <output id="pb-vxx-o"></output></label><input type="range" id="pb-vxx" min="-3" max="0.5" step="0.001" value="-0.223"></div>
+        <div class="btns">
+          <button class="btn ghost" type="button" id="pb-above">At T, above <span class="mb">m</span></button>
+          <button class="btn ghost" type="button" id="pb-below">At T, just below <span class="mb">m</span> = 1.1</button>
+        </div>
+      </div>
+      <div class="plotwrap"><svg id="pb-svg" viewBox="0 0 640 290" role="img" aria-label="Parabola in π and its maximum"></svg></div>
+      <div class="stats" id="pb-stats"></div>
+    </figure>
+  </details>
+</section>
+
+<!-- ============================================================ 10 -->
+<section id="chuleta">
+  <h2><span class="num">10</span>Cheat sheet of decisions</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Decision</th><th>What it achieves</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Three networks in turns, each with its own equation</td><td>Losses of known problems; no derivative goes through another network</td><td>All</td></tr>
+      <tr><td>The same network (tanh, 4 × 64) and the same recipe (Adam, then L-BFGS)</td><td>Exact and smooth derivatives; a single piece of code</td><td>All</td></tr>
+      <tr><td>New points at every step, and extra ones where people live</td><td>The equation holds over the whole domain, better where it matters</td><td>V, density</td></tr>
+      <tr><td>Copy network of π*, fitted by regression and frozen</td><td>Smooth derivatives of π*; the density learns with a fixed π*</td><td>Copy</td></tr>
+      <tr><td>Points of the copy 20 / 40 / 40, fixed</td><td>Accuracy where people live and in the valley of π*</td><td>Copy</td></tr>
+      <tr><td>log m = log m₀ + t·ψ</td><td>Positive, exact start, edges without a loss term</td><td>Density</td></tr>
+      <tr><td>Residual measured in m</td><td>What happens where there are no people does not count</td><td>Density</td></tr>
+      <tr><td>Mass part</td><td>The mass does not drift away from 1</td><td>Density</td></tr>
+      <tr><td>Φ by the mean equation, with the V network's π*</td><td>About ten times more accurate than the direct mean</td><td>Final mean</td></tr>
+      <tr><td>Shared secant, from 1.110</td><td>Few evaluations of Φ; the same loop as the check</td><td>Loop</td></tr>
+      <tr><td>Warm start from copies</td><td>About 9 min per evaluation instead of 43</td><td>Loop</td></tr>
+      <tr><td>Tolerance 2·10⁻⁴</td><td>Not chasing the error of the networks</td><td>Loop</td></tr>
+      <tr><td>Finite differences as a reference</td><td>An answer to measure the networks against</td><td>Check</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>
+  Translated from Ander's Spanish original. Based on the code of <code>main</code> at 36bac46: <code>src/mfg/pinn</code> (<code>fokker_planck.py</code> and <code>equilibrium.py</code>, Deepak's; <code>hjb.py</code> and <code>nets.py</code>, Ander's), <code>src/mfg/equilibrium.py</code> and <code>src/mfg/fd</code>, and on their docstrings.
+</footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var NS = 'http://www.w3.org/2000/svg';
+  var R = 0.02, MU = 0.08, SIGMA = 0.2;
+
+  function E(tag, attrs, parent) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) { if (Object.prototype.hasOwnProperty.call(attrs, k)) e.setAttribute(k, attrs[k]); }
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function T(parent, x, y, text, cls, anchor) {
+    var t = E('text', { x: x, y: y, 'class': cls || 'lbl', 'text-anchor': anchor || 'start' }, parent);
+    t.textContent = text;
+    return t;
+  }
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  function num(v, d) { var s = Math.abs(v).toFixed(d); return (v < 0 && Number(s) !== 0 ? '−' : '') + s; }
+  var SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+  function sci(v) {
+    if (v === 0) return '0';
+    var e = Math.floor(Math.log10(Math.abs(v)));
+    var m = v / Math.pow(10, e);
+    if (Math.abs(m) >= 9.95) { m /= 10; e += 1; }
+    var exp = String(e).split('').map(function (c) { return SUP[c]; }).join('');
+    return (v < 0 ? '−' : '') + Math.abs(m).toFixed(1) + '·10' + exp;
+  }
+  function big(v) {
+    var a = Math.abs(v);
+    if (a >= 1000) return (v < 0 ? '−' : '') + Math.round(a).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    if (a >= 1) return num(v, a >= 100 ? 0 : (a >= 10 ? 1 : 2));
+    if (a >= 0.01) return num(v, 3);
+    return sci(v);
+  }
+  function radioValue(name) {
+    var el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : null;
+  }
+  function stat(k, v, cls) {
+    return '<div class="stat"><span class="k">' + k + '</span><div class="v ' + (cls || '') + '">' + v + '</div></div>';
+  }
+  // m-bar outside the formulas: an overlined m (the fonts don't place the combining macron).
+  function rich(el, s) {
+    while (el.firstChild) el.removeChild(el.firstChild);
+    s.split('m̄').forEach(function (part, i) {
+      if (i > 0) E('tspan', { 'class': 'ov' }, el).textContent = 'm';
+      if (part) el.appendChild(document.createTextNode(part));
+    });
+    return el;
+  }
+  function mbHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/m̄/g, '<span class="mb">m</span>');
+  }
+  function path(svg, pts, cls) {
+    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join('');
+    return E('path', { d: d, 'class': cls }, svg);
+  }
+  // A small seeded random generator, so every redraw is reproducible.
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ------------------------------------------------------------------ the map */
+  var MAP = {
+    fd: { b2a: 'HJB backwards', b2b: 'grid → π* at each node', b3a: 'Fokker–Planck', b3b: 'grid, with the HJB’s π*', b4a: 'Φ(m̄)', b4b: 'mean at T' },
+    pinn: { b2a: 'V network + copy network', b2b: 'π*, and a smooth copy', b3a: 'Density network', b3b: 'with the copy of π*', b4a: 'Φ(m̄) = M(T)', b4b: 'mean equation' }
+  };
+  function drawMap() {
+    var mode = radioValue('mapmode') || 'pinn';
+    ['b2a', 'b2b', 'b3a', 'b3b', 'b4a', 'b4b'].forEach(function (id) {
+      var el = document.getElementById('m' + id);
+      if (el) rich(el, MAP[mode][id]);
+    });
+  }
+  document.querySelectorAll('input[name="mapmode"]').forEach(function (r) { r.addEventListener('change', drawMap); });
+  drawMap();
+
+  /* ------------------------------------------------------------------ where each network looks */
+  var PT = { X0: 64, X1: 548, Y0: 20, Y1: 280 };
+  var MBAR = 1.1;
+  var pt = { step: 0 };
+  function ptx(t) { return PT.X0 + t * (PT.X1 - PT.X0); }
+  function pty(x) { return PT.Y1 - (x + 1) / 4 * (PT.Y1 - PT.Y0); }
+  function pdot(svg, t, x, cls, r) {
+    E('circle', { cx: ptx(t).toFixed(1), cy: pty(x).toFixed(1), r: r || 1.9, 'class': 'pt ' + cls }, svg);
+  }
+  function uni(rand, a, b) { return a + (b - a) * rand(); }
+  function drawPoints() {
+    var mode = radioValue('ptmode') || 'm';
+    var svg = document.getElementById('pt-svg');
+    clear(svg);
+    // where the population lives (copy and density nets)
+    if (mode !== 'v') {
+      E('rect', { x: ptx(0), y: pty(2.2), width: ptx(1) - ptx(0), height: pty(0) - pty(2.2), 'class': 'band' }, svg);
+      T(svg, ptx(1) + 8, pty(2.2) + 4, 'x = 2.2', 'tick', 'start');
+      T(svg, ptx(1) + 8, pty(0) + 4, 'x = 0', 'tick', 'start');
+    }
+    E('rect', { x: PT.X0, y: PT.Y0, width: PT.X1 - PT.X0, height: PT.Y1 - PT.Y0, 'class': 'domain' }, svg);
+    if (mode === 'v') {
+      // the known sides of the value network
+      E('line', { x1: ptx(1), x2: ptx(1), y1: PT.Y0, y2: PT.Y1, 'class': 'side ctrl' }, svg);
+      E('line', { x1: PT.X0, x2: PT.X1, y1: PT.Y0, y2: PT.Y0, 'class': 'side ctrl' }, svg);
+      E('line', { x1: PT.X0, x2: PT.X1, y1: PT.Y1, y2: PT.Y1, 'class': 'side ctrl' }, svg);
+      E('rect', { x: ptx(0.9), y: pty(MBAR + 0.3), width: ptx(1) - ptx(0.9), height: pty(MBAR - 0.3) - pty(MBAR + 0.3), 'class': 'boxline' }, svg);
+      T(svg, ptx(0.9) - 6, pty(MBAR + 0.3) + 12, 'area of the jump', 'lbl small', 'end');
+    }
+    if (mode === 'p') {
+      E('rect', { x: ptx(0), y: pty(MBAR + 0.3), width: ptx(1) - ptx(0), height: pty(MBAR - 0.3) - pty(MBAR + 0.3), 'class': 'boxline' }, svg);
+      T(svg, ptx(0) + 6, pty(MBAR + 0.3) - 5, 'valley', 'lbl small', 'start');
+    }
+    if (mode === 'm') {
+      E('line', { x1: ptx(0), x2: ptx(0), y1: PT.Y0, y2: PT.Y1, 'class': 'side crowd' }, svg);
+    }
+    if (mode !== 'v') T(svg, ptx(0) + 6, pty(2.2) + 14, 'band of the population', 'lbl small', 'start');
+    E('line', { x1: PT.X0, x2: PT.X1, y1: pty(MBAR), y2: pty(MBAR), 'class': 'mbarline' }, svg);
+    rich(T(svg, ptx(1) + 8, pty(MBAR) + 4, '', 'lbl crowd', 'start'), 'm̄ = 1.1');
+    [-1, 0, 1, 2, 3].forEach(function (x) { T(svg, PT.X0 - 8, pty(x) + 4, x < 0 ? '−1' : String(x), 'tick', 'end'); });
+    [[0, '0'], [0.5, '0.5'], [1, 'T = 1']].forEach(function (p) { T(svg, ptx(p[0]), PT.Y1 + 18, p[1], 'tick', 'middle'); });
+    T(svg, (PT.X0 + PT.X1) / 2, PT.Y1 + 36, 'time t', 'alabel', 'middle');
+    T(svg, 18, (PT.Y0 + PT.Y1) / 2, 'wealth x', 'alabel', 'middle').setAttribute('transform', 'rotate(-90 18 ' + ((PT.Y0 + PT.Y1) / 2) + ')');
+    var explain = document.getElementById('pt-explain');
+    var i, rand, items;
+    if (mode === 'v') {
+      rand = rng(1000 + pt.step);
+      for (i = 0; i < 400; i++) pdot(svg, rand(), uni(rand, -1, 3), 'a');
+      for (i = 0; i < 100; i++) pdot(svg, uni(rand, 0.9, 1), uni(rand, MBAR - 0.3, MBAR + 0.3), 'b');
+      for (i = 0; i < 100; i++) pdot(svg, 1, uni(rand, -1, 3), 'c', 2.4);
+      for (i = 0; i < 20; i++) { pdot(svg, rand(), -1, 'd', 2.4); pdot(svg, rand(), 3, 'd', 2.4); }
+      items = [
+        ['ldot a', 'Grey, over the whole rectangle', '4000 points over the whole domain. At each one, the question is: does the network satisfy the HJB here?'],
+        ['ldot b', 'Purple, in the box', '1000 more points in the area of the jump, the end near m̄, where π* changes fastest. The same question, more concentrated.'],
+        ['ldot c', 'Green, on the right side (t = T)', '1000 points where the question is: is the network equal to U(x, m̄) here? And are its slopes those of U?'],
+        ['ldot d', 'Orange, top and bottom (x = 3 and x = −1)', '200 + 200 points where the question is: is the network equal here to what benchmarks.py says?'],
+        ['lkey line ctrl thick', 'Thick sides', 'The sides that are known. The left one (t = 0) is not imposed: there the network gives whatever comes out of the equation.'],
+        ['lkey line crowd dashk', 'Dashed green line', 'The assumed mean, m̄ = 1.1. It is only a reference in the drawing.']
+      ];
+      explain.innerHTML = ptList(items, 'One point in ten is drawn. “Next Adam step” draws them all again: each step asks at different places. Step ' + (pt.step + 1) + '.');
+    } else if (mode === 'p') {
+      rand = rng(77);
+      var pts = [];
+      for (i = 0; i < 400; i++) pts.push([rand(), uni(rand, -1, 3)]);
+      for (i = 0; i < 800; i++) pts.push([rand(), uni(rand, 0, 2.2)]);
+      for (i = 0; i < 800; i++) pts.push([rand(), uni(rand, MBAR - 0.3, MBAR + 0.3)]);
+      pts.forEach(function (p) { pdot(svg, p[0], p[1], 'a', 1.6); });
+      var pick = rng(5000 + pt.step);
+      for (i = 0; i < 40; i++) { var q = pts[Math.floor(pick() * pts.length)]; pdot(svg, q[0], q[1], 'b', 3.2); }
+      items = [
+        ['ldot a', 'Grey', 'The 200 000 fixed points, drawn only once. At each one the π* of the V network has been computed beforehand: they are the data to be copied. 20 % are over the whole rectangle, 40 % in the band of the population and 40 % in the valley (the box).'],
+        ['ldot b', 'Purple', 'The batch of this step: 4000 of those points, chosen at random. The loss of this step only looks at these: does the copy network resemble π* here?'],
+        ['lkey wash', 'Shaded band', 'Where the population lives: x between 0 and 2.2.'],
+        ['lkey line crowd dashk', 'Dashed green line', 'The assumed mean, m̄ = 1.1. The valley surrounds it, ±0.3.']
+      ];
+      explain.innerHTML = ptList(items, 'One point in a hundred is drawn. There are no sides to impose, because there is no equation: only data. “Next Adam step” picks another batch; the 200 000 points do not change. Step ' + (pt.step + 1) + '.');
+    } else {
+      rand = rng(2000 + pt.step);
+      for (i = 0; i < 16; i++) {
+        var tk = rand();
+        E('line', { x1: ptx(tk), x2: ptx(tk), y1: PT.Y0, y2: PT.Y1, 'class': 'mline' }, svg);
+      }
+      for (i = 0; i < 400; i++) pdot(svg, rand(), uni(rand, -1, 3), 'a');
+      for (i = 0; i < 200; i++) pdot(svg, rand(), uni(rand, 0, 2.2), 'c');
+      items = [
+        ['ldot a', 'Grey, over the whole rectangle', '4000 points over the whole domain. The question: does the network satisfy Fokker–Planck here?'],
+        ['ldot c', 'Green, in the shaded band', '2000 more points where the population lives (x between 0 and 2.2). The same question, where the people are.'],
+        ['lkey line crowd dots', 'Dotted vertical lines', '16 random instants. At each one the density is added up over all wealth (401 points from bottom to top) and it is required to give 1. They do not ask about the equation, but about the mass.'],
+        ['lkey line crowd thick', 'Left side, thick (t = 0)', 'There m = m₀ because of the form of the network, so it needs no points. Neither do the top and bottom edges: m is already tiny there.']
+      ];
+      explain.innerHTML = ptList(items, 'One point in ten is drawn. “Next Adam step” draws everything again, the 16 instants too. Step ' + (pt.step + 1) + '.');
+    }
+  }
+  function ptList(items, foot) {
+    return '<ul class="marks">' + items.map(function (it) {
+      return '<li><i class="' + it[0] + '"></i><span><b>' + mbHtml(it[1]) + '.</b> ' + mbHtml(it[2]) + '</span></li>';
+    }).join('') + '</ul><p class="status">' + mbHtml(foot) + '</p>';
+  }
+  document.querySelectorAll('input[name="ptmode"]').forEach(function (r) { r.addEventListener('change', function () { pt.step = 0; drawPoints(); }); });
+  document.getElementById('pt-next').addEventListener('click', function () { pt.step += 1; drawPoints(); });
+  drawPoints();
+
+  /* ------------------------------------------------------------------ derivatives amplify wiggles */
+  function smoothDer(x, n) {
+    // s(x) = -x + 0.2 sin(1.5 x), a gentle stand-in for v
+    var trig = 0.2 * Math.pow(1.5, n) * Math.sin(1.5 * x + n * Math.PI / 2);
+    if (n === 0) return -x + trig;
+    if (n === 1) return -1 + trig;
+    return trig;
+  }
+  function drawWiggle() {
+    var n = Number(radioValue('wgn'));
+    var a = Math.pow(10, Number(document.getElementById('wg-a').value));
+    var c = Number(document.getElementById('wg-c').value);
+    var k = 2 * Math.PI * c;
+    document.getElementById('wg-a-o').textContent = sci(a);
+    document.getElementById('wg-c-o').textContent = String(c);
+    var XA = 0, XB = 2.2, X0 = 60, X1 = 620, Y0 = 14, Y1 = 226;
+    var smooth = [], total = [], lo = Infinity, hi = -Infinity;
+    for (var i = 0; i <= 700; i++) {
+      var x = XA + (XB - XA) * i / 700;
+      var s = smoothDer(x, n), w = a * Math.pow(k, n) * Math.sin(k * x + n * Math.PI / 2);
+      smooth.push([x, s]); total.push([x, s + w]);
+      lo = Math.min(lo, s, s + w); hi = Math.max(hi, s, s + w);
+    }
+    var span = (hi - lo) || 1;
+    lo -= 0.08 * span; hi += 0.08 * span;
+    function sx(x) { return X0 + (x - XA) / (XB - XA) * (X1 - X0); }
+    function sy(v) { return Y1 - (v - lo) / (hi - lo) * (Y1 - Y0); }
+    var svg = document.getElementById('wg-svg');
+    clear(svg);
+    [0, 0.5, 1, 1.5, 2].forEach(function (x) {
+      E('line', { x1: sx(x), x2: sx(x), y1: Y0, y2: Y1, 'class': 'grid' }, svg);
+      T(svg, sx(x), Y1 + 18, String(x), 'tick', 'middle');
+    });
+    if (lo < 0 && hi > 0) E('line', { x1: X0, x2: X1, y1: sy(0), y2: sy(0), 'class': 'zero' }, svg);
+    T(svg, X0 - 8, sy(hi - 0.08 * span) + 4, big(hi - 0.08 * span), 'tick', 'end');
+    T(svg, X0 - 8, sy(lo + 0.08 * span) + 4, big(lo + 0.08 * span), 'tick', 'end');
+    T(svg, (X0 + X1) / 2, Y1 + 34, 'wealth x', 'alabel', 'middle');
+    path(svg, total.map(function (p) { return [sx(p[0]), sy(p[1])]; }), 'ln ink thin');
+    path(svg, smooth.map(function (p) { return [sx(p[0]), sy(p[1])]; }), 'ln muted dash');
+    var wig = a * Math.pow(k, n);
+    var sm = Math.max.apply(null, smooth.map(function (p) { return Math.abs(p[1]); }));
+    var names = ['v', '1st derivative', '2nd derivative', '3rd derivative', '4th derivative'];
+    document.getElementById('wg-stats').innerHTML =
+      stat('wiggle in v', sci(a)) +
+      stat('wiggle in the ' + (n === 0 ? 'function' : names[n]) + ': a·kⁿ', big(wig), wig > sm ? 'bad' : '') +
+      stat('smooth part, at most', big(sm)) +
+      stat('how much the wiggle weighs', wig > sm ? big(wig / sm) + ' times the smooth part' : 'less than the smooth part', wig > sm ? 'bad' : 'good');
+  }
+  document.querySelectorAll('input[name="wgn"]').forEach(function (r) { r.addEventListener('change', drawWiggle); });
+  ['wg-a', 'wg-c'].forEach(function (id) { document.getElementById(id).addEventListener('input', drawWiggle); });
+  drawWiggle();
+
+  /* ------------------------------------------------------------------ the density formula in pictures, at λ = 0 */
+  // At lam = 0 the exact density is normal at every t, with the mean M(t) and variance V(t) of benchmarks.py.
+  var KAP2 = Math.pow((MU - R) / SIGMA, 2); // κ² = 0.09, with γ = 1
+  function meanAt(t) { return Math.exp(R * t) + KAP2 * t * Math.exp(R * (t - 1)); }
+  function varAt(t) { return 0.04 * Math.exp(2 * R * t) + KAP2 * t * Math.exp(2 * R * (t - 1)); }
+  function logN(x, m, v) { return -(x - m) * (x - m) / (2 * v) - 0.5 * Math.log(2 * Math.PI * v); }
+  function logM0(x) { return logN(x, 1, 0.04); }
+  function tk(v) { return (v < 0 ? '−' : '') + String(Math.round(Math.abs(v) * 100) / 100); }
+  // A round tick spacing that gives about four ticks over the span.
+  function niceStep(span) {
+    var raw = span / 4, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+    return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p;
+  }
+  var PF = { X0: 56, X1: 616, Y0: 10, Y1: 132 };
+  function pfx(x) { return PF.X0 + (x + 1) / 4 * (PF.X1 - PF.X0); }
+  // One of the three stacked panels: the shaded tails, grid and ticks. Returns its y scale.
+  function pfPanel(svg, lo, hi, ticks, tails, xlabel) {
+    function sy(v) { return PF.Y1 - (v - lo) / (hi - lo) * (PF.Y1 - PF.Y0); }
+    clear(svg);
+    if (tails[0] > -1) E('rect', { x: pfx(-1), y: PF.Y0, width: pfx(Math.min(tails[0], 3)) - pfx(-1), height: PF.Y1 - PF.Y0, 'class': 'band' }, svg);
+    if (tails[1] < 3) E('rect', { x: pfx(Math.max(tails[1], -1)), y: PF.Y0, width: pfx(3) - pfx(Math.max(tails[1], -1)), height: PF.Y1 - PF.Y0, 'class': 'band' }, svg);
+    [-1, 0, 1, 2, 3].forEach(function (x) {
+      E('line', { x1: pfx(x), x2: pfx(x), y1: PF.Y0, y2: PF.Y1, 'class': 'grid' }, svg);
+      T(svg, pfx(x), PF.Y1 + 16, tk(x), 'tick', 'middle');
+    });
+    ticks.forEach(function (v) { T(svg, PF.X0 - 8, sy(v) + 4, tk(v), 'tick', 'end'); });
+    if (lo < 0 && hi > 0) E('line', { x1: PF.X0, x2: PF.X1, y1: sy(0), y2: sy(0), 'class': 'zero' }, svg);
+    if (xlabel) T(svg, (PF.X0 + PF.X1) / 2, PF.Y1 + 32, 'wealth x', 'alabel', 'middle');
+    return sy;
+  }
+  function drawFormula() {
+    var t = Number(document.getElementById('ps-t').value);
+    document.getElementById('ps-t-o').textContent = t.toFixed(2);
+    var M = meanAt(t), V = varAt(t);
+    // where m < 1e-4: the shaded tails
+    var cut = Math.sqrt(2 * V * (-Math.log(1e-4) - 0.5 * Math.log(2 * Math.PI * V)));
+    var tails = [M - cut, M + cut];
+    var xs = [];
+    for (var i = 0; i <= 400; i++) xs.push(-1 + 4 * i / 400);
+    function q(x) { return logN(x, M, V); }
+    function psi(x) { return (q(x) - logM0(x)) / t; }
+    // 1. the density
+    var svgM = document.getElementById('ps-m');
+    var syM = pfPanel(svgM, 0, 2.2, [0, 1, 2], tails, false);
+    path(svgM, xs.map(function (x) { return [pfx(x), syM(Math.exp(logM0(x)))]; }), 'ln muted dash');
+    path(svgM, xs.map(function (x) { return [pfx(x), syM(Math.exp(q(x)))]; }), 'ln crowd');
+    // 2. its logarithm; the shaded gap between the two curves is t·ψ
+    var svgQ = document.getElementById('ps-q');
+    var syQ = pfPanel(svgQ, -52, 4, [-40, -20, 0], tails, false);
+    var upper = xs.map(function (x) { return [pfx(x), syQ(q(x))]; });
+    var lower = xs.map(function (x) { return [pfx(x), syQ(logM0(x))]; });
+    var ring = upper.concat(lower.slice().reverse());
+    E('path', { d: ring.map(function (p, k) { return (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join('') + 'Z', 'class': 'gapfill' }, svgQ);
+    path(svgQ, lower, 'ln muted dash');
+    path(svgQ, upper, 'ln crowd');
+    var xl = -0.55, yTop = syQ(q(xl)), yBot = syQ(logM0(xl));
+    if (yBot - yTop > 18) T(svgQ, pfx(xl), (yTop + yBot) / 2 + 4, 't·ψ', 'lbl strong', 'middle');
+    // 3. ψ, the gap divided by t
+    var vals = xs.map(psi);
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    var step = niceStep(hi - lo), ticks = [];
+    for (var v = Math.ceil(lo / step) * step; v <= hi; v += step) ticks.push(v);
+    var pad = 0.06 * (hi - lo);
+    var svgP = document.getElementById('ps-psi');
+    var syP = pfPanel(svgP, lo - pad, hi + pad, ticks, tails, true);
+    path(svgP, xs.map(function (x, k) { return [pfx(x), syP(vals[k])]; }), 'ln ink');
+    // the two points of the numbers below: the centre and the lower edge
+    [1, -1].forEach(function (x) {
+      E('circle', { cx: pfx(x), cy: syM(Math.exp(q(x))), r: 4.5, 'class': 'dot crowd' }, svgM);
+      E('circle', { cx: pfx(x), cy: syQ(q(x)), r: 4.5, 'class': 'dot crowd' }, svgQ);
+      E('circle', { cx: pfx(x), cy: syP(psi(x)), r: 4.5, 'class': 'dot ink' }, svgP);
+    });
+    document.getElementById('ps-stats').innerHTML =
+      stat('middle, x = 1: m', num(Math.exp(q(1)), 2)) +
+      stat('middle: q = log m', num(q(1), 2)) +
+      stat('middle: ψ', num(psi(1), 2)) +
+      stat('edge, x = −1: m', sci(Math.exp(q(-1)))) +
+      stat('edge: q = log m', num(q(-1), 1)) +
+      stat('edge: ψ', num(psi(-1), 1));
+  }
+  document.getElementById('ps-t').addEventListener('input', drawFormula);
+  drawFormula();
+
+  /* ------------------------------------------------------------------ why the factor t, and not t² */
+  (function drawFactor() {
+    var svg = document.getElementById('fx-svg');
+    var X0 = 56, X1 = 616, Y0 = 12, Y1 = 162, lo = -12.5, hi = 0.5;
+    function sx(t) { return X0 + t * (X1 - X0); }
+    function sy(v) { return Y1 - (v - lo) / (hi - lo) * (Y1 - Y0); }
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
+      E('line', { x1: sx(t), x2: sx(t), y1: Y0, y2: Y1, 'class': 'grid' }, svg);
+      T(svg, sx(t), Y1 + 16, tk(t), 'tick', 'middle');
+    });
+    [0, -4, -8, -12].forEach(function (v) { T(svg, X0 - 8, sy(v) + 4, tk(v), 'tick', 'end'); });
+    E('line', { x1: X0, x2: X1, y1: sy(0), y2: sy(0), 'class': 'zero' }, svg);
+    T(svg, (X0 + X1) / 2, Y1 + 32, 'instant t', 'alabel', 'middle');
+    // how much log m has changed at the centre x = 1 since the start; divided by t or by t²
+    function change(t) { return logN(1, meanAt(t), varAt(t)) - logM0(1); }
+    var rate0 = -0.5 * (0.08 * R + KAP2 * Math.exp(-2 * R)) / 0.04; // its rate at t = 0: −V'(0) / (2 V(0))
+    var withT = [[sx(0), sy(rate0)]], withT2 = [];
+    for (var i = 1; i <= 500; i++) {
+      var t = i / 500;
+      withT.push([sx(t), sy(change(t) / t)]);
+      var v2 = change(t) / (t * t);
+      if (v2 >= lo) withT2.push([sx(t), sy(v2)]);
+    }
+    path(svg, withT2, 'ln fail');
+    path(svg, withT, 'ln ink');
+    E('circle', { cx: sx(0), cy: sy(rate0), r: 4.5, 'class': 'dot ink' }, svg);
+    T(svg, sx(0) + 10, sy(rate0) + 18, num(rate0, 2) + ' at t = 0', 'lbl small', 'start');
+    var c1 = change(1);
+    E('circle', { cx: sx(1), cy: sy(c1), r: 4.5, 'class': 'dot ink' }, svg);
+    T(svg, sx(1) - 8, sy(c1) + 22, num(c1, 2) + ' at t = 1, with both', 'lbl small', 'end');
+    var c01 = change(0.1) / 0.01;
+    E('circle', { cx: sx(0.1), cy: sy(c01), r: 4.5, 'class': 'dot fail' }, svg);
+    T(svg, sx(0.1) + 10, sy(c01) + 4, num(c01, 1) + ' at t = 0.1, and −∞ at t = 0', 'lbl small', 'start');
+  })();
+
+  /* ------------------------------------------------------------------ the secant */
+  var MSTAR = 1.0651, BIAS = -1.5e-4;
+  var NOISE = [0.4e-4, -0.6e-4, 0.3e-4, -0.2e-4, 0.5e-4, -0.4e-4, 0.2e-4, -0.3e-4];
+  function gToy(m) { var d = m - MSTAR; return -1.065 * d - 0.8 * d * d; }
+  var sc = { pts: [], done: false };
+  function scPinn() { return radioValue('scmode') === 'pinn'; }
+  function scTol() { return scPinn() ? 2e-4 : 1e-10; }
+  function scEval(m) {
+    var k = sc.pts.length;
+    var g = gToy(m) + (scPinn() ? BIAS + NOISE[k % NOISE.length] : 0);
+    sc.pts.push({ m: m, g: g });
+    if (sc.pts.length >= 2 && Math.abs(g) < scTol()) sc.done = true;
+    if (sc.pts.length >= 10) sc.done = true;
+  }
+  function scNext() {
+    if (sc.done) return;
+    var n = sc.pts.length;
+    if (n === 0) scEval(1.1102);
+    else if (n === 1) scEval(sc.pts[0].m + sc.pts[0].g);
+    else {
+      var a = sc.pts[n - 2], b = sc.pts[n - 1];
+      if (b.g === a.g) { sc.done = true; return; }
+      scEval(b.m - b.g * (b.m - a.m) / (b.g - a.g));
+    }
+    drawSecant();
+  }
+  function drawSecant() {
+    var M0 = 1.05, M1 = 1.12, G0 = -0.06, G1 = 0.02;
+    var X0 = 64, X1 = 620, Y0 = 16, Y1 = 248;
+    function sx(m) { return X0 + (m - M0) / (M1 - M0) * (X1 - X0); }
+    function sy(g) { return Y1 - (g - G0) / (G1 - G0) * (Y1 - Y0); }
+    var svg = document.getElementById('sc-svg');
+    clear(svg);
+    [1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12].forEach(function (m) {
+      E('line', { x1: sx(m), x2: sx(m), y1: Y0, y2: Y1, 'class': 'grid' }, svg);
+      T(svg, sx(m), Y1 + 18, m.toFixed(2), 'tick', 'middle');
+    });
+    [-0.06, -0.04, -0.02, 0, 0.02].forEach(function (g) {
+      T(svg, X0 - 8, sy(g) + 4, g === 0 ? '0' : num(g, 2), 'tick', 'end');
+    });
+    E('line', { x1: X0, x2: X1, y1: sy(0), y2: sy(0), 'class': 'zero' }, svg);
+    rich(T(svg, (X0 + X1) / 2, Y1 + 38, '', 'alabel', 'middle'), 'assumed m̄');
+    var curve = [];
+    for (var k = 0; k <= 140; k++) {
+      var m = M0 + (M1 - M0) * k / 140;
+      curve.push([sx(m), sy(gToy(m))]);
+    }
+    path(svg, curve, 'ln ink');
+    var n = sc.pts.length;
+    if (n >= 2) {
+      var a = sc.pts[n - 2], b = sc.pts[n - 1];
+      if (b.m !== a.m) {
+        var slope = (b.g - a.g) / (b.m - a.m);
+        E('line', { x1: sx(M0), y1: sy(b.g + slope * (M0 - b.m)), x2: sx(M1), y2: sy(b.g + slope * (M1 - b.m)), 'class': 'ln ctrl thin' }, svg);
+      }
+    }
+    sc.pts.forEach(function (p, i) {
+      var cx = sx(Math.min(Math.max(p.m, M0), M1)), cy = sy(Math.min(Math.max(p.g, G0), G1));
+      E('circle', { cx: cx, cy: cy, r: 6, 'class': 'dot crowd' }, svg);
+      if (i < 3) T(svg, cx + 9, cy - 9, String(i + 1), 'lbl strong', 'start');
+    });
+    var pinn = scPinn();
+    var tb = document.querySelector('#sc-table tbody');
+    tb.innerHTML = sc.pts.map(function (p, i) {
+      var ok = i >= 1 && Math.abs(p.g) < scTol();
+      var time = pinn ? (43 + 9 * i) + ' min' : '—';
+      return '<tr><td class="num">' + (i + 1) + '</td><td class="num">' + p.m.toFixed(7) + '</td><td class="num">' + sci(p.g) + '</td><td>' + (i === 0 ? '—' : (ok ? 'yes: equilibrium' : 'no')) + '</td><td class="num">' + time + '</td></tr>';
+    }).join('');
+    var st = document.getElementById('sc-status');
+    var msg;
+    if (n === 0) msg = 'Press “Evaluate Φ ▶”. The first point is 1.110, the mean without the penalty.' + (pinn ? ' With networks, this first evaluation trains from scratch.' : '');
+    else if (n === 1) msg = 'The second point is Φ of the first one: one step of plain iteration.' + (pinn ? ' Now warm: it starts from the networks of evaluation 1.' : '');
+    else if (!sc.done) msg = 'The purple line goes through the last two points; the next one is where it crosses zero. From evaluation 3 on, the points overlap in the drawing: look at the table.';
+    else {
+      var last = sc.pts[n - 1];
+      msg = pinn
+        ? 'Stopped after ' + n + ' evaluations with |g| < 2·10⁻⁴: m̄ = ' + last.m.toFixed(6) + ' against the unbiased zero, ' + MSTAR.toFixed(4) +
+          '. It has moved ' + sci(last.m - MSTAR) + ', of the order of the bias divided by 1.065 (−1.4·10⁻⁴), plus the noise.'
+        : 'Stopped after ' + n + ' evaluations with |g| < 10⁻¹⁰: m̄ = ' + last.m.toFixed(7) + '. An almost straight g is solved almost at once.';
+    }
+    st.innerHTML = mbHtml(msg);
+    document.getElementById('sc-next').disabled = sc.done;
+  }
+  function scReset() { sc.pts = []; sc.done = false; drawSecant(); }
+  document.getElementById('sc-next').addEventListener('click', scNext);
+  document.getElementById('sc-reset').addEventListener('click', scReset);
+  document.querySelectorAll('input[name="scmode"]').forEach(function (r) { r.addEventListener('change', scReset); });
+  scReset();
+
+  /* ------------------------------------------------------------------ FD: the grid sweep */
+  var SW = { n: 9, x0: 96, x1: 576, y0: 40, y1: 290 };
+  var sw = { mode: 'hjb', k: 0 };
+  function gx(i) { return SW.x0 + i * (SW.x1 - SW.x0) / (SW.n - 1); }
+  function gy(j) { return SW.y1 - j * (SW.y1 - SW.y0) / (SW.n - 1); }
+  var SUBS = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈'];
+  function drawSweep() {
+    var svg = document.getElementById('sw-svg');
+    clear(svg);
+    var hjb = sw.mode === 'hjb';
+    var last = SW.n - 1;
+    var cur = hjb ? last - sw.k : sw.k;
+    var start = hjb ? last : 0;
+    T(svg, 30, (SW.y0 + SW.y1) / 2, 'wealth x', 'alabel', 'middle').setAttribute('transform', 'rotate(-90 30 ' + ((SW.y0 + SW.y1) / 2) + ')');
+    T(svg, SW.x0 - 16, gy(0) + 4, '−1', 'tick', 'end');
+    T(svg, SW.x0 - 16, gy(last) + 4, '3', 'tick', 'end');
+    for (var i = 0; i < SW.n; i++) {
+      var lab = i === last ? 'T' : (i === 0 ? '0' : 't' + SUBS[i]);
+      T(svg, gx(i), SW.y1 + 26, lab, 'tick', 'middle');
+    }
+    T(svg, (SW.x0 + SW.x1) / 2, SW.y1 + 48, 'time t', 'alabel', 'middle');
+    var ay = 18;
+    if (hjb) {
+      E('path', { d: 'M' + (SW.x1 - 10) + ' ' + ay + ' H' + (SW.x0 + 30), 'class': 'sweep' }, svg);
+      E('path', { d: 'M' + (SW.x0 + 30) + ' ' + ay + ' l9 -5 v10 z', 'class': 'sweephead' }, svg);
+      T(svg, (SW.x0 + SW.x1) / 2, ay - 6, 'the HJB runs backwards, from T', 'lbl small', 'middle');
+    } else {
+      E('path', { d: 'M' + (SW.x0 + 10) + ' ' + ay + ' H' + (SW.x1 - 30), 'class': 'sweep' }, svg);
+      E('path', { d: 'M' + (SW.x1 - 30) + ' ' + ay + ' l-9 -5 v10 z', 'class': 'sweephead' }, svg);
+      T(svg, (SW.x0 + SW.x1) / 2, ay - 6, 'Fokker–Planck runs forwards, from t = 0', 'lbl small', 'middle');
+    }
+    if (!hjb) {
+      E('line', { x1: SW.x0 - 8, x2: SW.x1 + 8, y1: gy(last) - 12, y2: gy(last) - 12, 'class': 'wall' }, svg);
+      E('line', { x1: SW.x0 - 8, x2: SW.x1 + 8, y1: gy(0) + 12, y2: gy(0) + 12, 'class': 'wall' }, svg);
+      T(svg, SW.x1 + 14, gy(last) - 8, 'nobody leaves', 'lbl small', 'start');
+      T(svg, SW.x1 + 14, gy(0) + 16, 'nobody leaves', 'lbl small', 'start');
+    }
+    if (sw.k > 0) {
+      E('rect', { x: gx(cur) - 14, y: SW.y0 - 14, width: 28, height: SW.y1 - SW.y0 + 28, rx: 8, 'class': 'colbox ' + sw.mode }, svg);
+      var j = 4, prevCol = hjb ? cur + 1 : cur - 1;
+      E('line', { x1: gx(cur), y1: gy(j), x2: gx(cur), y2: gy(j + 1), 'class': 'stc ' + sw.mode }, svg);
+      E('line', { x1: gx(cur), y1: gy(j), x2: gx(cur), y2: gy(j - 1), 'class': 'stc ' + sw.mode }, svg);
+      E('line', { x1: gx(cur), y1: gy(j), x2: gx(prevCol), y2: gy(j), 'class': 'stc ' + sw.mode }, svg);
+    }
+    for (var c = 0; c < SW.n; c++) {
+      var state;
+      if (c === start) state = 'known';
+      else if (c === cur && sw.k > 0) state = 'cur';
+      else if (hjb ? c > cur : c < cur) state = 'done';
+      else state = 'todo';
+      for (var r = 0; r < SW.n; r++) {
+        var edge = hjb && (r === 0 || r === last) && state !== 'todo';
+        var cls = 'nd ' + state + (state === 'cur' ? ' ' + sw.mode : '');
+        if (edge) E('rect', { x: gx(c) - 6, y: gy(r) - 6, width: 12, height: 12, 'class': cls }, svg);
+        else E('circle', { cx: gx(c), cy: gy(r), r: state === 'todo' ? 4.5 : 5.5, 'class': cls }, svg);
+      }
+    }
+    document.getElementById('sw-edgekey').hidden = !hjb;
+    document.getElementById('sw-curkey').className = 'lkey ' + (hjb ? 'ctrl' : 'crowd');
+    var st = document.getElementById('sw-status');
+    var colName = cur === last ? 'T' : (cur === 0 ? 't = 0' : 't' + SUBS[cur]);
+    var prevName = hjb ? (cur + 1 === last ? 'T' : 't' + SUBS[cur + 1]) : (cur - 1 === 0 ? 't = 0' : 't' + SUBS[cur - 1]);
+    var msg;
+    if (sw.k === 0) {
+      msg = hjb
+        ? 'Starting point: at T the whole column is known: V = U(x, m̄) and the exact π. Press “Step ▶”.'
+        : 'Starting point: at t = 0 the whole column is known: m = m₀, the normal N(1, 0.2²). Press “Step ▶”.';
+    } else if (sw.k < last) {
+      msg = 'Step ' + sw.k + ' of ' + last + ': the column ' + colName + ' is computed all at once, from ' + prevName +
+        ', which is already known. Each node is tied to its two neighbours in the same column (the dashes): a tridiagonal system.' +
+        (hjb ? ' The squares at the top and bottom are the edges, fixed with benchmarks.py.' : ' There is no way out at the top and bottom: the mass is conserved.');
+    } else {
+      msg = hjb
+        ? 'Done: V and π* over the whole grid. In the code it is 400 steps of 801 nodes, and at each one the system is repeated a few times (policy iteration).'
+        : 'Done: the density at every instant. Its mean in the last column is Φ(m̄). In the code it is 400 steps of 801 nodes.';
+    }
+    st.innerHTML = mbHtml(msg);
+    document.getElementById('sw-prev').disabled = sw.k === 0;
+    document.getElementById('sw-next').disabled = sw.k === last;
+  }
+  document.querySelectorAll('input[name="swmode"]').forEach(function (r) {
+    r.addEventListener('change', function () { sw.mode = radioValue('swmode'); sw.k = 0; drawSweep(); });
+  });
+  document.getElementById('sw-next').addEventListener('click', function () { if (sw.k < SW.n - 1) { sw.k += 1; drawSweep(); } });
+  document.getElementById('sw-prev').addEventListener('click', function () { if (sw.k > 0) { sw.k -= 1; drawSweep(); } });
+  document.getElementById('sw-reset').addEventListener('click', function () { sw.k = 0; drawSweep(); });
+  drawSweep();
+
+  /* ------------------------------------------------------------------ FD: the jump rates */
+  function drawRates() {
+    var pi = Number(document.getElementById('rt-pi').value);
+    var x = Number(document.getElementById('rt-x').value);
+    var dx = Number(radioValue('rtdx'));
+    document.getElementById('rt-pi-o').textContent = pi.toFixed(3);
+    document.getElementById('rt-x-o').textContent = num(x, 2);
+    var b = R * x + pi * (MU - R);
+    var s2 = Math.pow(SIGMA * pi, 2);
+    var dif = s2 / (2 * dx * dx);
+    var der = b / (2 * dx);
+    var aC = dif - der, bC = dif + der;
+    var peclet = s2 >= Math.abs(b) * dx;
+    var aU = dif + Math.max(-b, 0) / dx, bU = dif + Math.max(b, 0) / dx;
+    var rows = [
+      { lab: 'down, α', base: dif, fin: aC, group: 'centred' },
+      { lab: 'up, β', base: dif, fin: bC, group: 'centred' }
+    ];
+    if (!peclet) {
+      rows.push({ lab: 'down, α', base: dif, fin: aU, group: 'upwind (what the code uses)' });
+      rows.push({ lab: 'up, β', base: dif, fin: bU, group: 'upwind (what the code uses)' });
+    }
+    var vals = [0];
+    rows.forEach(function (rw) { vals.push(rw.base, rw.fin); });
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    var span = (hi - lo) || 1;
+    lo -= 0.08 * span; hi += 0.12 * span;
+    var X0 = 150, X1 = 610;
+    function sx(v) { return X0 + (v - lo) / (hi - lo) * (X1 - X0); }
+    var svg = document.getElementById('rt-svg');
+    clear(svg);
+    var height = peclet ? 120 : 210;
+    svg.setAttribute('viewBox', '0 0 640 ' + height);
+    if (lo < 0) E('rect', { x: sx(lo), y: 18, width: sx(0) - sx(lo), height: height - 30, 'class': 'rb neg' }, svg);
+    E('line', { x1: sx(0), x2: sx(0), y1: 14, y2: height - 10, 'class': 'axis' }, svg);
+    T(svg, sx(0), 12, '0', 'tick', 'middle');
+    var y = 30, lastGroup = '';
+    rows.forEach(function (rw) {
+      if (rw.group !== lastGroup) {
+        T(svg, 8, y + 2, rw.group, 'lbl strong', 'start');
+        y += 16; lastGroup = rw.group;
+      }
+      T(svg, X0 - 10, y + 13, rw.lab, 'lbl', 'end');
+      var a0 = Math.min(0, rw.base), a1 = Math.max(0, rw.base);
+      E('rect', { x: sx(a0), y: y, width: Math.max(0.5, sx(a1) - sx(a0)), height: 18, 'class': 'rb dif' }, svg);
+      var d0 = Math.min(rw.base, rw.fin), d1 = Math.max(rw.base, rw.fin);
+      if (d1 - d0 > 0) E('rect', { x: sx(d0), y: y + 4, width: Math.max(0.5, sx(d1) - sx(d0)), height: 10, 'class': 'rb der' }, svg);
+      E('line', { x1: sx(rw.fin), x2: sx(rw.fin), y1: y - 3, y2: y + 21, 'class': 'rtick' }, svg);
+      var right = sx(Math.max(rw.fin, rw.base, 0));
+      T(svg, Math.min(right + 8, 630), y + 13, num(rw.fin, Math.abs(rw.fin) >= 10 ? 1 : 3), rw.fin < 0 ? 'lbl strong' : 'lbl', right + 8 > 600 ? 'end' : 'start');
+      y += 30;
+    });
+    document.getElementById('rt-stats').innerHTML =
+      stat('drift b = rx + π(μ − r)', num(b, 4)) +
+      stat('luck (σπ)²', s2 < 0.01 ? sci(s2) : num(s2, 4)) +
+      stat('Péclet: (σπ)² ≥ |b|·Δx', (s2 < 0.01 ? sci(s2) : num(s2, 4)) + (peclet ? ' ≥ ' : ' < ') + sci(Math.abs(b) * dx), peclet ? 'good' : 'bad') +
+      stat('what the code uses', peclet ? 'centred' : 'upwind', peclet ? 'good' : 'bad');
+  }
+  ['rt-pi', 'rt-x'].forEach(function (id) { document.getElementById(id).addEventListener('input', drawRates); });
+  document.querySelectorAll('input[name="rtdx"]').forEach(function (r) { r.addEventListener('change', drawRates); });
+  drawRates();
+
+  /* ------------------------------------------------------------------ FD: the parabola inside the sup */
+  function drawParabola() {
+    var vx = Number(document.getElementById('pb-vx').value);
+    var vxx = Number(document.getElementById('pb-vxx').value);
+    document.getElementById('pb-vx-o').textContent = vx.toFixed(3);
+    document.getElementById('pb-vxx-o').textContent = num(vxx, 3);
+    function f(p) { return p * (MU - R) * vx + 0.5 * SIGMA * SIGMA * p * p * vxx; }
+    var P0 = -0.5, P1 = 3;
+    var ys = [0];
+    for (var i = 0; i <= 120; i++) ys.push(f(P0 + (P1 - P0) * i / 120));
+    var hasMax = vxx < 0;
+    var pstar = hasMax ? -(MU - R) * vx / (SIGMA * SIGMA * vxx) : NaN;
+    if (hasMax && pstar <= P1) ys.push(f(pstar));
+    var lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys);
+    var span = (hi - lo) || 1;
+    lo -= 0.1 * span; hi += 0.15 * span;
+    var X0 = 60, X1 = 620, Y0 = 20, Y1 = 250;
+    function sx(p) { return X0 + (p - P0) / (P1 - P0) * (X1 - X0); }
+    function sy(v) { return Y1 - (v - lo) / (hi - lo) * (Y1 - Y0); }
+    var svg = document.getElementById('pb-svg');
+    clear(svg);
+    [0, 0.5, 1, 1.5, 2, 2.5, 3].forEach(function (p) {
+      E('line', { x1: sx(p), x2: sx(p), y1: Y0, y2: Y1, 'class': 'grid' }, svg);
+      T(svg, sx(p), Y1 + 18, String(p), 'tick', 'middle');
+    });
+    E('line', { x1: X0, x2: X1, y1: sy(0), y2: sy(0), 'class': 'zero' }, svg);
+    E('line', { x1: sx(0), x2: sx(0), y1: Y0, y2: Y1, 'class': 'axis' }, svg);
+    T(svg, (X0 + X1) / 2, Y1 + 38, 'position π (dollars in the stock)', 'alabel', 'middle');
+    T(svg, X0 - 8, Y0 + 4, 'what is inside the sup', 'alabel', 'start');
+    var curve = [];
+    for (var k = 0; k <= 160; k++) {
+      var p = P0 + (P1 - P0) * k / 160;
+      curve.push([sx(p), sy(f(p))]);
+    }
+    path(svg, curve, 'ln ink');
+    var st = document.getElementById('pb-stats');
+    if (hasMax) {
+      if (pstar <= P1) {
+        E('line', { x1: sx(pstar), x2: sx(pstar), y1: sy(f(pstar)), y2: sy(0), 'class': 'ln ctrl dash thin' }, svg);
+        E('circle', { cx: sx(pstar), cy: sy(f(pstar)), r: 6, 'class': 'dot ctrl' }, svg);
+        T(svg, sx(pstar) + (pstar > 2.3 ? -10 : 10), sy(f(pstar)) - 10, 'π* = ' + pstar.toFixed(3), 'lbl strong', pstar > 2.3 ? 'end' : 'start');
+      }
+      st.innerHTML = stat('curvature', 'negative: V concave', 'good') +
+        stat('maximum at π* = −(μ−r)·∂ₓV / (σ²·∂ₓₓV)', pstar.toFixed(3) + (pstar > P1 ? ' (off the drawing)' : ''));
+    } else {
+      T(svg, (X0 + X1) / 2, Y0 + 24, 'No maximum: the parabola opens upwards', 'lbl strong', 'middle');
+      st.innerHTML = stat('curvature', vxx === 0 ? 'zero' : 'positive: V not concave', 'bad') +
+        stat('what the code does', 'it reports it as a warning (with the project parameters, it never happens)');
+    }
+  }
+  ['pb-vx', 'pb-vxx'].forEach(function (id) { document.getElementById(id).addEventListener('input', drawParabola); });
+  document.getElementById('pb-above').addEventListener('click', function () {
+    var e = Math.exp(-1.5);
+    document.getElementById('pb-vx').value = e.toFixed(3);
+    document.getElementById('pb-vxx').value = (-e).toFixed(3);
+    drawParabola();
+  });
+  document.getElementById('pb-below').addEventListener('click', function () {
+    var e = Math.exp(-1.1);
+    document.getElementById('pb-vx').value = e.toFixed(3);
+    document.getElementById('pb-vxx').value = (-(e + 2)).toFixed(3);
+    drawParabola();
+  });
+  drawParabola();
+})();
+</script>
+
+</body>
+</html>

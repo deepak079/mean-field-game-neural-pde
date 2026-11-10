@@ -1,0 +1,142 @@
+EXAMPLE: HOW THE CLASS SLIDES WERE STARTED WITH CLAUDE CODE
+============================================================
+
+Below is the prompt Ander gave Claude Code to start the slides in slides.html, translated from
+Spanish. Use it as a template for your own sections: keep the general part (context, way of
+working, style, technical) and replace the list of slides with yours. The paths are those of
+Ander's computer; point them to your copies (the guides are in docs/presentation/guides/ and the
+AMS 520 deck in docs/presentation/reference/).
+
+
+PART 1. WHAT TO INSTALL (once)
+------------------------------
+
+  1. Claude Code
+       - VS Code extension "Claude Code" (what Ander uses), or the terminal version:
+             npm install -g @anthropic-ai/claude-code
+       - Sign in with your claude.ai account. Publishing the slides as a private web page
+         (an "artifact" on claude.ai) works through that account; nothing extra to install.
+
+  2. Node.js (LTS version, from nodejs.org)
+       - Needed by the Playwright server below, which runs with "npx".
+
+  3. Playwright MCP server  <-- the one that really matters
+       - It lets Claude open the slides in a real browser, click through them and take
+         screenshots, so it can see overlaps, cut-off text or broken buttons and fix them
+         before showing you anything.
+       - Install it with ONE of these:
+           a) In a terminal:
+                 claude mcp add --scope user playwright -- npx -y @playwright/mcp@latest
+           b) Or inside Claude Code, as the official plugin:
+                 /plugin install playwright@claude-plugins-official
+              (if it says the marketplace is unknown, first run
+                 /plugin marketplace add anthropics/claude-plugins-official )
+       - Restart Claude Code and type /mcp: "playwright" must show as connected.
+       - The first time, it may ask to download a browser: let it, or run
+                 npx playwright install chromium
+
+  4. Python 3
+       - Only to serve the folder locally during the checks: the Playwright browser does not
+         open file:// pages, so Claude runs   python -m http.server 8765   in the folder of the
+         slides and opens  http://127.0.0.1:8765/slides.html
+
+  Nothing else: the slides load their fonts (Google Fonts) and the formula renderer (MathJax)
+  from the internet, so you also need a connection when presenting.
+
+
+PART 2. THE PROMPT (translated)
+-------------------------------
+
+We are going to make the slides of my project to present them in class. I will describe the
+slides to you one by one. As for the style etc., the instructions are the same as for the slides
+of C:\Users\User\Desktop\3 trimestre\520-ML in QF\AMS 520 project\docs\presentacion\slides.html.
+Which basically are:
+
+CONTEXT
+- The HTML guides that explain the project are specified in each instruction.
+- Language of the slides: English. With me, speak Spanish.
+
+HOW WE ARE GOING TO WORK
+- We build them section by section. I give you the guidelines of more or less what I want on
+  each slide and which interactives to use. The design, the look and the art I leave to you. You
+  may depart from my instructions or interpret them as you see best for the presentation.
+- When a section has no material in the guides, propose the slides that are needed yourself,
+  following my rough guidelines.
+
+STYLE
+- Clean, with very little text per slide: short titles, short sentences, and I give the
+  explanation by speaking. No crowded slides.
+- Visual: schemes, flow charts and step-by-step animations rather than bullet points. Better one
+  idea per slide.
+- INTERACTIVES whenever they add something: reuse the simulators and charts of the guides
+  (sliders, dragging, buttons), removing the explanatory texts that are not needed, and improving
+  them if necessary.
+- Visual coherence with the project guides (typeface and palette). If they have none, choose a
+  display typeface with personality, a readable sans, a mono for code and formulas, and a sober
+  palette with one accent colour.
+- Clean section title slides, with one visual element. Closing "Thank you · Questions?" with my
+  name, my partner's and contact (do not make this slide until we get there).
+
+TECHNICAL
+- A single self-made HTML file (e.g. docs/presentacion/slides.html), published as a normal HTML
+  artifact and always republished at the same URL. DO NOT use the claude.ai "Slides" artifact
+  type: its interactives sometimes cannot be clicked or animated.
+- Own engine: a 1920×1080 stage scaled to the window; ← → and clicker (PageUp/PageDown) to move
+  forward, F for full screen, step-by-step reveals inside a slide and #n in the URL to go to a
+  given slide. Automatic slide counter.
+- Well-typeset formulas (KaTeX or similar), without odd dependencies.
+- Before showing it to me, check it in a browser (screenshots) to make sure nothing overlaps or
+  spills over and that the interactives work.
+- Save in memory and in CLAUDE.md where the file is, the URL of the artifact and my preferences,
+  so they are kept between sessions.
+
+Here are the guidelines for the first slides (the numbers mean nothing, they are only for
+ordering; you do not have to restrict yourself to one slide per number):
+
+1- A slide with the title and our names, Ander Ibarrondo, Deepak Singh.
+- It has to be a cover with some animation related to the topic, but very subtle, not calling
+  for attention, just movement in the background.
+
+2- We have to present what the project is about. First, the problem we are going to explain has
+to be understood intuitively (we will explain it out loud, but we need something in the
+background); then we have to explain how to translate the problem we have just described into
+equations and make the notation clear.
+
+3- Now that it is known what each equation describes, we have to draw the scheme that explains
+the flow: we assume m bar, then the network for V, then the network for Fokker–Planck, then we
+compare m and go back round the loop.
+- I want it like this:
+- First, in the middle of the screen, a box with the assumed mean m (or whatever notation), then a
+  movement of that box to the left, ready to be the first in the series of the flow. Now I want,
+  again, a pop-up of the V network with the HJB equation, and in the same way an animation in
+  which an arrow comes out of the m box and points to this V network. Now, again, a pop-up: the m
+  network is solved using Fokker–Planck, and in the same way it takes its place in the row. Now,
+  again, the comparison: a box summarising that we compare the assumed m with the one that comes
+  out, and in the same way it goes to the end of the row. And then, to finish, an arrow "if they
+  do not match" that points from the last box to the first. We leave the π network out for now:
+  we want the main scheme to be understood.
+
+4- And now we dive a bit deeper into the PINNs and each equation, starting with V.
+- First show the exact strategy at t = T, i.e. more or less the chart in
+  exploratory/guia_pinn_hjb_en.html ("What the network is asked at t = T"), and then, following
+  the equation V(t,x) = sup E[...] or, equivalently, the HJB equation, it is carried backwards,
+  and then I can press a button and see those two charts going backwards from T to 0, as the chart
+  "The strategy over time" does (only also showing the value of v). Like "What investors do /
+  Results · the strategy π*(t, x) · λ = 2 / Just below the average, investors play safe" in
+  exploratory/presentacion/guia_graficos.html, but the other way round: the solution is set at T
+  and we go backwards instead of forwards.
+- Now we explain the training, the "how do we train the above", because the above was with
+  everything already trained. On the next slide we show how the points are spread, i.e. the same
+  drawing as "The points of one step" in exploratory/guia_pinn_hjb_en.html.
+- And on the next slide we have to write the loss function somewhere and, on the same slide, the
+  mathematical formula of each term, and when we move on, the formulas of the terms shrink or fold
+  away so that they are no longer needed, and give way to an animation like "How the network
+  learns": on one side the neural network changing and next to it the loss function plotted.
+
+5- Then we would move on to Fokker–Planck. But first let us do the ones I have already told you.
+
+Notes: As you can see, I have not used the charts you have just made for me either, because
+although I did not find them the most suitable, they are not quite complete within the overall
+frame of what I want to explain; that is why I have told you how I want them redone in certain
+ways. You can take the ones already made in the guides. Obviously they have to be cleaned of so
+much text. And I would like you to improve the look of some that do not look so good.
