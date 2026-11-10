@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The league of N investors</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Same look as the earlier study guides (v2, the value-network guide, the implementation guide).
+   Layout: one reading column of 44rem; figures and diagrams use the same column.
+   Five colors carry meaning everywhere: time, the predictable drift, luck, my decision, the rivals. */
+:root {
+  --bg: #f4f5f8;
+  --surface: #ffffff;
+  --ink: #141820;
+  --ink-2: #454d5e;
+  --muted: #6f788a;
+  --rule: #dce0e8;
+  --grid: #e9ecf1;
+  --axis: #b4bbc8;
+  --wash: #eceff4;
+  --k-time: #5f6b7d;
+  --k-drift: #256abf;
+  --k-risk: #c2410c;
+  --k-ctrl: #a12f9a;
+  --k-crowd: #0f7a55;
+  --m-drift: #256abf;
+  --m-risk: #c2410c;
+  --m-ctrl: #a12f9a;
+  --m-crowd: #0f7a55;
+  --bad: #c62828;
+  --f-display: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1116; --surface: #171a21; --ink: #e7eaf0; --ink-2: #b2bac8; --muted: #8790a1;
+    --rule: #2a2f39; --grid: #222731; --axis: #3b4250; --wash: #1c2028;
+    --k-time: #a7b1c2; --k-drift: #6ca9f0; --k-risk: #f0875a; --k-ctrl: #e07fc4; --k-crowd: #3cc796;
+    --m-drift: #3987e5; --m-risk: #e0622e; --m-ctrl: #cc4f9e; --m-crowd: #199e70;
+    --bad: #ef6b6b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1116; --surface: #171a21; --ink: #e7eaf0; --ink-2: #b2bac8; --muted: #8790a1;
+  --rule: #2a2f39; --grid: #222731; --axis: #3b4250; --wash: #1c2028;
+  --k-time: #a7b1c2; --k-drift: #6ca9f0; --k-risk: #f0875a; --k-ctrl: #e07fc4; --k-crowd: #3cc796;
+  --m-drift: #3987e5; --m-risk: #e0622e; --m-ctrl: #cc4f9e; --m-crowd: #199e70;
+  --bad: #ef6b6b;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 max(72px, env(safe-area-inset-bottom, 0px));
+}
+.col { max-width: 44rem; margin-inline: auto; }
+p, li { text-wrap: pretty; }
+a { color: inherit; text-decoration-color: var(--axis); text-underline-offset: 3px; }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--m-drift); outline-offset: 2px; border-radius: 4px; }
+b, strong { font-weight: 600; }
+figure { margin-inline: 0; }
+
+/* Hero */
+.hero { padding-block: 56px 8px; display: grid; gap: 18px; }
+.eyebrow { margin: 0; font: 500 0.78rem var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font: 700 clamp(2.1rem, 1.3rem + 3.4vw, 3.3rem)/1.06 var(--f-display); letter-spacing: -0.02em; text-wrap: balance; }
+.lede { margin: 0; font-size: 1.2rem; line-height: 1.55; color: var(--ink-2); }
+.legendbox { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; display: grid; gap: 10px; }
+.lab { margin: 0; font: 600 0.72rem var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.keys { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 10px 22px; }
+.keys li { display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: 8px; align-items: baseline; font-size: 0.95rem; line-height: 1.4; margin: 0; }
+.keys b { font-family: var(--f-display); font-weight: 600; }
+.keys li > span:last-child { grid-column: 2; color: var(--ink-2); }
+.sw { display: inline-block; width: 22px; height: 4px; border-radius: 2px; transform: translateY(-3px); }
+.sw.time { background: var(--k-time); } .sw.drift { background: var(--k-drift); } .sw.risk { background: var(--k-risk); }
+.sw.ctrl { background: var(--k-ctrl); } .sw.crowd { background: var(--k-crowd); }
+.toc { font-family: var(--f-display); }
+.toc ol { margin: 0; padding: 0; list-style: none; counter-reset: toc; columns: 2 15rem; column-gap: 28px; }
+.toc li { counter-increment: toc; padding: 3px 0; break-inside: avoid; font-size: 0.95rem; margin: 0; }
+.toc li::before { content: counter(toc); display: inline-block; width: 1.6em; font: 500 0.8rem var(--f-mono); color: var(--muted); }
+
+/* Sections */
+section { padding-block: 44px 8px; border-top: 1px solid var(--rule); margin-top: 36px; scroll-margin-top: 12px; }
+h2 { margin: 0 0 14px; font: 650 clamp(1.5rem, 1.2rem + 1.2vw, 2rem)/1.15 var(--f-display); letter-spacing: -0.012em; text-wrap: balance; display: flex; gap: 14px; align-items: baseline; }
+h2 .num { font: 500 0.95rem var(--f-mono); color: var(--muted); flex: none; }
+h3 { margin: 30px 0 8px; font: 600 1.15rem/1.3 var(--f-display); text-wrap: balance; }
+p { margin: 0 0 14px; }
+ul, ol { padding-left: 1.3em; margin: 0 0 14px; }
+li { margin-bottom: 6px; }
+.purpose { border-left: 3px solid var(--ink); padding: 2px 0 2px 14px; font-size: 1.08rem; }
+.note { background: var(--wash); border-radius: 10px; padding: 14px 18px; margin: 20px 0; }
+.note > :last-child { margin-bottom: 0; }
+.note .lab { margin-bottom: 6px; }
+.files { font: 500 0.82rem var(--f-mono); color: var(--muted); margin: -6px 0 16px; }
+code { font-family: var(--f-mono); font-size: 0.86em; background: var(--wash); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+
+mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding-block: 4px; min-width: 0 !important; }
+mjx-container { color: inherit; }
+.k-time { color: var(--k-time); fill: var(--k-time); stroke: var(--k-time); }
+.k-drift { color: var(--k-drift); fill: var(--k-drift); stroke: var(--k-drift); }
+.k-risk { color: var(--k-risk); fill: var(--k-risk); stroke: var(--k-risk); }
+.k-ctrl { color: var(--k-ctrl); fill: var(--k-ctrl); stroke: var(--k-ctrl); }
+.k-crowd { color: var(--k-crowd); fill: var(--k-crowd); stroke: var(--k-crowd); }
+
+/* A bar over a letter outside the formulas: the display and mono faces don't place the combining
+   macron, so the bar is drawn as an overline instead. */
+.ov { text-decoration-line: overline; text-decoration-thickness: 0.07em; text-decoration-skip-ink: none; }
+
+/* Recipe (the map) */
+.recipe { list-style: none; padding: 0; margin: 0 0 10px; counter-reset: rs; }
+.recipe > li { counter-increment: rs; position: relative; padding-left: 2.7rem; margin-bottom: 14px; }
+.recipe > li::before { content: counter(rs); position: absolute; left: 0; top: 0; width: 1.85rem; height: 1.85rem; border-radius: 50%; border: 1.5px solid var(--ink-2); background: var(--surface); font: 600 0.85rem/1.7rem var(--f-mono); text-align: center; color: var(--ink); }
+.recipe .what { display: block; font: 600 1.02rem/1.45 var(--f-display); }
+.recipe .why { display: block; font-size: 0.97rem; color: var(--ink-2); }
+.go { font: 600 0.72rem/1.5 var(--f-mono); padding: 0 7px; border: 1px solid var(--axis); border-radius: 999px; color: var(--ink-2); text-decoration: none; white-space: nowrap; margin-left: 4px; }
+.go:hover { border-color: var(--ink); color: var(--ink); }
+
+/* Pseudocode */
+pre.pseudo { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; margin: 16px 0 20px; overflow-x: auto; font: 0.84rem/1.6 var(--f-mono); color: var(--ink); }
+pre.pseudo .cm { color: var(--muted); }
+pre.pseudo .kw { font-weight: 500; color: var(--k-time); }
+
+/* Decisions: what was chosen, and why */
+.decs { margin: 14px 0 22px; border-top: 1px solid var(--rule); }
+.dec { display: grid; grid-template-columns: minmax(0, 13rem) minmax(0, 1fr); gap: 4px 22px; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.dec dt { font: 600 0.98rem/1.4 var(--f-display); }
+.dec dd { margin: 0; font-size: 0.98rem; min-width: 0; }
+.dec dd p:last-child { margin-bottom: 0; }
+.decs-lab { margin: 26px 0 6px; }
+@media (max-width: 640px) { .dec { grid-template-columns: minmax(0, 1fr); } }
+.hand { background: var(--surface); border: 1px dashed var(--axis); border-radius: 10px; padding: 12px 16px; margin: 16px 0 20px; font-size: 0.97rem; }
+.hand > :last-child { margin-bottom: 0; }
+.hand .lab { margin-bottom: 6px; }
+.src, .opt { font: 600 0.68rem var(--f-display); letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--axis); border-radius: 999px; padding: 0 6px; white-space: nowrap; vertical-align: 0.1em; }
+
+/* Tables */
+.tbl { overflow-x: auto; margin: 18px 0 22px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 600 0.78rem var(--f-display); letter-spacing: 0.03em; color: var(--ink-2); background: var(--wash); }
+td.num, th.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+td.rowh { font: 600 0.85rem var(--f-display); color: var(--ink-2); white-space: nowrap; }
+td.yes { color: var(--k-crowd); font: 600 0.85rem var(--f-display); }
+td.no { color: var(--muted); }
+.wide-tbl table { min-width: 560px; }
+
+/* Figures and controls */
+.fig { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 20px; margin-block: 28px; }
+.fig-head { display: grid; gap: 4px; margin-bottom: 10px; }
+.fig-title { margin: 0; font: 650 1.08rem/1.3 var(--f-display); }
+.fig-sub { margin: 0; font-size: 0.97rem; color: var(--ink-2); }
+.controls { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-end; margin: 14px 0 10px; }
+.ctl { display: grid; gap: 4px; min-width: 0; }
+.ctl > .ctl-l { font: 500 0.8rem var(--f-display); color: var(--ink-2); }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--axis); border-radius: 999px; padding: 2px; gap: 2px; }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.seg label { font: 500 0.82rem var(--f-display); padding: 3px 11px; border-radius: 999px; cursor: pointer; color: var(--ink-2); }
+.seg input:checked + label { background: var(--ink); color: var(--surface); }
+.seg input:focus-visible + label { outline: 2px solid var(--m-drift); outline-offset: 1px; }
+.plotwrap { position: relative; min-width: 0; }
+.plotwrap svg { display: block; width: 100%; height: auto; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 12px 20px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule); }
+.stat { min-width: 0; }
+.stat .k { display: block; font: 500 0.78rem/1.35 var(--f-display); color: var(--muted); }
+.stat .v { font: 500 1rem var(--f-mono); font-variant-numeric: tabular-nums; margin-top: 2px; overflow-wrap: anywhere; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font: 500 0.8rem var(--f-display); color: var(--ink-2); margin: 4px 0 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.lkey { display: inline-block; width: 16px; height: 0; border-top: 2.5px solid var(--ink); flex: none; }
+.lkey.ctrl { border-top-color: var(--m-ctrl); border-top-width: 3px; }
+.lkey.muted { border-top: 1.5px solid var(--muted); }
+.lkey.dash { border-top: 2px dashed var(--ink); }
+.lkey.mdash { border-top: 1.5px dashed var(--muted); }
+.lkey.crowd { border-top: 1.5px dashed var(--m-crowd); }
+
+/* SVG parts */
+.grid { stroke: var(--grid); stroke-width: 1; }
+.axis { stroke: var(--axis); stroke-width: 1; }
+.tick { font: 11.5px var(--f-mono); fill: var(--muted); }
+.alabel { font: 500 12.5px var(--f-display); fill: var(--ink-2); }
+.lbl { font: 500 12.5px var(--f-display); fill: var(--ink-2); }
+.lbl.strong { fill: var(--ink); font-weight: 600; }
+.lbl.small { font-size: 11.5px; }
+.lbl.crowd { fill: var(--k-crowd); }
+.lbl.ctrl { fill: var(--k-ctrl); }
+.ln { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ln.ink { stroke: var(--ink); } .ln.ctrl { stroke: var(--m-ctrl); stroke-width: 3; } .ln.muted { stroke: var(--muted); stroke-width: 1.4; stroke-opacity: 0.75; }
+.ln.dash { stroke-dasharray: 6 5; } .ln.dot { stroke-dasharray: 2 4; }
+.vline { stroke: var(--m-crowd); stroke-width: 1.3; stroke-dasharray: 5 4; }
+.hline { stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 2 4; }
+.dot { stroke: var(--surface); stroke-width: 2; }
+.dot.ink { fill: var(--ink); } .dot.ctrl { fill: var(--m-ctrl); } .dot.crowd { fill: var(--m-crowd); } .dot.muted { fill: var(--muted); }
+.dens { fill: var(--m-crowd); fill-opacity: 0.14; stroke: var(--m-crowd); stroke-width: 1.5; }
+/* diagram */
+.diagram { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 18px; margin-block: 26px; }
+.dscroll { overflow-x: auto; }
+.dscroll svg { display: block; width: 100%; min-width: 620px; height: auto; }
+.dg-box { fill: var(--surface); stroke: var(--axis); stroke-width: 1.25; }
+.dg-box.ctrl { stroke: var(--m-ctrl); }
+.dg-box.crowd { stroke: var(--m-crowd); }
+.dg-box.wash { fill: var(--wash); }
+.dg-t { font: 600 14px var(--f-display); fill: var(--ink); }
+.dg-s { font: 500 12.5px var(--f-display); fill: var(--ink-2); }
+.dg-line { fill: none; stroke: var(--ink-2); stroke-width: 1.5; }
+.dg-line.crowd { stroke: var(--m-crowd); stroke-width: 2; }
+.dg-head { fill: var(--ink-2); } .dg-head.crowd { fill: var(--m-crowd); }
+
+details.more { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 2px 18px; margin: 14px 0; }
+details.more > summary { cursor: pointer; font: 600 0.98rem/1.4 var(--f-display); padding: 11px 0; }
+details.more > summary:hover { color: var(--k-drift); }
+details.more[open] > summary { border-bottom: 1px solid var(--rule); margin-bottom: 14px; }
+
+footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--rule); font: 0.85rem/1.5 var(--f-display); color: var(--muted); }
+@media (max-width: 520px) {
+  body { font-size: 1rem; }
+  .fig, .diagram { padding: 14px; border-radius: 12px; }
+  details.more { padding: 2px 12px; }
+  .ctl { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+<script>
+window.MathJax = {
+  loader: { load: ['[tex]/html'] },
+  tex: {
+    packages: { '[+]': ['html'] },
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['\\[', '\\]']],
+    macros: {
+      cT: ['\\class{k-time}{#1}', 1],
+      cB: ['\\class{k-drift}{#1}', 1],
+      cR: ['\\class{k-risk}{#1}', 1],
+      cP: ['\\class{k-ctrl}{#1}', 1],
+      cM: ['\\class{k-crowd}{#1}', 1]
+    }
+  },
+  svg: { fontCache: 'global' },
+  options: { enableMenu: false }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" defer></script>
+
+<div class="col">
+
+<header class="hero">
+  <p class="eyebrow">AMS 516 · Problem 21 · the extension</p>
+  <h1>The league of N investors</h1>
+  <p class="lede">The same problem, but with a few investors who see each other. This guide explains it from scratch: the exact model, the game theory it needs, the equation of each investor, how it is solved with one network trained in rounds, and how it is checked.</p>
+  <div class="legendbox">
+    <p class="lab">Colours: each one always means the same thing</p>
+    <ul class="keys">
+      <li><span class="sw time"></span><b>Time</b><span>what changes because the clock moves: \(\partial_t\)</span></li>
+      <li><span class="sw drift"></span><b>The predictable part</b><span>the drift of a wealth: \(rx + \pi(\mu - r)\)</span></li>
+      <li><span class="sw risk"></span><b>Luck</b><span>the noise, \((\sigma\pi)^2\), and the curvature</span></li>
+      <li><span class="sw ctrl"></span><b>My decision</b><span>how much I invest: \(\pi\)</span></li>
+      <li><span class="sw crowd"></span><b>The rivals</b><span>their wealths \(y_j\), their mean \(\bar y\) and what they invest, \(\pi_j\)</span></li>
+    </ul>
+  </div>
+  <div class="note">
+    <p class="lab">Where the numbers come from</p>
+    <p>The formulas and the sums in the boxes can be redone by hand. The training settings are a first implementation: each one comes with its reason and can be changed. Computing times are rough estimates, not measurements. What comes from a paper carries the mark <span class="src">paper</span>, and the links are at the end. The implementation and the experiments are in the repository: <code>src/mfg/pinn/nplayer.py</code>, <code>configs/nplayer.yaml</code>, <code>scripts/run_nplayer.py</code> and <code>scripts/analyze_nplayer.py</code>.</p>
+  </div>
+  <nav class="toc" aria-label="Contents">
+    <ol>
+      <li><a href="#map">The map</a></li>
+      <li><a href="#model">The model, with no ambiguity</a></li>
+      <li><a href="#games">Just enough game theory</a></li>
+      <li><a href="#equation">The equation of each investor</a></li>
+      <li><a href="#fd">Why finite differences are not enough</a></li>
+      <li><a href="#rounds">The rounds</a></li>
+      <li><a href="#network">The networks</a></li>
+      <li><a href="#points">The training points</a></li>
+      <li><a href="#loss">The loss, part by part</a></li>
+      <li><a href="#checks">The checks</a></li>
+    </ol>
+  </nav>
+</header>
+
+<!-- ============================================================ 1 -->
+<section id="map">
+  <h2><span class="num">1</span>The map</h2>
+  <p class="purpose">What we build, on one screen.</p>
+  <p>In the base problem there are infinitely many investors, and each of them needs only one number from the rest: the final mean \(\cM{\bar m_T}\). In the league there are \(N\) investors, from 2 to 20, and each one sees every rival's wealth at every moment. How much an investor invests depends on their own wealth and on everyone else's: \(N\) variables at once. From \(N = 4\) on, that is too many for a finite-difference grid, but not for a network.</p>
+
+  <figure class="diagram" aria-labelledby="map1-cap">
+    <div class="dscroll">
+      <svg viewBox="0 0 760 214" role="img" aria-label="Left: mean-field, the crowd enters through one fixed number. Right: league, each rival enters through their current wealth.">
+        <text class="dg-t" x="20" y="24">Mean-field (done)</text>
+        <text class="dg-s" x="20" y="44">the crowd enters through a single number</text>
+        <path class="dens" d="M30,149.9 L50,149.4 L70,148 L90,144.1 L110,135.6 L130,121.2 L150,102.8 L170,86.6 L190,80 L210,86.6 L230,102.8 L250,121.2 L270,135.6 L290,144.1 L310,148 L330,149.4 L350,149.9 Z"></path>
+        <line class="axis" x1="24" y1="150" x2="356" y2="150"></line>
+        <line class="vline" x1="196" y1="62" x2="196" y2="150"></line>
+        <text class="lbl crowd" x="202" y="70"><tspan class="ov">m</tspan><tspan dy="4" style="font-size:10px">T</tspan><tspan dy="-4">: one fixed number</tspan></text>
+        <circle class="dot ctrl" cx="128" cy="150" r="7"></circle>
+        <text class="lbl ctrl" x="128" y="176" text-anchor="middle">me</text>
+        <text class="dg-s" x="190" y="204" text-anchor="middle">wealth →</text>
+
+        <line x1="380" y1="20" x2="380" y2="200" class="axis"></line>
+
+        <text class="dg-t" x="404" y="24">League of N (the extension)</text>
+        <text class="dg-s" x="404" y="44">each rival enters through their current wealth</text>
+        <line class="axis" x1="408" y1="150" x2="740" y2="150"></line>
+        <line class="vline" x1="597" y1="62" x2="597" y2="150"></line>
+        <text class="lbl crowd" x="603" y="70"><tspan class="ov">y</tspan>: rivals' mean, moving</text>
+        <circle class="dot crowd" cx="520" cy="150" r="7"></circle>
+        <circle class="dot crowd" cx="575" cy="150" r="7"></circle>
+        <circle class="dot crowd" cx="612" cy="150" r="7"></circle>
+        <circle class="dot crowd" cx="681" cy="150" r="7"></circle>
+        <text class="lbl crowd" x="520" y="130" text-anchor="middle">y₁</text>
+        <text class="lbl crowd" x="575" y="130" text-anchor="middle">y₂</text>
+        <text class="lbl crowd" x="612" y="130" text-anchor="middle">y₃</text>
+        <text class="lbl crowd" x="681" y="130" text-anchor="middle">y₄</text>
+        <circle class="dot ctrl" cx="548" cy="150" r="7"></circle>
+        <text class="lbl ctrl" x="548" y="176" text-anchor="middle">me</text>
+        <text class="dg-s" x="574" y="204" text-anchor="middle">wealth → (here N = 5)</text>
+      </svg>
+    </div>
+    <figcaption id="map1-cap" class="fig-sub" style="margin-top:10px">In the mean-field, my rule looks at my wealth and one fixed number. In the league it looks at my wealth and at each rival's, which change over time.</figcaption>
+  </figure>
+
+  <p>The recipe:</p>
+  <ol class="recipe">
+    <li><span class="what">Write the equation of an investor who knows the rivals' rule.</span>
+      <span class="why">It is an HJB like the 1-D one, with one more term per rival.<a class="go" href="#equation">§4</a></span></li>
+    <li><span class="what">Give it a symmetric network.</span>
+      <span class="why">A network that does not care in which order the rivals are passed to it. The same network serves everyone.<a class="go" href="#network">§7</a></span></li>
+    <li><span class="what">Train it where the group lives.</span>
+      <span class="why">On situations drawn around the population, with no box and no edges.<a class="go" href="#points">§8</a><a class="go" href="#loss">§9</a></span></li>
+    <li><span class="what">Play in rounds.</span>
+      <span class="why">The rivals play the rule of the round before and the network learns the best response. This is repeated until the rule only changes by training noise.<a class="go" href="#rounds">§6</a></span></li>
+    <li><span class="what">Check the minimum.</span>
+      <span class="why">Exact tests without training and one trained exact case. The rest (finite differences with N = 2, Monte Carlo of the value, a best response from scratch) is optional.<a class="go" href="#checks">§10</a></span></li>
+    <li><span class="what">Measure what changes with N.</span>
+      <span class="why">The final mean, the spread and how much the group crowds together, for N = 2, 3, 5, 10 and 20, against the mean-field. The plan is in <code>configs/nplayer.yaml</code> and <code>scripts/analyze_nplayer.py</code>.</span></li>
+  </ol>
+  <p>For each \(N\) the result is a network that gives my value \(V(t, x, y)\) and my rule \(\pi(t, x, y)\) in any realistic situation, plus the group's statistics and the figures.</p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="model">
+  <h2><span class="num">2</span>The model, with no ambiguity</h2>
+  <p class="purpose">The usual statement with finite \(N\), plus the only new assumption: everyone sees everyone's wealth.</p>
+
+  <h3>The investors</h3>
+  <p>There are \(N\) identical investors, \(i = 1, \dots, N\). Each one has a wealth \(X^i_t\) and puts \(\pi^i_t\) dollars in their stock. Each one's luck is independent of the others', as in equation (1) of the proposal:</p>
+  \[ dX^i_t = \cB{\big(rX^i_t + \cP{\pi^i_t}(\mu - r)\big)\,dt} + \cR{\sigma\,\cP{\pi^i_t}\,dW^i_t}, \qquad W^1, \dots, W^N \text{ independent}. \]
+  <p>Initial wealths: each one drawn on its own, \(X^i_0 \sim \mathcal N(1, 0.2^2)\). Base parameters: \(r = 0.02\), \(\mu = 0.08\), \(\sigma = 0.2\), \(\gamma = 1\), \(T = 1\) and \(\lambda = 2\).</p>
+
+  <h3>What each one wants</h3>
+  <p>To maximise \(\mathbb E\big[U(X^i_T, \bar X_T)\big]\), with the group's final mean, in which each investor also counts:</p>
+  \[ \bar X_T = \frac1N\sum_{k=1}^N X^k_T, \qquad U(x, \bar x) = -e^{-\gamma x} - \frac{\lambda}{2}\Big(\big(\bar x - x\big)^+\Big)^2. \]
+  <p>The utility has two parts:</p>
+  <ul>
+    <li><b>\(-e^{-\gamma x}\):</b> the exponential utility of one's own wealth, the usual one. It is always negative, more wealth brings it closer to 0, and \(\gamma\) measures how much risk is disliked.</li>
+    <li><b>\(-\tfrac{\lambda}{2}\big((\bar x - x)^+\big)^2\):</b> the penalty for ending below the mean. The \(^+\) means “if negative, 0”: if I end above the mean, there is no penalty; if I end 0.2 below, it subtracts \(\tfrac{\lambda}{2}\cdot 0.2^2\). At \(x = \bar x\) the utility has a kink: its curvature jumps, because on one side there is a penalty and on the other there is none.</li>
+  </ul>
+  <p>We already saw what it causes in the mean-field with λ = 2. Just below the mean it pays to be careful, because a bad shock that leaves you further down hurts more than a good one helps: at the end people invest about 0.2, against 1.5 just above. So many people end up crowded just below the mean, and the final density has a peak there that drops suddenly at the mean: a cliff.</p>
+
+  <h3>What each one can see</h3>
+  <p>Every investor sees everyone's wealth at every moment: the ranking is public. Their rule can depend on the time, on their own wealth and on their rivals' wealths:</p>
+  \[ \cP{\pi^i_t} = \pi\big(t,\ X^i_t,\ \text{wealths of the rivals of } i\big). \]
+  <p>This is called a feedback (or Markov) rule: it reacts to the situation at each moment.</p>
+
+  <h3>What we are looking for</h3>
+  <p>One single rule \(\pi(t, x, y)\) that everyone uses, each from their own seat, and that is the best for each one if the others use it. It is a <b>symmetric Nash equilibrium</b>; section 3 explains what that is.</p>
+
+  <h3>The penalty, against my rivals</h3>
+  <p>My rule looks at my rivals, so it is convenient to write the penalty with the mean of my \(N - 1\) rivals, \(\bar y\), instead of the group's mean. The group's mean mixes my wealth with theirs:</p>
+  \[ \bar x = \frac{x + (N-1)\,\bar y}{N} \quad\Longrightarrow\quad \bar x - x = \frac{x + (N-1)\,\bar y - Nx}{N} = \Big(1 - \frac1N\Big)(\bar y - x). \]
+  <p>Since \(1 - 1/N\) is positive, it does not change the sign, and squaring gives its square:</p>
+  \[ \frac{\lambda}{2}\Big(\big(\bar x - x\big)^+\Big)^2 = \frac{\cM{\lambda_N}}{2}\Big(\big(\cM{\bar y} - x\big)^+\Big)^2, \qquad \cM{\lambda_N} = \lambda\Big(1 - \frac1N\Big)^2. \]
+  <p>So \(U = -e^{-\gamma x} - \tfrac{\lambda_N}{2}\big((\bar y - x)^+\big)^2\): our 1-D utility with \(\bar m\) replaced by \(\bar y\) and \(\lambda\) by \(\lambda_N\). In the code it is the same function, <code>utility(x, ybar, p.with_(lam=lam_N))</code>. Against my rivals the penalty is milder than \(\lambda\), because when I go up, the mean goes up with me.</p>
+  <div class="hand">
+    <p class="lab">Check it by hand</p>
+    <p>\(N = 5\), \(\lambda = 2\), \(x = 0.9\) and my four rivals with mean \(\bar y = 1.1\). The group's mean is \((0.9 + 4 \cdot 1.1)/5 = 1.06\), 0.16 away from me, and the penalty is \(\tfrac{2}{2}\cdot 0.16^2 = 0.0256\). With the rewrite: \(\lambda_5 = 2 \cdot 0.8^2 = 1.28\) and \(\tfrac{1.28}{2}\cdot 0.2^2 = 0.0256\). The same.</p>
+  </div>
+
+  <div class="tbl"><table>
+    <thead><tr><th>Symbol</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td>\(N\)</td><td>investors in the group, me included (2, 3, 5, 10, 20)</td></tr>
+      <tr><td>\(x\)</td><td>my wealth</td></tr>
+      <tr><td>\(y = (y_1, \dots, y_{N-1})\)</td><td>my rivals' wealths; as processes, \(Y^j_t\)</td></tr>
+      <tr><td>\(\bar y\)</td><td>the mean of my rivals</td></tr>
+      <tr><td>\(\bar x = \big(x + (N-1)\bar y\big)/N\)</td><td>the group's mean, me included</td></tr>
+      <tr><td>\(\lambda_N = \lambda(1 - 1/N)^2\)</td><td>the strength of the penalty against my rivals' mean</td></tr>
+      <tr><td>\(\pi(t, x, y)\)</td><td>the rule: dollars in the stock</td></tr>
+      <tr><td>\(\pi_j\)</td><td>what rival \(j\) invests: the same rule, from their seat (§4)</td></tr>
+      <tr><td>\(V(t, x, y)\), \(v = \log(-V)\)</td><td>my value, and what the network learns</td></tr>
+      <tr><td>\(\theta\)</td><td>the network's weights</td></tr>
+      <tr><td>\(\kappa = (\mu - r)/\sigma = 0.3\)</td><td>the Sharpe ratio</td></tr>
+      <tr><td>\(M(t)\), \(S(t)\)</td><td>mean and standard deviation of the λ = 0 population (closed form, <code>population_mean</code>, <code>population_var</code>)</td></tr>
+      <tr><td>\(\eta\)</td><td>the weight of the comparison in the original utility of the statement. There it is called θ; here η, because θ are the network's weights.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="games">
+  <h2><span class="num">3</span>Just enough game theory</h2>
+  <p class="purpose">Six ideas, applied to our case.</p>
+  <ol class="recipe">
+    <li><span class="what">Game.</span>
+      <span class="why">Several players, and what each one gets depends on what everyone does. Here, my final utility depends on my wealth and on the group's mean, which depends on what each one invests.</span></li>
+    <li><span class="what">Rule, or strategy.</span>
+      <span class="why">What to do in each situation. Here, \(\pi(t, x, y)\): how many dollars to invest given the time, my wealth and my rivals' wealths.</span></li>
+    <li><span class="what">Best response.</span>
+      <span class="why">If I know my rivals' rule, the best rule for me. Computing it is a control problem like the 1-D one, an HJB, with \(N\) variables instead of one.</span></li>
+    <li><span class="what">Nash equilibrium.</span>
+      <span class="why">A set of rules in which nobody gains by changing theirs while the others keep theirs. In other words, each rule is the best response to the others.</span></li>
+    <li><span class="what">Symmetric.</span>
+      <span class="why">All investors are identical, so we look for an equilibrium in which everyone uses the same rule, each from their own seat: "me" in the first slot and my rivals in the others.</span></li>
+    <li><span class="what">Rounds (in the literature, <i>fictitious play</i>).</span>
+      <span class="why">Start from a rule, compute the best response, give it to everyone and repeat. If the rule stops changing, it is the best response to itself, and that is an equilibrium.</span></li>
+  </ol>
+
+  <div class="hand">
+    <p class="lab">An exact example, with the original utility of the statement</p>
+    <p>With \(U = -\exp\!\big(-\gamma(x - \eta\bar x)\big)\), \(\eta = 0.5\) and \(N = 5\), my wealth is one fifth of the mean, so comparing myself with it is partly comparing myself with myself. What is left is like having a lower risk aversion: \(\gamma(1 - \eta/N) = 0.9\).</p>
+    <p><b>Round 1.</b> The rivals play Merton: 1.47 at \(t = 0\). My best response is Merton with aversion 0.9: \(1.47/0.9 = 1.63\).</p>
+    <p><b>Round 2.</b> The rivals play 1.63. My best response is still 1.63, because it does not depend on which fixed rule they use. The rule does not change: equilibrium in two rounds.</p>
+    <p>It matches the one of Lacker and Zariphopoulou <span class="src">paper</span> and what Appendix A of our proposal already said. We will use it as an exact test (§10).</p>
+  </div>
+
+  <h3>What if the rounds do not converge?</h3>
+  <p>There is no general guarantee: there are classic games in which the rounds go round in circles forever. Here we expect them to converge because the interaction is weak. In the mean-field, a wrong guess of the final mean moved the result about 15 times less (\(\Phi' \approx -0.065\)), and the loop closed in 3 evaluations. Section 6 sets what to do if they do not converge.</p>
+
+  <h3>The mean-field is the limit</h3>
+  <p>With infinitely many rivals, none of them weighs on its own and their mean stops being random (law of large numbers). My rule no longer needs to look at anyone in particular, only at the number \(\bar m_T\): that is our 1-D problem. Section 4 shows it in the equation.</p>
+
+  <div class="note">
+    <p class="lab">A note on rules that look at everyone</p>
+    <p>Lacker and Zariphopoulou only look for constant rules, decided at \(t = 0\). For constant rules it makes no difference whether the situation at each moment is observed or not. We let the rule react to the ranking, because with the penalty on the mean there is no reason for it to be constant.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="equation">
+  <h2><span class="num">4</span>The equation of each investor</h2>
+  <p class="files">what the V network has to satisfy</p>
+  <p class="purpose">A single HJB: the 1-D one with one more term per rival. It is derived in four steps; the last one writes it with \(v = \log(-V)\), which is what the network learns.</p>
+
+  <h3>One HJB, not N</h3>
+  <p>In a game of \(N\) there are \(N\) control problems, one per investor. Since all are identical and we want everyone to use the same rule, the \(N\) problems are the same equation seen from different seats. It is enough to solve mine; each rival's is the same function with the roles swapped.</p>
+  <p>Compared with the 1-D HJB, four things change: there are \(N\) wealths instead of one, each rival adds two terms, the final condition uses \(\bar y\) and \(\lambda_N\), and the rivals' positions come from the solution itself. This last point is what makes it a game. Below, subscripts are derivatives: \(V_x = \partial V/\partial x\), \(V_{y_jy_j} = \partial^2 V/\partial y_j^2\).</p>
+
+  <h3>Step 1 · What \(V\) is, and its value at the end</h3>
+  <p>\(V(t, x, y)\) is the best expected utility I can get from the situation \((t, x, y)\), if my rivals follow their rule. At \(T\) there is nothing left to decide, so the value is the utility, written with \(\bar y\) and \(\lambda_N\) as in section 2:</p>
+  \[ V(T, x, y) = -e^{-\gamma x} - \frac{\cM{\lambda_N}}{2}\Big(\big(\cM{\bar y} - x\big)^+\Big)^2. \]
+
+  <h3>Step 2 · How much \(V\) changes in an instant</h3>
+  <p>In an instant \(dt\), my wealth and each rival's move. As in 1-D (Itô's formula), \(V\) changes on average because of the clock, because of each slope times the drift of that wealth, and because of half the curvature times the variance of that wealth:</p>
+  \[ \frac{\mathbb E[dV]}{dt} = \cT{V_t} + \cB{\big(rx + \cP{\pi}(\mu - r)\big)V_x} + \cR{\tfrac12\sigma^2\cP{\pi}^2\,V_{xx}} + \sum_{j=1}^{N-1}\Big[\cB{\big(r\cM{y_j} + \cM{\pi_j}(\mu - r)\big)V_{y_j}} + \cR{\tfrac12\sigma^2\cM{\pi_j}^2\,V_{y_jy_j}}\Big]. \]
+  <p>Each rival moves with the same equation as me, with their own position \(\pi_j\). There are no cross terms, such as \(V_{xy_j}\), because each one's luck is independent.</p>
+
+  <details class="more">
+    <summary>The derivation, step by step</summary>
+    <p>It is a Taylor expansion, as in calculus, with one difference: the luck of an instant \(dt\) has size \(\sqrt{dt}\), much larger than \(dt\), so the squared terms cannot be thrown away. Four steps.</p>
+    <p><b>1 · Taylor to second order.</b> In an instant, the clock moves by \(dt\), my wealth by \(dX\) and each rival's by \(dY_j\). As with one variable (the change is the derivative times the step, plus half the second derivative times the step squared), but with all the variables and their products:</p>
+    \[ dV = V_t\,dt + V_x\,dX + \sum_j V_{y_j}\,dY_j + \tfrac12 V_{xx}\,(dX)^2 + \tfrac12\sum_j V_{y_jy_j}\,(dY_j)^2 + \sum_j V_{xy_j}\,dX\,dY_j + \tfrac12\sum_{j \ne k} V_{y_jy_k}\,dY_j\,dY_k + \dots \]
+    <p>The dots are even smaller terms, such as \(V_{tt}\,dt^2\) or \(V_{tx}\,dt\,dX\).</p>
+    <p><b>2 · The size of each piece.</b> My wealth moves by \(dX = \cB{(rx + \cP{\pi}(\mu - r))\,dt} + \cR{\sigma\cP{\pi}\,dW}\), where the luck \(dW\) is a normal with mean 0 and variance \(dt\): its typical size is \(\sqrt{dt}\). With \(dt = 0.01\), \(dW\) is of order ±0.1, and the products that appear are:</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Product</th><th class="num">Size with dt = 0.01</th><th>Kept as</th></tr></thead>
+      <tbody>
+        <tr><td>\(dt \cdot dt\)</td><td class="num">0.0001</td><td>0</td></tr>
+        <tr><td>\(dt \cdot dW\)</td><td class="num">±0.001</td><td>0</td></tr>
+        <tr><td>\((dW)^2\)</td><td class="num">0.01</td><td>\(dt\)</td></tr>
+        <tr><td>\(dW \cdot dW^j\) (independent noises)</td><td class="num">±0.01</td><td>0</td></tr>
+      </tbody>
+    </table></div>
+    <p>The first two are much smaller than \(dt\) and, added up along the whole path, leave nothing. \((dW)^2\) is of the size of \(dt\) and is never negative: added up over a stretch of time, it gives that stretch of time. The product of two independent noises is as often positive as negative, and cancels out.</p>
+    <p><b>3 · The squares that remain.</b> Squaring \(dX\) gives three pieces, \((\text{drift})^2\,dt^2\), \(2\,(\text{drift})\,\sigma\pi\,dt\,dW\) and \(\sigma^2\pi^2\,(dW)^2\), and only the last one remains. The same for each rival, with their own luck \(dW^j\):</p>
+    \[ (dX)^2 = \cR{\sigma^2\cP{\pi}^2\,dt}, \qquad (dY_j)^2 = \cR{\sigma^2\cM{\pi_j}^2\,dt}, \qquad dX\,dY_j = 0, \qquad dY_j\,dY_k = 0 \ \ (j \ne k). \]
+    <p>The cross products are 0 because each wealth has its own luck: that is why \(V_{xy_j}\) does not appear in the HJB.</p>
+    <p><b>4 · Substitute and take the mean.</b> Putting \(dX\), \(dY_j\) and the squares into step 1:</p>
+    \[ dV = \Big[\cT{V_t} + \cB{(rx + \cP{\pi}(\mu - r))V_x} + \cR{\tfrac12\sigma^2\cP{\pi}^2V_{xx}} + \sum_j\Big(\cB{(r\cM{y_j} + \cM{\pi_j}(\mu - r))V_{y_j}} + \cR{\tfrac12\sigma^2\cM{\pi_j}^2V_{y_jy_j}}\Big)\Big]dt + \cR{\sigma\cP{\pi}V_x\,dW} + \sum_j \cR{\sigma\cM{\pi_j}V_{y_j}\,dW^j}. \]
+    <p>The luck terms have mean 0, so the last two terms disappear when taking the mean. What is left, divided by \(dt\), is the formula above.</p>
+  </details>
+
+  <h3>Step 3 · The HJB</h3>
+  <p>If I play the best, \(V\) does not change on average along the way: what I expect to get is already counted in \(V\). If I play anything else, it goes down. So the expression above is 0 with my best \(\pi\) and negative with any other one. I only choose my \(\pi\); the \(\pi_j\) are the rivals' rule:</p>
+  \[ \cT{V_t} + \max_{\pi}\Big\{ \cB{\big(rx + \cP{\pi}(\mu - r)\big)V_x} + \cR{\tfrac12\sigma^2\cP{\pi}^2\,V_{xx}} \Big\} + \sum_{j=1}^{N-1}\Big[ \cB{\big(r\cM{y_j} + \cM{\pi_j}(\mu - r)\big)V_{y_j}} + \cR{\tfrac12\sigma^2\cM{\pi_j}^2\,V_{y_jy_j}} \Big] = 0. \]
+
+  <h3>Step 4 · The form the network learns</h3>
+  <p>\(V\) is negative and changes like an exponential of wealth; its logarithm is almost a straight line, easier for a network. As in 1-D, the network learns \(v = \log(-V)\), that is, \(V = -e^{v}\). By the chain rule:</p>
+  \[ V_t = -e^{v}v_t, \qquad V_x = -e^{v}v_x, \qquad V_{xx} = -e^{v}\big(v_{xx} + v_x^2\big), \]
+  <p>and the same in each \(y_j\). The \(v_x^2\) appears when \(-e^{v}v_x\) is differentiated again: \(e^{v}\) releases another \(v_x\). After substituting, the whole HJB is multiplied by \(-e^{v}\), which is negative; dividing by it, the maximum over \(\pi\) becomes a minimum. My part with \(\pi\) is a parabola:</p>
+  \[ \min_{\pi}\Big\{\cP{\pi}(\mu - r)\,v_x + \tfrac12\sigma^2\cP{\pi}^2\big(v_{xx} + v_x^2\big)\Big\}. \]
+  <p>Its minimum is where the derivative in \(\pi\) vanishes, \((\mu - r)v_x + \sigma^2\pi\,(v_{xx} + v_x^2) = 0\). Substituting gives its value (with \(\kappa = (\mu - r)/\sigma\)):</p>
+  \[ \cP{\pi^*(t, x, y)} = -\frac{\mu - r}{\sigma^2}\,\frac{v_x}{v_{xx} + v_x^2}, \qquad \text{minimum} = -\frac{\kappa^2}{2}\,\frac{v_x^2}{v_{xx} + v_x^2}. \]
+  <p>This needs \(v_{xx} + v_x^2 \gt 0\), which is the same as \(V\) being concave: each extra dollar helps a little less. Putting everything together:</p>
+  \[ \cT{v_t} + \cB{r x\, v_x} - \frac{\kappa^2}{2}\,\frac{v_x^2}{v_{xx} + v_x^2} + \sum_{j=1}^{N-1}\Big[ \cB{\big(r\cM{y_j} + \cM{\pi_j}(\mu - r)\big)\,v_{y_j}} + \cR{\tfrac{\sigma^2}{2}\cM{\pi_j}^2\big(v_{y_jy_j} + v_{y_j}^2\big)} \Big] = 0, \]
+  \[ v(T, x, y) = \log\!\Big(e^{-\gamma x} + \frac{\lambda_N}{2}\big((\bar y - x)^+\big)^2\Big). \]
+  <p>The first three terms are those of the 1-D V network (<code>residual_formula</code> in <code>pinn/hjb.py</code>). The sum over the rivals is the new part: the same two terms for each rival, passed through the same chain rule. The final condition is \(\log(-U)\).</p>
+
+  <div class="hand">
+    <p class="lab">Check it by hand: with λ = 0 you get Merton</p>
+    <p>Without the penalty, \(v = -\gamma e^{r(T-t)}x - \tfrac12\kappa^2(T - t)\), with no rivals. Then \(v_t = r\gamma e^{r(T-t)}x + \tfrac12\kappa^2\), \(r x v_x = -r\gamma e^{r(T-t)}x\), \(v_{xx} = 0\) and \(v_{y_j} = 0\). The third term is \(-\kappa^2/2\), and everything adds up to 0. The rule: \(\pi^* = -1.5\,v_x/v_x^2 = 1.5\,e^{-r(T-t)}\), which gives 1.47 at \(t = 0\).</p>
+  </div>
+
+  <h3>The seat of each rival</h3>
+  <p>Rival \(j\) uses the same rule, from their own seat: their wealth goes in the own slot and the others, mine included, in the rivals' slots:</p>
+  \[ \cM{\pi_j} = \pi\big(t,\ y_j,\ y^{(j)}\big), \qquad y^{(j)} = (x,\ y_1, \dots, y_{j-1},\ y_{j+1}, \dots, y_{N-1}). \]
+  <p>For example, with \(N = 4\), \(x = 1\) and \(y = (2, 3, 4)\), the rival who has 3 sees themselves with 3 and sees their rivals with \(\{1, 2, 4\}\), mean 7/3. It is the easiest step to program wrongly (forgetting my wealth, leaving theirs in), and the exact solutions would not detect it, because their rules do not depend on wealth. That is why a single piece of code builds every seat, in training and in the Monte Carlo, and a test checks this example (§10).</p>
+
+  <div class="note">
+    <p class="lab">Where the equilibrium is in this equation</p>
+    <p>Inside the sum, the rivals use a rule \(\pi\). Out of the equation comes my best response \(\pi^*\). There is an equilibrium when the two coincide: the rule used inside is the one that comes out. The rounds of section 6 look for that match.</p>
+  </div>
+
+  <h3>Three effects the mean-field does not have</h3>
+  <ol>
+    <li><b>My wealth moves the mean.</b> Against my rivals, the penalty weighs \(\lambda_N = \lambda(1 - 1/N)^2\): 25% of λ with N = 2, 64% with 5 and 81% with 10.</li>
+    <li><b>The bar is uncertain.</b> Before \(T\) I do not know where my rivals' mean will end. Its standard deviation at the end is about \(0.28/\sqrt{N-1}\), with 0.28 the spread of final wealth in the mean-field: ±0.09 with 10 investors. It should smooth the cliff more than a milder penalty (effect 1) already does; the analysis separates the two by comparing with the mean-field at \(\lambda_N\) (<code>scripts/analyze_nplayer.py</code>).</li>
+    <li><b>The rule looks at the ranking.</b> How much I invest depends on whether I am ahead of or behind my rivals, not only on my wealth.</li>
+  </ol>
+
+  <div class="tbl"><table>
+    <thead><tr><th>N</th><th class="num">\(\lambda_N\) (with λ = 2)</th><th class="num">π* just below \(\bar y\), at T</th><th class="num">std of \(\bar y_T\) (≈)</th></tr></thead>
+    <tbody>
+      <tr><td class="rowh">2</td><td class="num">0.50</td><td class="num">0.60</td><td class="num">0.28</td></tr>
+      <tr><td class="rowh">5</td><td class="num">1.28</td><td class="num">0.31</td><td class="num">0.14</td></tr>
+      <tr><td class="rowh">10</td><td class="num">1.62</td><td class="num">0.26</td><td class="num">0.09</td></tr>
+      <tr><td class="rowh">20</td><td class="num">1.805</td><td class="num">0.23</td><td class="num">0.06</td></tr>
+      <tr><td class="rowh">∞ (mean-field)</td><td class="num">2</td><td class="num">0.21</td><td class="num">0</td></tr>
+    </tbody>
+  </table></div>
+  <p>The third column is exact: at \(T\) the rule only depends on my wealth and on \(\bar y\), and it is <code>pi_terminal</code> with \(\lambda_N\) (here with \(\bar y = 1.1\)). The fourth is an estimate. With 2 investors, the one just below invests almost three times more than in the mean-field: the penalty weighs less. The figure shows it in full.</p>
+
+  <figure class="fig" aria-labelledby="pt-title">
+    <div class="fig-head">
+      <p class="fig-title" id="pt-title">At the end (t = T): how much each one invests, by N</p>
+      <p class="fig-sub">The exact rule at \(T\), with the rivals' mean at \(\bar y = 1.1\): \(\pi^*(T, x) = 1.5\,\dfrac{e^{-x} + \lambda_N(\bar y - x)}{e^{-x} + \lambda_N}\) below \(\bar y\), and 1.5 (Merton) above.</p>
+    </div>
+    <div class="controls">
+      <div class="ctl">
+        <span class="ctl-l" id="ptN-l">Investors in the league</span>
+        <div class="seg" role="radiogroup" aria-labelledby="ptN-l">
+          <input type="radio" id="ptN-2" name="ptN" value="2"><label for="ptN-2">N = 2</label>
+          <input type="radio" id="ptN-5" name="ptN" value="5" checked><label for="ptN-5">5</label>
+          <input type="radio" id="ptN-10" name="ptN" value="10"><label for="ptN-10">10</label>
+          <input type="radio" id="ptN-20" name="ptN" value="20"><label for="ptN-20">20</label>
+          <input type="radio" id="ptN-inf" name="ptN" value="inf"><label for="ptN-inf">∞</label>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="lkey ctrl"></i>the chosen N</span>
+      <span><i class="lkey muted"></i>the other N</span>
+      <span><i class="lkey dash"></i>mean-field (N → ∞)</span>
+      <span><i class="lkey mdash"></i>Merton, 1.5</span>
+      <span><i class="lkey crowd"></i>rivals' mean</span>
+    </div>
+    <div class="plotwrap"><svg id="pt-svg" viewBox="0 0 640 330" role="img" aria-label="Optimal position at the end against own wealth, for N = 2, 5, 10, 20 and infinity"></svg></div>
+    <div class="stats">
+      <div class="stat"><span class="k">\(\lambda_N\)</span><span class="v" id="pt-lam">–</span></div>
+      <div class="stat"><span class="k">just below \(\bar y\)</span><span class="v" id="pt-below">–</span></div>
+      <div class="stat"><span class="k">at \(\bar y - 0.5\)</span><span class="v" id="pt-half">–</span></div>
+      <div class="stat"><span class="k">crosses Merton at</span><span class="v" id="pt-cross">–</span></div>
+    </div>
+    <p class="fig-sub" style="margin-top:12px">What to look at: the smaller \(N\) is, the less the curve dips just below the mean. They all cross Merton at the same place, \(x = \bar y - 1/\gamma\), because that point does not depend on \(\lambda_N\). Before \(T\) only the network can give the curves.</p>
+  </figure>
+
+  <h3>With infinitely many rivals we get our 1-D problem</h3>
+  <p>If \(N \to \infty\), \(\lambda_N \to \lambda\) and each rival weighs \(1/(N-1)\). At the equilibrium the rivals are spread like the population, so, by the law of large numbers, their mean stops being random and follows a fixed path \(\bar m_t\). Then my value depends on the rivals only through their mean, \(v(t, x, y) \approx \tilde v(t, x, \bar y)\), and the sum over the rivals becomes:</p>
+  \[ \sum_j \big(r y_j + \pi_j(\mu - r)\big)\frac{\tilde v_{\bar y}}{N-1} \;\to\; \frac{d\bar m_t}{dt}\,\tilde v_{\bar y}, \qquad \sum_j \tfrac{\sigma^2}{2}\pi_j^2\,\frac{\tilde v_{\bar y\bar y} + \tilde v_{\bar y}^2}{(N-1)^2} \;\to\; 0. \]
+  <p>Along \(\bar y = \bar m_t\), the function \(v_1(t, x) = \tilde v(t, x, \bar m_t)\) satisfies \(\partial_t v_1 = \tilde v_t + \frac{d\bar m_t}{dt}\,\tilde v_{\bar y}\). The equation reduces to the 1-D HJB with \(V(T, x) = U(x, \bar m_T)\): the base problem. That is why the mean-field is the reference for large N.</p>
+
+  <h3>Why there is no Fokker–Planck here</h3>
+  <p>In the mean-field, the population's density said where the crowd is. In the league, the rivals are already inside the equation: their wealths are variables, and their terms say how they will move. The HJB alone defines the equilibrium. To see how the group ends up (mean, spread, how much it crowds together), games are simulated with Monte Carlo.</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="fd">
+  <h2><span class="num">5</span>Why finite differences are not enough</h2>
+  <p class="purpose">A grid needs points in every variable at once; a network does not.</p>
+  <p>Our FD solver puts 800 points on the wealth axis. With \(N\) wealths, the grid of a single instant has \(800^N\) points, and each point takes 8 bytes:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>N</th><th class="num">points per instant</th><th class="num">memory per instant</th><th>FD?</th></tr></thead>
+    <tbody>
+      <tr><td class="rowh">1 (Merton)</td><td class="num">800</td><td class="num">6 KB</td><td>yes</td></tr>
+      <tr><td class="rowh">2</td><td class="num">6.4·10⁵</td><td class="num">5 MB</td><td>yes: it is our reference</td></tr>
+      <tr><td class="rowh">3</td><td class="num">5.1·10⁸</td><td class="num">4 GB</td><td>barely</td></tr>
+      <tr><td class="rowh">4</td><td class="num">4.1·10¹¹</td><td class="num">3 TB</td><td>no</td></tr>
+      <tr><td class="rowh">10</td><td class="num">1.1·10²⁹</td><td class="num">—</td><td>no</td></tr>
+      <tr><td class="rowh">20</td><td class="num">1.2·10⁵⁸</td><td class="num">—</td><td>no</td></tr>
+    </tbody>
+  </table></div>
+  <p>Even with only 100 points per axis, N = 5 needs 10¹⁰ points: 80 GB per instant. This is the curse of dimensionality: the cost is multiplied with each new variable.</p>
+  <p>The network has no grid. It learns on drawn points (§8), and only where the group lives, not in the whole cube. Each point costs more the larger \(N\) is: \(N - 1\) rival curvatures must be computed, and each one goes through the \(N - 1\) rivals, so the cost per point grows between \(N\) and \(N^2\). Even so, \(N = 20\) fits in one night.</p>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="rounds">
+  <h2><span class="num">6</span>The rounds</h2>
+  <p class="files">src/mfg/pinn/nplayer.py · solve_nplayer_equilibrium</p>
+  <p class="purpose">How the equilibrium is searched for: the same scheme as the mean-field loop, but what passes from one turn to the next is a rule, not a number.</p>
+
+  <figure class="diagram" aria-labelledby="rounds-cap">
+    <div class="dscroll">
+      <svg viewBox="0 0 760 236" role="img" aria-label="Rounds: the rivals play the previous rule, the network learns the best response, the new rule is read; if the change stopped falling, equilibrium; if not, the rivals switch to the new rule">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="dg-head"></path></marker>
+          <marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="dg-head crowd"></path></marker>
+        </defs>
+        <rect class="dg-box crowd" x="8" y="30" width="200" height="80" rx="10"></rect>
+        <text class="dg-t" x="108" y="62" text-anchor="middle">The rivals play</text>
+        <text class="dg-t" x="108" y="80" text-anchor="middle">the previous rule</text>
+        <text class="dg-s" x="108" y="99" text-anchor="middle">round 1: Merton</text>
+        <rect class="dg-box ctrl" x="252" y="30" width="230" height="80" rx="10"></rect>
+        <text class="dg-t" x="367" y="62" text-anchor="middle">Train the V network</text>
+        <text class="dg-s" x="367" y="82" text-anchor="middle">my best response to those rivals</text>
+        <text class="dg-s" x="367" y="99" text-anchor="middle">(starts from the last network)</text>
+        <rect class="dg-box" x="526" y="30" width="226" height="80" rx="10"></rect>
+        <text class="dg-t" x="639" y="62" text-anchor="middle">Read the new rule π</text>
+        <text class="dg-s" x="639" y="82" text-anchor="middle">on 20,000 check states</text>
+        <path class="dg-line" d="M210 70 H248" marker-end="url(#ah)"></path>
+        <path class="dg-line" d="M484 70 H522" marker-end="url(#ah)"></path>
+        <rect class="dg-box wash" x="420" y="158" width="230" height="48" rx="10"></rect>
+        <text class="dg-t" x="535" y="187" text-anchor="middle">did the change stop falling?</text>
+        <path class="dg-line" d="M639 112 C639 136 600 140 580 154" marker-end="url(#ah)"></path>
+        <path class="dg-line" d="M652 182 H684" marker-end="url(#ah)"></path>
+        <text class="dg-t" x="690" y="178">yes:</text>
+        <text class="dg-s" x="690" y="196">equilibrium</text>
+        <path class="dg-line crowd" d="M418 182 C280 182 116 176 108 114" marker-end="url(#ahc)"></path>
+        <text class="dg-s" x="250" y="214" text-anchor="middle" style="fill: var(--k-crowd)">no: the rivals switch to the new rule</text>
+      </svg>
+    </div>
+    <figcaption id="rounds-cap" class="fig-sub" style="margin-top:10px">A round is one training of the V network with the rivals frozen. Since everyone is identical, one network is enough: the new rule holds for everyone.</figcaption>
+  </figure>
+
+  <pre class="pseudo"><span class="kw">rivals</span> ← Merton                                   <span class="cm"># round 1: π_j = 1.5·e^(−r(T−t)), merton_pi</span>
+<span class="kw">net</span> ← new symmetric network (with its seed)
+π_before ← Merton
+<span class="kw">for</span> k = 1, 2, …, 6:
+    settings ← full if k = 1, short otherwise     <span class="cm"># 10,000 Adam + 500 L-BFGS  |  2,000 Adam + 200 L-BFGS</span>
+    train(net, rivals, settings)                  <span class="cm"># loss of §9; the rivals' π_j without gradient</span>
+    π_k ← the network's rule on the check states
+    Δ_k ← mean of |π_k − π_before|
+    save(net, Δ_k)                                <span class="cm"># a relaunch continues from here</span>
+    <span class="kw">if</span> k ≥ 3 and Δ_k ≥ Δ_(k−1)/2: <span class="kw">stop</span>            <span class="cm"># no longer halves: only noise is left</span>
+    rivals ← frozen copy of the network
+    π_before ← π_k
+<span class="kw">accept</span> if the last Δ &lt; 0.02                       <span class="cm"># otherwise, or after 6 rounds: look at it before using it</span></pre>
+
+  <p class="decs-lab lab">Decisions, and why</p>
+  <dl class="decs">
+    <div class="dec"><dt>Start with the rivals at Merton</dt>
+      <dd>It is exact and smooth, does not depend on anything trained, and is the starting point of the mean-field loop (the λ = 0 mean).</dd></div>
+    <div class="dec"><dt>Round 1 in full, the others short</dt>
+      <dd>The network starts at random, so round 1 uses the default 1-D settings. The others continue from the previous network with the 1-D warm-start settings (<code>warm_stage</code>). Han and Hu found that each round does not need to be solved precisely if the network keeps training from one round to the next <span class="src">paper</span>.</dd></div>
+    <div class="dec"><dt>Rivals = frozen copy of the previous round</dt>
+      <dd>During a round, my best-response problem stays fixed and well defined. The last round is used, as in Han and Hu, and not an average of several: the loop contracts strongly (in the mean-field, each turn divided the error by about 15), so the last round is already the best estimate, and mixing it with earlier ones would only slow things down.</dd></div>
+    <div class="dec"><dt>Each rival's π, from the frozen copy</dt>
+      <dd>\(\pi_j = \min\!\Big(10,\ \max\!\big(0,\ -\tfrac{\mu - r}{\sigma^2}\,\tfrac{v'_x}{\max(v'_{xx} + v'^2_x,\ 0.05)}\big)\Big)\), with \(v'\) the copy evaluated from the rival's seat (§4). The 0.05 floor is the same safety net as in the 1-D network, and the cap [0, 10] is the same as in the FD solver; how many times they act is counted, and it should be 0. The copy carries no gradient, and it is only differentiated in each seat's own wealth, which only enters the final network: it costs less than 10% of a step and takes less than 1 GB with N = 20.</dd></div>
+    <div class="dec"><dt>Measure the change on check states</dt>
+      <dd>20,000 fixed states (seed 1): \(t\) uniform on [0, 0.9] and the \(N\) wealths drawn, each on its own, from \(\mathcal N\big(M(t), S(t)^2\big)\), the λ = 0 population. \(t \gt 0.9\) is left out, where the rule near the kink is not reliable even in 1-D. All the numerical checks are measured on these same states (§10).</dd></div>
+    <div class="dec"><dt>Stop when the change stops falling</dt>
+      <dd>Each short round is 2,200 more training steps, and that alone moves π a little: it is the method's noise, and it is not known in advance. While the rule approaches the equilibrium, Δ falls fast; when only noise is left, it stops falling. That is why the rounds stop as soon as Δ no longer halves, from round 3 on (Δ₂ is needed for the comparison). A fixed threshold could sit below the noise, and the rounds would never stop.</dd></div>
+    <div class="dec"><dt>Accept if the last change is below 0.02</dt>
+      <dd>It is the mean error in π asked of every check. A mean error of 0.02 in π moves the final mean by at most \(0.06 \times 0.02 \approx 10^{-3}\), the accuracy we ask of the mean. The last Δ is recorded: it says how precisely the final rule is the best response to itself.</dd></div>
+    <div class="dec"><dt>No damping; at most 6 rounds</dt>
+      <dd>With a loop that contracts this much there are no oscillations to damp. If at the sixth round the change still halves, or the last one is above 0.02, something is wrong: everything is saved and looked at, and it is not taken as an equilibrium.</dd></div>
+    <div class="dec"><dt>Save every round</dt>
+      <dd>The frozen copy is needed anyway. If something crashes in the middle of the night, at most one round is lost: the script continues from the last saved one when relaunched.</dd></div>
+  </dl>
+</section>
+
+<!-- ============================================================ 7 -->
+<section id="network">
+  <h2><span class="num">7</span>The networks</h2>
+  <p class="files">src/mfg/pinn/nets.py · SymmetricNet</p>
+  <p class="purpose">How many networks there are, what each one receives and gives, and why it has to be symmetric.</p>
+
+  <h3>One network per N, and one copy per round</h3>
+  <p>For each \(N\) there is a single network, \(v_\theta(t, x, y)\), with \(\theta\) its weights. It belongs to everyone: since everyone uses the same rule, the same network gives my value and, read from each rival's seat (§4), theirs. There is no density network as in 1-D, because there is no Fokker–Planck equation. During a round two copies live side by side:</p>
+  <ul>
+    <li><b>the one being trained:</b> my best response to that round's rivals;</li>
+    <li><b>a frozen copy of the previous round:</b> it only serves to compute how much each rival invests, and it does not change during the round.</li>
+  </ul>
+  <p>If the optional check C6 is run (§10), one more network is trained, from scratch.</p>
+
+  <h3>What it receives and what it gives</h3>
+  <p>It receives the time \(t\), my wealth \(x\) and the wealths of my \(N - 1\) rivals, and gives one number, \(v\). Everything else comes from it by automatic differentiation: my value \(V = -e^{v}\) and my rule \(\pi^*\) (§4).</p>
+
+  <h3>What symmetric means</h3>
+  <p>The rivals have no names. “Rivals with 1.2 and 0.9” is the same situation as “rivals with 0.9 and 1.2”, so the value cannot depend on the order in which they are passed:</p>
+  \[ v\big(t,\ 1.0,\ (1.2,\ 0.9)\big) = v\big(t,\ 1.0,\ (0.9,\ 1.2)\big). \]
+  <p>An ordinary network, with a fixed slot for each rival, could give two different numbers, and would have to learn that they are equal. A symmetric network gives the same number by construction. The symmetry is only among the rivals: my wealth has its own slot, because I am not interchangeable with them.</p>
+
+  <h3>How it is built</h3>
+  <figure class="diagram" aria-labelledby="network-cap">
+    <div class="dscroll">
+      <svg viewBox="0 0 760 252" role="img" aria-label="Each rival goes through the same summary network, the outputs are averaged, and a final network receives the time, my wealth, the rivals' mean and that average of summaries">
+        <defs>
+          <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="dg-head"></path></marker>
+        </defs>
+        <text class="lbl crowd" x="40" y="58" text-anchor="middle">y₁</text>
+        <text class="lbl crowd" x="40" y="108" text-anchor="middle">y₂</text>
+        <text class="lbl crowd" x="40" y="150" text-anchor="middle">⋮</text>
+        <text class="lbl crowd" x="40" y="196" text-anchor="middle">y<tspan dy="4" style="font-size:10px">N−1</tspan></text>
+        <rect class="dg-box crowd" x="80" y="36" width="150" height="34" rx="8"></rect>
+        <text class="dg-s" x="155" y="58" text-anchor="middle">summary network</text>
+        <rect class="dg-box crowd" x="80" y="86" width="150" height="34" rx="8"></rect>
+        <text class="dg-s" x="155" y="108" text-anchor="middle">summary network</text>
+        <rect class="dg-box crowd" x="80" y="174" width="150" height="34" rx="8"></rect>
+        <text class="dg-s" x="155" y="196" text-anchor="middle">summary network</text>
+        <text class="dg-s" x="155" y="232" text-anchor="middle">the same network (same weights)</text>
+        <path class="dg-line" d="M56 53 H76" marker-end="url(#ah2)"></path>
+        <path class="dg-line" d="M56 103 H76" marker-end="url(#ah2)"></path>
+        <path class="dg-line" d="M62 191 H76" marker-end="url(#ah2)"></path>
+        <path class="dg-line" d="M232 53 C270 53 280 110 300 118" marker-end="url(#ah2)"></path>
+        <path class="dg-line" d="M232 103 C262 103 280 118 300 120" marker-end="url(#ah2)"></path>
+        <path class="dg-line" d="M232 191 C270 191 280 130 300 124" marker-end="url(#ah2)"></path>
+        <rect class="dg-box" x="304" y="96" width="132" height="52" rx="10"></rect>
+        <text class="dg-t" x="370" y="120" text-anchor="middle">mean</text>
+        <text class="dg-s" x="370" y="138" text-anchor="middle">32 numbers</text>
+        <path class="dg-line" d="M438 122 H500" marker-end="url(#ah2)"></path>
+        <text class="lbl" x="528" y="34" text-anchor="middle">t</text>
+        <text class="lbl ctrl" x="587" y="34" text-anchor="middle">x (me)</text>
+        <text class="lbl crowd" x="648" y="34" text-anchor="middle"><tspan class="ov">y</tspan></text>
+        <path class="dg-line" d="M528 42 V90" marker-end="url(#ah2)"></path>
+        <path class="dg-line" d="M587 42 V90" marker-end="url(#ah2)"></path>
+        <path class="dg-line" d="M648 42 V90" marker-end="url(#ah2)"></path>
+        <rect class="dg-box ctrl" x="504" y="94" width="166" height="56" rx="10"></rect>
+        <text class="dg-t" x="587" y="118" text-anchor="middle">final network</text>
+        <text class="dg-s" x="587" y="137" text-anchor="middle">4 layers of 64, tanh</text>
+        <path class="dg-line" d="M672 122 H716" marker-end="url(#ah2)"></path>
+        <text class="dg-t" x="736" y="127" text-anchor="middle">v</text>
+      </svg>
+    </div>
+    <figcaption id="network-cap" class="fig-sub" style="margin-top:10px">Each rival is summarised in 32 numbers by the same small network. The summaries are averaged, and the final network looks at the time, my wealth, the mean of the rivals' wealths and that average of summaries.</figcaption>
+  </figure>
+
+  <ol class="recipe">
+    <li><span class="what">Summarise each rival.</span>
+      <span class="why">A small network, the same for all of them (same weights), turns each rival's wealth into 32 numbers: a description of that rival that the network learns to choose.</span></li>
+    <li><span class="what">Average the summaries.</span>
+      <span class="why">The average does not change if the rivals are reordered. This is where the symmetry comes from.</span></li>
+    <li><span class="what">The final network.</span>
+      <span class="why">It receives \(t\), \(x\), the mean of the rivals' wealths \(\bar y\) and the 32 numbers, and gives \(v\). \(\bar y\) also goes in directly because the kink of the final value is exactly at \(x = \bar y\): this way the network does not have to learn where it is.</span></li>
+  </ol>
+  \[ v_\theta(t, x, y) = \text{final}\Big(t,\ x,\ \bar y,\ \frac{1}{N-1}\sum_{j=1}^{N-1}\text{summary}(y_j)\Big). \]
+  <p>That this is enough is no accident: any symmetric function can be written this way if the summary has about \(N + 1\) numbers. It is the DeepSets architecture, which Germain, Laurière, Pham and Warin use for symmetric equations in \(N\) agents <span class="src">paper</span>. With 32 we cover all our \(N \le 20\).</p>
+
+  <p class="decs-lab lab">Decisions, and why</p>
+  <dl class="decs">
+    <div class="dec"><dt>Mean, not sum</dt>
+      <dd>With the mean, the numbers the final network sees have the same scale for any \(N\), and as \(N \to \infty\) they become an average over the population, as in the mean-field. Also, the same weights serve any \(N\): N = 20 can start from the network of N = 10.</dd></div>
+    <div class="dec"><dt>Sizes</dt>
+      <dd>Summary network: 1 → 32 → 32 → 32, with tanh in the hidden layers and a linear output (2,176 weights). Final network: 35 inputs and 4 layers of 64, like the 1-D V network (<code>TanhNet</code>; 14,849 weights). About 17,000 in total, whatever \(N\) is, against 12,700 in 1-D.</dd></div>
+    <div class="dec"><dt>tanh everywhere</dt>
+      <dd>The equation uses second derivatives in every wealth, and with ReLU they would be zero. Germain and co-authors found that ReLU approximates single functions better, but it is of no use here.</dd></div>
+    <div class="dec"><dt>Inputs rescaled as in 1-D</dt>
+      <dd>\(t \mapsto 2t/T - 1\), and each wealth, \(\bar y\) included, becomes \((\text{wealth} - 1)/2\), so that tanh works without saturating. Xavier start and zero biases, as in <code>TanhNet</code>.</dd></div>
+  </dl>
+  <p>A fact from the same paper: in their tests with symmetric functions (N from 10 to 1000), ordinary networks, without enforcing the symmetry, were often enough, and DeepSets was the best of the symmetric ones. We chose the symmetric one for the exactness of the order and to be able to use the same network for every \(N\), not because an ordinary network would surely fail.</p>
+</section>
+
+<!-- ============================================================ 8 -->
+<section id="points">
+  <h2><span class="num">8</span>The training points</h2>
+  <p class="files">src/mfg/pinn/nplayer.py · sample_batch</p>
+  <p class="purpose">Which situations the network is shown: drawn around the population, of four types, with no box and no edges.</p>
+
+  <h3>What a point is</h3>
+  <p>A PINN does not see solutions. At each step it receives a batch of situations \((t, x, y)\): a time and the \(N\) wealths. At each one it measures how much the equation fails (§9), and the weights are corrected so that it fails less. Each Adam step uses new situations. The network only learns well where it is shown situations, so choosing where to draw them is choosing where it will be reliable.</p>
+  <p>They are drawn from four types: realistic groups; groups in which someone is far away, me or a rival; situations near the end with my wealth next to the rivals' mean, where the rule changes fastest; and the final time, where the final condition is imposed. The figure shows the first three.</p>
+
+  <h3>Why not a box as in 1-D</h3>
+  <p>In 1-D the network lived on the rectangle \([0, 1]\times[-1, 3]\), with known values on the edges. In \(N\) dimensions the box \([-1, 3]^N\) has \(2N\) faces with no known values, and almost all of its volume is impossible situations, such as everyone being at \(-1\) at the same time.</p>
+  <p>Nor does it work to draw each wealth widely on its own. With 19 rivals drawn from a normal with standard deviation 0.75, the probability that all 19 fall within 0.3 of the centre, as in a real group, is \(0.31^{19} \approx 2\cdot10^{-10}\): the network would never see a realistic group. That is why the centre and the width of the group are drawn first, and then each wealth.</p>
+
+  <figure class="diagram" aria-labelledby="pts-cap">
+    <div class="dscroll">
+      <svg viewBox="0 0 760 262" role="img" aria-label="Four types of points on the wealth axis: realistic group, me far away, a rival far away, and near the kink at the end">
+        <text class="dg-t" x="8" y="40">A · group</text>
+        <line class="axis" x1="150" y1="36" x2="750" y2="36"></line>
+        <circle class="dot crowd" cx="396" cy="36" r="6"></circle><circle class="dot crowd" cx="430" cy="36" r="6"></circle>
+        <circle class="dot crowd" cx="452" cy="36" r="6"></circle><circle class="dot crowd" cx="480" cy="36" r="6"></circle>
+        <circle class="dot crowd" cx="505" cy="36" r="6"></circle><circle class="dot ctrl" cx="465" cy="36" r="7"></circle>
+
+        <text class="dg-t" x="8" y="96">B · me far away</text>
+        <line class="axis" x1="150" y1="92" x2="750" y2="92"></line>
+        <circle class="dot crowd" cx="400" cy="92" r="6"></circle><circle class="dot crowd" cx="436" cy="92" r="6"></circle>
+        <circle class="dot crowd" cx="455" cy="92" r="6"></circle><circle class="dot crowd" cx="472" cy="92" r="6"></circle>
+        <circle class="dot crowd" cx="510" cy="92" r="6"></circle><circle class="dot ctrl" cx="672" cy="92" r="7"></circle>
+
+        <text class="dg-t" x="8" y="152">B · rival far away</text>
+        <line class="axis" x1="150" y1="148" x2="750" y2="148"></line>
+        <circle class="dot crowd" cx="214" cy="148" r="6"></circle><circle class="dot crowd" cx="420" cy="148" r="6"></circle>
+        <circle class="dot crowd" cx="446" cy="148" r="6"></circle><circle class="dot crowd" cx="476" cy="148" r="6"></circle>
+        <circle class="dot crowd" cx="500" cy="148" r="6"></circle><circle class="dot ctrl" cx="458" cy="148" r="7"></circle>
+
+        <text class="dg-t" x="8" y="208">Kink (t ≥ 0.9)</text>
+        <line class="axis" x1="150" y1="204" x2="750" y2="204"></line>
+        <line class="vline" x1="466" y1="186" x2="466" y2="222"></line>
+        <circle class="dot crowd" cx="410" cy="204" r="6"></circle><circle class="dot crowd" cx="440" cy="204" r="6"></circle>
+        <circle class="dot crowd" cx="482" cy="204" r="6"></circle><circle class="dot crowd" cx="532" cy="204" r="6"></circle>
+        <circle class="dot ctrl" cx="472" cy="204" r="7"></circle>
+
+        <line class="axis" x1="150" y1="240" x2="750" y2="240"></line>
+        <text class="tick" x="150" y="256" text-anchor="middle">−1.5</text>
+        <text class="tick" x="210" y="256" text-anchor="middle">−1</text>
+        <text class="tick" x="330" y="256" text-anchor="middle">0</text>
+        <text class="tick" x="450" y="256" text-anchor="middle">1</text>
+        <text class="tick" x="570" y="256" text-anchor="middle">2</text>
+        <text class="tick" x="690" y="256" text-anchor="middle">3</text>
+        <text class="tick" x="750" y="256" text-anchor="middle">3.5</text>
+      </svg>
+    </div>
+    <figcaption id="pts-cap" class="fig-sub" style="margin-top:10px">Purple: me. Green: my rivals (5 here). The dashed line in the last row is the rivals' mean: at those points I am right next to it, near the end.</figcaption>
+  </figure>
+
+  <h3>The exact recipe</h3>
+  <ol class="recipe">
+    <li><span class="what">Type A, a realistic group: 2,000 points per step.</span>
+      <span class="why">\(t\) uniform on \([0, T]\). Centre \(c = M(t) + \mathcal U[-0.3, 0.3]\) and width \(s = S(t)\cdot\mathcal U[0.5, 1.5]\). The \(N\) wealths, mine included, drawn from \(\mathcal N(c, s^2)\).</span></li>
+    <li><span class="what">Type B, someone far away: 2,000 points per step.</span>
+      <span class="why">A type A point in which a single wealth is replaced by a draw from \(\mathcal U[-1.5, 3.5]\). Mine with probability ½; otherwise a random rival's.</span></li>
+    <li><span class="what">Kink: 1,000 points per step.</span>
+      <span class="why">\(t\) uniform on \([T - 0.1, T]\), rivals as in A, and me at \(x = \bar y + \mathcal U[-0.3, 0.3]\). It is where the rule changes fastest, like the extra 1-D points near \((T, \bar m)\).</span></li>
+    <li><span class="what">Final: 1,000 points per step.</span>
+      <span class="why">\(t = T\), half of type A and half of type B.</span></li>
+  </ol>
+  <p>\(M(t)\) and \(S(t)\) are the mean and the standard deviation of the λ = 0 population (<code>population_mean</code> and the square root of <code>population_var</code>): \(S\) goes from 0.20 at \(t = 0\) to 0.36 at \(T\). The points are new at each Adam step; L-BFGS polishes on one fixed draw, as in 1-D.</p>
+
+  <p class="decs-lab lab">Why each type</p>
+  <dl class="decs">
+    <div class="dec"><dt>Random centre and width</dt>
+      <dd>At the end, the real λ = 2 group has a width of about 0.77·S(T) (0.278 against 0.363) and its centre a little below \(M(T)\) (1.065 against 1.110), within what is drawn. Shifting the centre gives situations of being ahead of or behind the group, which the ranking needs.</dd></div>
+    <div class="dec"><dt>Me far away</dt>
+      <dd>To read my rule at any wealth in \([0, 2.2]\) and beyond, even if the group is far away.</dd></div>
+    <div class="dec"><dt>A rival far away</dt>
+      <dd>When I am far away, each rival sees me as their far rival. To read their rule from their seat, the network must have seen that situation. With the two cases of B, every situation that is read is among the trained ones.</dd></div>
+    <div class="dec"><dt>No edges</dt>
+      <dd>There is no box, so there are no faces to fix. The ends of the uniform draws, \(-1.5\) and \(3.5\), are far from where we read results. In the time left, a wealth moves by about \(\sigma\pi\sqrt{T - t} \approx 0.2 \times 1.5 \times 1 = 0.3\). The probability of travelling from 2.2 to 3.5, more than 4 standard deviations, is \(2\Phi(-1.3/0.3) \approx 1.5\cdot10^{-5}\). What the network does at the ends does not reach \([0, 2.2]\).</dd></div>
+  </dl>
+  <div class="note">
+    <p class="lab">A rule for reading results</p>
+    <p>Only situations among the trained ones are read. What the network says about situations nobody reaches, such as two investors very far from the centre at the same time and on opposite sides, is neither used nor compared. There are two tools for this:</p>
+    <ul>
+      <li><b>The check states</b> (§6): 20,000 fixed situations, drawn from the population. The change between rounds and all the numerical checks are measured there, including the optional N = 2 comparison with FD.</li>
+      <li><b>To plot my rule against my wealth,</b> the rivals are placed at the quantiles of the population at that time, \(y_j = \bar y + s_t\,\Phi^{-1}\!\big((j - \tfrac12)/(N-1)\big)\). This way the group has a realistic width. Everyone at the same point (zero width) was never trained, so it is not used.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section id="loss">
+  <h2><span class="num">9</span>The loss, part by part</h2>
+  <p class="files">src/mfg/pinn/nplayer.py · nplayer_loss</p>
+  <p class="purpose">Three parts, each a mean of squares, with coefficient 1. It is the 1-D loss without the edges and with the rivals inside the equation.</p>
+  \[ L(\theta) = L_{\text{eq}} + L_T + L_{\text{slopes}}. \]
+
+  <h3>1 · The equation, \(L_{\text{eq}}\)</h3>
+  \[ L_{\text{eq}} = \frac{1}{n}\sum_{\text{points}} R^2, \qquad R = \frac{v_t + r x v_x + \sum_j\Big[\big(r y_j + \pi_j(\mu - r)\big)v_{y_j} + \tfrac{\sigma^2}{2}\pi_j^2\big(v_{y_jy_j} + v_{y_j}^2\big)\Big]}{\kappa^2/2} - \frac{v_x^2}{\max\big(v_{xx} + v_x^2,\ 0.05\big)}. \]
+  <ul>
+    <li><b>Points:</b> those of types A and B and the kink points (5,000 per step).</li>
+    <li><b>What it measures:</b> how much the HJB of section 4 fails.</li>
+    <li><b>Why this way:</b> it is divided by \(\kappa^2/2\) for the same reason as in 1-D, so that its terms are of size one. The \(\pi_j\) come from the frozen copy (§6) and carry no gradient: during the round they are data.</li>
+  </ul>
+
+  <h3>2 · The final value, \(L_T\)</h3>
+  \[ L_T = \frac{1}{n_T}\sum_{\text{final points}} \Big(v_\theta(T, x, y) - \log\!\big(e^{-\gamma x} + \tfrac{\lambda_N}{2}\big((\bar y - x)^+\big)^2\big)\Big)^2. \]
+  <ul>
+    <li><b>Points:</b> the 1,000 at \(t = T\).</li>
+    <li><b>What it measures:</b> whether the network gives exactly the final utility.</li>
+    <li><b>Why:</b> it is the only thing that pins down the solution, because the HJB runs backward from \(T\).</li>
+  </ul>
+
+  <h3>3 · My own slopes at the end, \(L_{\text{slopes}}\)</h3>
+  \[ L_{\text{slopes}} = \frac{1}{n'}\sum_{|x - \bar y| \gt 0.05}\Big[\big(v_x - g_1\big)^2 + \big(v_{xx} - g_2\big)^2\Big], \qquad g_1 = \frac{U_x}{U},\quad g_2 = \frac{U_{xx}}{U} - g_1^2. \]
+  <ul>
+    <li><b>Points:</b> the final ones that are not within 0.05 of the rivals' mean.</li>
+    <li><b>What it measures:</b> whether at \(T\) the network has the right slope and curvature in my wealth. \(U\) is the utility with \(\lambda_N\) and \(\bar y\); the targets are <code>terminal_targets(x, ybar, p.with_(lam=lam_N))</code>.</li>
+    <li><b>Why:</b> \(\pi^*\) depends on \(v_{xx}\), which the value alone does not pin down well (we learnt that in 1-D). Near \(\bar y\), \(U\) has a kink and \(v_{xx}\) jumps, so that band is not compared.</li>
+    <li><b>Why only mine:</b> the rule only uses the derivatives in my wealth, and each rival's slope is \(N - 1\) times smaller than mine: \(\lambda(\bar x - x)/N\) against \(\lambda_N(\bar y - x)\).</li>
+  </ul>
+
+  <h3>How the derivatives are computed</h3>
+  <p>All by automatic differentiation. One backward pass gives \(v_t\), \(v_x\) and all the \(v_{y_j}\). Then one more pass for \(v_{xx}\) and one per rival for each \(v_{y_jy_j}\): \(N\) extra passes, and each one goes through the \(N - 1\) rivals. This is the cost that grows with \(N\).</p>
+
+  <h3>How a round is trained</h3>
+  <p>With the settings of the 1-D V network. Round 1: 10,000 Adam steps with the step size falling from 10⁻³ to 10⁻⁴, plus 500 of L-BFGS. Later rounds: 2,000 of Adam (3·10⁻⁴ → 10⁻⁴) plus 200 of L-BFGS. All in float32 and on the GPU.</p>
+  <p>L-BFGS polishes on one fixed batch of points, and in many dimensions it could fit that batch and get worse away from it: with N = 20 the network has about 17,000 weights, and the batch imposes about 8,000 conditions on it. That is why, before L-BFGS, a copy of the weights is kept, and afterwards the loss of both networks is computed on a new batch, the same for both. The one with the smaller loss is kept.</p>
+</section>
+
+<!-- ============================================================ 10 -->
+<section id="checks">
+  <h2><span class="num">10</span>The checks</h2>
+  <p class="purpose">The aim is to see how the problem changes with N, not to certify every number. The minimum is cheap and says whether the code solves the right equation; the rest is optional.</p>
+
+  <h3>The minimum</h3>
+  <ol class="recipe">
+    <li><span class="what">Tests without training, in seconds.</span>
+      <span class="why">The network is replaced by exact formulas. The exact solution of C2 (below) must give zero residual, and its rule at every seat. The seat example of §4 must come out: with the made-up function \(v = -\text{own} + 0.1\cdot\text{own}\cdot\bar y\), the rival who has 3 invests \(1.5/(1 - 0.1\cdot 7/3) = 1.957\), and a badly built seat would give 2.0 or 2.143. Also, reordering the rivals does not change the network's output, and \(\lambda_N = 0.5\) with N = 2.</span></li>
+    <li><span class="what">C2 trained with N = 5, about 10 minutes.</span>
+      <span class="why">Original utility with \(\eta = 0.5\): \(\pi(0) = 1.4703/(1 - 0.5/5) = 1.6337\). It tests the rivals' terms and the rounds at the same time: the exact rule does not change after round 1, so the rounds must stop right away, at round 3 or 4. It passes with the 1-D targets, on the check states: mean error in \(\pi\) below 0.02, maximum below 0.07, and \(V\) within 0.5%.</span></li>
+    <li><span class="what">C3 and the change between rounds, for free.</span>
+      <span class="why">At \(t = T\), the rule must be <code>pi_terminal(x, ybar, p.with_(lam=lam_N))</code> outside the kink band. And the last Δ of each N (§6) says how precisely the final rule is the best response to itself.</span></li>
+  </ol>
+  <p>Without these three things, an error in the seats or in the rivals' terms would give the equilibrium of another game, with believable figures. The Monte Carlo of games is not a check: it is how we see how the group ends up (§4), so it always runs.</p>
+
+  <h3>The exact solution of C2</h3>
+  <p>With \(U = -\exp\!\big(-\gamma(x - \eta\bar x)\big)\), and everyone with the constant rule \(\pi(t) = \dfrac{(\mu - r)e^{-r(T-t)}}{\gamma(1 - \eta/N)\sigma^2}\):</p>
+  \[ v(t, x, y) = -\gamma e^{r(T-t)}\Big[\Big(1 - \frac{\eta}{N}\Big)x - \frac{\eta}{N}\sum_{j} y_j\Big] + \kappa^2 k_N\,(T - t), \qquad k_N = -\frac12 + (N - 1)\Big[\frac{\eta}{N - \eta} + \frac12\Big(\frac{\eta}{N - \eta}\Big)^2\Big]. \]
+  <div class="hand">
+    <p class="lab">Check it by hand</p>
+    <p>Put \(v\) into the equation of §4. Since \(v\) is linear in the wealths, \(v_{xx} = v_{y_jy_j} = 0\), and the terms with \(x\) and with each \(y_j\) cancel. A constant is left, which fixes \(k_N\). The rule comes from \(\pi^* = -\tfrac{\mu - r}{\sigma^2}\,\tfrac{v_x}{v_x^2}\).</p>
+    <p>With N = 5: \(\eta/(N - \eta) = 1/9\), \(k_5 = -\tfrac12 + 4\big(\tfrac19 + \tfrac1{162}\big) = -\tfrac{5}{162}\), and \(\kappa^2 k_5 = -0.00278\). With \(\eta = 0\), \(k_N = -\tfrac12\), which is C1.</p>
+  </div>
+
+  <div class="note">
+    <p class="lab">What will be said about the results</p>
+    <ul>
+      <li>They are what the network finds, validated on the exact cases. Without the optional checks, the λ = 2 case has no external reference, so they are reported as trends.</li>
+      <li>The network only holds in realistic situations (§8).</li>
+      <li>It is an equilibrium to the method's precision: below the training noise it cannot be told apart from something very close to one.</li>
+      <li>With N = 10 and 20, the difference from the mean-field is a few thousandths, of the order of our precision: there the mean-field already holds.</li>
+    </ul>
+  </div>
+
+  <details class="more">
+    <summary>Extra checks <span class="opt">optional</span></summary>
+    <p>They give more confidence in the numbers, at the cost of computing time or of Deepak's work. With them, the λ = 2 case would have an external reference at N = 2 and an equilibrium certificate at N = 5 and 10.</p>
+    <ol class="recipe">
+      <li><span class="what">C1 · No penalty (λ = 0), trained.</span>
+        <span class="why">Exact: \(v = -\gamma e^{r(T-t)}x - \tfrac12\kappa^2(T - t)\), independent of the rivals, and \(\pi = 1.47\) at \(t = 0\). With N = 5, about 5 minutes.</span></li>
+      <li><span class="what">C4 · N = 2 against finite differences in 2-D.</span>
+        <span class="why">Deepak would compute it (specification below). It is compared on the N = 2 check states, and on slices with my wealth in [0, 2.2] and the rival at 0.8, 1.0 and 1.2, which are trained situations.</span></li>
+      <li><span class="what">C5 · Monte Carlo of the value.</span>
+        <span class="why">Games are played with the network's rule from wealths drawn from \(\mathcal N(1, 0.2^2)\). The mean of \(U(X^1_T, \bar X_T)\) must equal the mean of \(V(0, X^1_0, \text{rivals}_0)\) on the same draws, within 3 standard errors plus 0.5%.</span></li>
+      <li><span class="what">C6 · Best response from scratch.</span>
+        <span class="why">With N = 5 and 10, the best response against the final rivals is trained from scratch, and the mean of \(|\pi_{\text{new}} - \pi_{\text{final}}|\) is measured on the check states. If it is less than twice the difference between two seeds, it is an equilibrium to the method's precision. The comparison is in π and not in utility, because utility barely changes near the best rule: an error of 0.1 in π costs about \(\tfrac12\gamma\sigma^2\cdot 0.1^2 = 2\cdot10^{-4}\) sure dollars.</span></li>
+      <li><span class="what">C7 · Towards the mean-field.</span>
+        <span class="why">With the rivals at the quantiles of the mean-field population, the rule for large N must approach the 1-D one. It is more a result than a test.</span></li>
+      <li><span class="what">Two seeds with N = 3, 5 and 10.</span>
+        <span class="why">How much π changes between them is the real precision, as in 1-D, and it gives error bars to the figures.</span></li>
+    </ol>
+    <h3>The finite-difference reference for N = 2 (for Deepak)</h3>
+    <ul>
+      <li><b>Unknown:</b> \(V(t, x, y)\) on \([0, 1]\times[-1.5, 3.5]^2\), with λ = 2 (so \(\lambda_2 = 0.5\)).</li>
+      <li><b>Equation:</b> the one of §4 with one rival. The rival's position is the previous round's rule with the roles swapped, \(\pi_{\text{rival}}(t, x, y) = \pi(t, y, x)\); on a symmetric grid it is the transpose.</li>
+      <li><b>Rounds:</b> as in §6, with Merton at the start, until the largest change of π on \([0, 2.2]^2\) and \(t \le 0.9\) falls below 10⁻⁶.</li>
+      <li><b>Edges:</b> your choice. Condition to accept them: if the box grows by 0.5 on each side, π on \([0, 2.2]^2\) does not change by more than 10⁻³.</li>
+      <li><b>Suggested grid:</b> 400 × 400 nodes and 400 time steps, implicit, with policy iteration as in 1-D; check with a finer one.</li>
+      <li><b>Tests:</b> λ = 0 gives Merton; the original utility (\(\eta = 0.5\)) gives \(\pi(0) = 1.96\).</li>
+      <li><b>Interface:</b> <code>value(t, x, y)</code> and <code>position(t, x, y)</code> with NumPy, like the network's (<code>NPlayerSolution</code> in <code>src/mfg/pinn/nplayer.py</code>).</li>
+    </ul>
+  </details>
+</section>
+
+<footer>
+  Based on <code>main</code> at 36bac46 (<code>pinn/hjb.py</code>, <code>pinn/nets.py</code>, <code>pinn/equilibrium.py</code>, <code>utility.py</code>, <code>benchmarks.py</code>) and on the mean-field results of <code>notebooks/results_pinn_vs_fd.ipynb</code>. Papers cited: <a href="https://arxiv.org/abs/1703.07685" target="_blank" rel="noopener">Lacker and Zariphopoulou (2019)</a>, <a href="https://arxiv.org/abs/1912.01809" target="_blank" rel="noopener">Han and Hu (2020)</a> and <a href="https://arxiv.org/abs/2103.00838" target="_blank" rel="noopener">Germain, Laurière, Pham and Warin (2022)</a>. Implementation: <code>src/mfg/pinn/nplayer.py</code>, <code>src/mfg/montecarlo.py</code> and <code>configs/nplayer.yaml</code>. 7 November 2026, revised on 8 November.
+</footer>
+</div>
+
+<script>
+/* Exact optimal position at t = T against own wealth, for several league sizes N.
+   pi*(T, x) = (mu - r)/sigma^2 * U_x / (-U_xx), with U = -e^{-x} - (lam_N/2)((ybar - x)^+)^2,
+   gamma = 1, (mu - r)/sigma^2 = 1.5, lam = 2, ybar = 1.1. Above ybar it is Merton, 1.5. */
+(function () {
+  const svg = document.getElementById('pt-svg');
+  if (!svg) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  const W = 640, H = 330, L = 50, R = 16, TOP = 30, B = 44;
+  const xmin = -1, xmax = 3, ymin = 0, ymax = 2.4;
+  const X = x => L + (x - xmin) / (xmax - xmin) * (W - L - R);
+  const Y = y => H - B - (y - ymin) / (ymax - ymin) * (H - B - TOP);
+  const lam = 2, merton = 1.5, ybar = 1.1;
+  const sizes = [2, 5, 10, 20, Infinity];
+
+  function lamN(N) { return N === Infinity ? lam : lam * (1 - 1 / N) ** 2; }
+  function pos(x, N) {
+    if (x >= ybar) return merton;
+    const e = Math.exp(-x), l = lamN(N);
+    return merton * (e + l * (ybar - x)) / (e + l);
+  }
+  function el(name, attrs, text) {
+    const node = document.createElementNS(NS, name);
+    for (const k in attrs) node.setAttribute(k, attrs[k]);
+    if (text !== undefined) node.textContent = text;
+    svg.appendChild(node);
+    return node;
+  }
+  function path(N) {
+    let below = '', above = '';
+    for (let x = xmin; x < ybar - 1e-9; x += 0.01) {
+      below += (below ? ' L' : 'M') + X(x).toFixed(1) + ',' + Y(pos(x, N)).toFixed(1);
+    }
+    below += ' L' + X(ybar).toFixed(1) + ',' + Y(pos(ybar - 1e-9, N)).toFixed(1);
+    above = 'M' + X(ybar).toFixed(1) + ',' + Y(merton).toFixed(1) + ' L' + X(xmax).toFixed(1) + ',' + Y(merton).toFixed(1);
+    return [below, above];
+  }
+
+  // Frame: grid, axes, ticks, labels.
+  [0, 0.5, 1, 1.5, 2].forEach(v => {
+    el('line', { class: 'grid', x1: L, x2: W - R, y1: Y(v), y2: Y(v) });
+    el('text', { class: 'tick', x: L - 8, y: Y(v) + 4, 'text-anchor': 'end' }, v.toFixed(1));
+  });
+  [-1, 0, 1, 2, 3].forEach(v => {
+    el('line', { class: 'grid', x1: X(v), x2: X(v), y1: TOP, y2: H - B });
+    el('text', { class: 'tick', x: X(v), y: H - B + 18, 'text-anchor': 'middle' }, String(v));
+  });
+  el('line', { class: 'axis', x1: L, x2: W - R, y1: H - B, y2: H - B });
+  el('text', { class: 'alabel', x: (L + W - R) / 2, y: H - 6, 'text-anchor': 'middle' }, 'my wealth x at T');
+  el('text', { class: 'alabel', x: L, y: 16, 'text-anchor': 'start' }, 'π*(T, x): dollars in the stock');
+  el('line', { class: 'hline', x1: L, x2: W - R, y1: Y(merton), y2: Y(merton) });
+  el('line', { class: 'vline', x1: X(ybar), x2: X(ybar), y1: TOP, y2: H - B });
+  const yl = el('text', { class: 'lbl crowd small', x: X(ybar) + 6, y: TOP + 12 });
+  const ov = document.createElementNS(NS, 'tspan'); ov.setAttribute('class', 'ov'); ov.textContent = 'y';
+  yl.appendChild(ov); yl.appendChild(document.createTextNode(' = 1.1'));
+
+  // One pair of paths per N; the chosen one is drawn last, on top.
+  const layers = {};
+  sizes.forEach(N => {
+    const [a, b] = path(N);
+    layers[N] = [el('path', { d: a }), el('path', { d: b })];
+  });
+  const cross = el('circle', { class: 'dot ink', cx: X(ybar - 1), cy: Y(merton), r: 5 });
+  const cl = el('text', { class: 'lbl small', x: X(ybar - 1), y: Y(merton) - 12, 'text-anchor': 'middle' });
+  const ov2 = document.createElementNS(NS, 'tspan'); ov2.setAttribute('class', 'ov'); ov2.textContent = 'y';
+  cl.appendChild(document.createTextNode('x = ')); cl.appendChild(ov2); cl.appendChild(document.createTextNode(' − 1/γ'));
+
+  const fmt = v => v.toFixed(2);
+  function show(choice) {
+    sizes.forEach(N => {
+      const isChosen = N === choice;
+      const isMF = N === Infinity;
+      const cls = isChosen ? 'ln ctrl' : (isMF ? 'ln ink dash' : 'ln muted');
+      layers[N].forEach(p => p.setAttribute('class', cls));
+      if (isChosen) layers[N].forEach(p => svg.appendChild(p));
+    });
+    svg.appendChild(cross);
+    document.getElementById('pt-lam').textContent = (choice === Infinity ? '2 (= λ)' : lamN(choice).toFixed(choice === 20 ? 3 : 2));
+    document.getElementById('pt-below').textContent = fmt(pos(ybar - 1e-9, choice));
+    document.getElementById('pt-half').textContent = fmt(pos(ybar - 0.5, choice));
+    document.getElementById('pt-cross').textContent = 'x = ' + (ybar - 1).toFixed(1);
+  }
+  document.querySelectorAll('input[name="ptN"]').forEach(input => {
+    input.addEventListener('change', () => {
+      show(input.value === 'inf' ? Infinity : Number(input.value));
+    });
+  });
+  show(5);
+})();
+</script>
