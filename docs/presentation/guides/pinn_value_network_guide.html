@@ -1169,7 +1169,7 @@ sol2 = train_value_net(p, mbar=1.4, net=sol.net)  <span class="cm"># starts from
   const ncdf = z => 0.5 * (1 + erf(z / Math.SQRT2));
   const npdf = (x, mu, sd) => Math.exp(-0.5 * ((x - mu) / sd) ** 2) / (sd * Math.sqrt(2 * Math.PI));
 
-  
+
 
   /* ---------- exact formulas: the target at t = T and Merton ---------- */
   function terminal(x) {

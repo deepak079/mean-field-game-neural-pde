@@ -18,7 +18,7 @@ example of how they were made with Claude Code.
 | `implementation_guide.html` | How the equilibrium is built in the code: the V network, the copy of π*, the density network, the final mean, the secant loop and the finite-difference check. |
 | `pinn_value_network_guide.html` | The V network in detail: the equation for v = log(−V), the edges, the loss part by part, the training and its results. Slides 7 to 9 come from it. |
 | `presentation_figures.html` | Nine interactive figures at slide size, rebuilt from the results notebook (equilibrium, strategy, density, investors, λ sweep, accuracy, PINN vs FD). Each one says what it shows and what to say. It needs `figure_data.js` next to it. |
-| `N_investors_guide.html` | The finite-N extension. Same file as `docs/tasks/N_investors task/` on the branch `feat/pinn-nplayer`. |
+| `../tasks/N_investors task/N_investors_guide.html` | The finite-N extension (kept with its task in `docs/tasks/`). |
 
 The study guide and the implementation guide are translations of Ander's Spanish originals; the
 other three were written in English.
