@@ -5,7 +5,7 @@ example of how they were made with Claude Code.
 
 | Path | What it is |
 |---|---|
-| `slides.html` | The slides so far: cover, the game, the equations, the loop and the V network (9 slides). |
+| `slides.html` | Ander's part, 18 slides: cover, the game, the equations, the loop and the V network (1–9), the league of N investors (10–16), a real case, Chile's pension funds and why the penalty is a square (17), and "Thank you · Questions?" (18). Deepak's Fokker–Planck slides are not in it. |
 | `prompt_example.txt` | The prompt Ander used to start the slides with Claude Code (translated), and the tools to install. A template for your sections. |
 | `guides/` | The HTML guides that explain the project, all in English: the source material for the slides. |
 | `reference/AMS520_attention_factors_slides.html` | Ander's AMS 520 deck. The look and the slide engine of `slides.html` come from it. |
@@ -29,7 +29,9 @@ other three were written in English.
   browser. They need an internet connection for the fonts and the formulas (MathJax).
 - In `slides.html`: ← → or a clicker to move, F for full screen, `#7` at the end of the address to
   jump to slide 7. Some slides build up step by step; the buttons and sliders on them are live.
-- `slides.html` is a copy of the deck Ander keeps as a private page on claude.ai. Its numbers come
-  from saved results: the V network trained at m̄ = 1.1 (slides 7–9), the training shown in the V
-  network guide (slide 9) and the Monte Carlo investors of the finite-difference equilibrium
-  (slides 1–2).
+- `slides.html` is a copy of the deck Ander keeps as a private page on claude.ai, with every number
+  inside it: nothing else is needed to run it. Its numbers come from saved results: the V network
+  trained at m̄ = 1.1 (slides 7–9), the training shown in the V network guide (slide 9), the Monte
+  Carlo investors of the finite-difference equilibrium (slides 1–2), the league runs in
+  `results/nplayer/main` (slides 12–14), and a second training of each N that saved photos of the
+  network as it learned (slide 16). Slide 17 is a sketch, not data.
