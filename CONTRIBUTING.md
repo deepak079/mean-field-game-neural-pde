@@ -57,7 +57,7 @@ same equations, so their answers must be directly comparable.
   figures are committed, under `report/figures/`.
 - **Notebooks are for exploring.** Once code is reused, move it into `src/mfg` and test it.
   Outputs may be committed, so results can be read without rerunning; run the notebook top to
-  bottom first, so the outputs match the code. Pre-commit rejects files over 2 MB.
+  bottom first, so the outputs match the code. Pre-commit rejects files over 5 MB.
 - **Fix the seed** for anything random, and record it.
 
 ## Avoiding merge conflicts
