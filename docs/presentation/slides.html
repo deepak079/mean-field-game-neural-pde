@@ -1201,7 +1201,7 @@ setTimeout(() => document.documentElement.classList.remove('mj-wait'), 9000);
       <div class="nchips" id="rn-chips" role="group" aria-label="Investors in the league"><span class="nl"><span class="mi">N</span> =</span></div>
       <svg id="rn-pi" style="left:0" role="img" aria-label="My rule against my wealth for the chosen N: at the start of the year, then through one game"></svg>
       <svg id="rn-at" style="left:1206px" role="img" aria-label="What I invest if I start at the average, for each N and for the mean field"></svg>
-      <div class="ctlrow">
+      <div class="ctlrow" data-frag="1">
         <button class="btn solid" id="rn-play" type="button">▶ Play one game</button>
         <label class="ctl-lab" for="rn-t">time <span class="mi">t</span></label>
         <input type="range" id="rn-t" min="0" max="1" step="0.001" value="0" aria-label="time t">
@@ -2534,10 +2534,10 @@ const LoopN = (function(){
    their luck and my rule follows them; the other N, faint, play their own games at the same
    moment; the mean field does not react to anyone. On the right, what I invest if I start at the
    average (x = 1) for each N.
-   Driven by the clicker, one N per step: entering the slide plays the game of N = 2; the next
-   steps show N = 3, 5 and 10 without playing it again (a game still running goes on with the new
-   N), and the last step, N = 20, plays it again. Coming back from a later slide shows the end.
-   The button plays it whenever needed. */
+   Driven by the clicker: step 0 shows the start of the year for N = 2, still; step 1 plays its
+   game; the next steps show N = 3, 5 and 10 without playing it again (a game still running goes
+   on with the new N), and the last step, N = 20, plays it again. Coming back from a later slide
+   shows the end. The button plays it whenever needed. */
 const RuleN = (function(){
   const L = D.league, G = D.live, MF = window.DSDATA.strategy, MFT = window.DSDATA.t;
   const NS = L.N, KEYS = NS.map(String), root = $('rulen');
@@ -2595,11 +2595,8 @@ const RuleN = (function(){
   // N chips and the time controls
   const chipB = NS.map(N => { const bt = H('button', {type: 'button', class: 'nchip'}, $('rn-chips'), String(N)); bt.addEventListener('click', () => select(N)); return bt; });
   const slider = $('rn-t'), playB = $('rn-play');
-  let sel = NS[0], inGame = true, t = 0, raf = 0, playing = false, last = 0, hoverI = null, lastEv = null, cur = null;
-  let entering = false, timer = 0;
-  root.classList.add('game');
-  /* My rivals, my rule and the mean field now, at time t of the game (the static view of the start
-     of the year, inGame = false, is no longer used: the game at t = 0 shows the same rule). */
+  let sel = NS[0], inGame = false, t = 0, raf = 0, playing = false, last = 0, hoverI = null, lastEv = null, cur = null;
+  /* My rivals, my rule and the mean field now: at the start of the year (step 0) or at time t of the game. */
   function state(key){
     if (!inGame) return {riv: startRiv[key], row: start[key], mf: MF.fd[0], t: 0};
     const g = game[key], f = t * G.n_steps, i = Math.min(Math.floor(f), G.n_steps - 1), w = f - i;
@@ -2648,7 +2645,7 @@ const RuleN = (function(){
     if (reduce){ setT(1); label(); return; }
     playing = true; last = performance.now(); raf = requestAnimationFrame(frame); label();
   }
-  function stop(){ cancelAnimationFrame(raf); clearTimeout(timer); playing = false; label(); }
+  function stop(){ cancelAnimationFrame(raf); playing = false; label(); }
   playB.addEventListener('click', () => { if (playing) stop(); else play(); });
   slider.addEventListener('input', () => { stop(); setT(+slider.value); label(); });
   function showHover(){
@@ -2665,32 +2662,31 @@ const RuleN = (function(){
   const hit = S('rect', {x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0, class: 'hit'}, svgP);
   hit.addEventListener('pointermove', ev => { lastEv = ev; hoverI = nearest(pxs, svgPoint(svgP, ev).x); showHover(); });
   hit.addEventListener('pointerleave', () => { hoverI = null; hov.style.display = 'none'; tip.hide(); });
-  /* Step k shows the k-th N (one hidden marker per N after the first, so the clicker walks
-     through them). Entering at the first N plays the game after a moment at the start of the
-     year; moving forward onto the last N plays it again; any other step only changes N. */
-  for (let k = 1; k < NS.length; k++) H('i', {'data-frag': String(k), hidden: ''}, $('s13'));
+  /* Step 0: the start of the year, N = 2, still. Step k >= 1 shows the k-th N in the game (the
+     controls appear at step 1, then one hidden marker per further N, so the clicker walks through
+     them): step 1 plays it, moving forward onto the last N plays it again, any other step only
+     changes N. Coming back from a later slide shows the end. */
+  for (let k = 2; k <= NS.length; k++) H('i', {'data-frag': String(k), hidden: ''}, $('s13'));
   function step(k, prev){
-    sel = NS[clamp(k, 0, NS.length - 1)];
-    if (entering){
-      entering = false; stop();
-      if (k === 0){ t = 0; render(); timer = setTimeout(play, 700); }
-      else { t = 1; render(); }
-      return;
-    }
-    if (k === NS.length - 1 && prev === k - 1){ stop(); t = 0; render(); play(); return; }
+    sel = NS[clamp(k - 1, 0, NS.length - 1)];
+    inGame = k >= 1;
+    root.classList.toggle('game', inGame);
+    if (!inGame){ stop(); t = 0; render(); return; }
+    if (prev < 0){ stop(); t = 1; render(); label(); return; }
+    if ((k === 1 && prev === 0) || (k === NS.length && prev === k - 1)){ stop(); t = 0; render(); play(); return; }
     render();
   }
   render(); label();
-  // enter runs before step only when the slide is really entered, not when the deck first draws it
-  return {enter(){ entering = true; }, step: step, stop: stop};
+  return {step: step, stop: stop};
 })();
 
 /* ================= 14 · the rivals' mean in real games ================= */
 /* Left: the mean of investor 0's rivals in 120 games and the average of 2,000, and at T all the
    games; right: where it ends on average for every N, against the mean field with lambda_N.
-   Driven by the clicker, one N per step: entering the slide draws the games of N = 2; the next
-   steps show N = 3, 5, 10 and 20 without drawing them again (games still being drawn go on with
-   the new N). Coming back from a later slide shows the end. The button draws them again. */
+   Driven by the clicker: step 0 shows the empty chart (and the right panel) for N = 2; step 1
+   draws its games; the next steps show N = 3, 5, 10 and 20 without drawing them again (games
+   still being drawn go on with the new N). Coming back from a later slide shows the end. The
+   button draws them again. */
 const Games = (function(){
   const G = D.games, ts = G.t, NS = G.N, root = $('gm');
   const W = 1150, HH = 572, box = {x0: 92, x1: 860, y0: 40, y1: 470}, hb = {x0: 884, x1: 1130};
@@ -2736,7 +2732,7 @@ const Games = (function(){
   const chipB = NS.map(N => { const bt = H('button', {type: 'button', class: 'nchip'}, $('gm-chips'), String(N)); bt.addEventListener('click', () => select(N)); return bt; });
   const read = $('gm-read'), playB = $('gm-play');
   const paths = {}; NS.forEach(N => { paths[N] = G.paths_milli[String(N)].map(r => Float32Array.from(r, v => v / 1000)); });
-  let sel = NS[0], prog = 1, cancel = () => {}, scale = 1, entering = false;
+  let sel = NS[0], prog = 1, cancel = () => {}, scale = 1;
   /* A path drawn up to the fraction q of the year. */
   function upTo(ys, q){
     const kf = q * (ts.length - 1), k = Math.floor(kf), xs = [], out = [];
@@ -2778,16 +2774,17 @@ const Games = (function(){
     cancel = animate(2600, k => { prog = k; render(); });
   }
   playB.addEventListener('click', play);
-  // step k shows the k-th N: one hidden marker per N after the first, so the clicker walks through them
-  for (let k = 1; k < NS.length; k++) H('i', {'data-frag': String(k), hidden: ''}, $('s14'));
-  function step(k){
-    sel = NS[clamp(k, 0, NS.length - 1)];
-    if (entering){ entering = false; if (k === 0){ play(); return; } cancel(); prog = 1; }
+  // step 0 the empty chart, step k >= 1 the k-th N: one hidden marker per step, so the clicker walks through them
+  for (let k = 1; k <= NS.length; k++) H('i', {'data-frag': String(k), hidden: ''}, $('s14'));
+  function step(k, prev){
+    sel = NS[clamp(k - 1, 0, NS.length - 1)];
+    if (k === 0){ cancel(); prog = 0; }
+    else if (prev < 0){ cancel(); prog = 1; }       // back from a later slide: the end
+    else if (k === 1 && prev === 0){ play(); return; }
     render();
   }
   render();
-  // enter runs before step only when the slide is really entered, not when the deck first draws it
-  return {enter(){ entering = true; }, step: step, stop(){ cancel(); cancel = () => {}; prog = 1; render(); }, resize(s){ scale = s; drawFan(); }};
+  return {step: step, stop(){ cancel(); cancel = () => {}; prog = 1; render(); }, resize(s){ scale = s; drawFan(); }};
 })();
 
 /* ================= 15 · the training situations of the league, batch by batch ================= */
@@ -3056,8 +3053,8 @@ hook('s9', {step: Train.step, leave: Train.stop});
 hook('s-dens', {step: Dens.step, leave: Dens.stop});
 hook('s-res', {step: Res.step, leave: Res.stop});
 hook('s12', {step: LoopN.step, leave: LoopN.stop});
-hook('s13', {enter: RuleN.enter, step: RuleN.step, leave: RuleN.stop});
-hook('s14', {enter: Games.enter, step: Games.step, leave: Games.stop, resize: Games.resize});
+hook('s13', {step: RuleN.step, leave: RuleN.stop});
+hook('s14', {step: Games.step, leave: Games.stop, resize: Games.resize});
 hook('s15', {step: Batches.step, leave: Batches.stop});
 hook('s16', {step: TrainN.step, leave: TrainN.stop});
 hook('s17', {step: Chile.step, leave: Chile.stop});
