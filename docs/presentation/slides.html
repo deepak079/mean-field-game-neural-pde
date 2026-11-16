@@ -1222,7 +1222,7 @@ setTimeout(() => document.documentElement.classList.remove('mj-wait'), 9000);
       <svg id="gm-fan" style="left:0" role="img" aria-label="The mean of one investor's rivals over the year, in 120 simulated games, and its spread at the end"></svg>
       <canvas id="gm-cv" aria-hidden="true"></canvas>
       <svg id="gm-top" style="left:0" aria-hidden="true"></svg>
-      <svg id="gm-avg" style="left:1206px" role="img" aria-label="Where the rivals' mean ends on average for each N, against the mean field with lambda_N"></svg>
+      <svg id="gm-avg" style="left:1206px" role="img" aria-label="Where the rivals' mean ends on average for each N, between no penalty and the mean field"></svg>
       <div class="ctlrow">
         <button class="btn solid" id="gm-play" type="button">▶ Play the games</button>
         <p class="gm-read" id="gm-read"></p>
@@ -2682,7 +2682,7 @@ const RuleN = (function(){
 
 /* ================= 14 · the rivals' mean in real games ================= */
 /* Left: the mean of investor 0's rivals in 120 games and the average of 2,000, and at T all the
-   games; right: where it ends on average for every N, against the mean field with lambda_N.
+   games; right: where it ends on average for every N (dots only, no legend: Ander says it).
    Driven by the clicker: step 0 shows the empty chart (and the right panel) for N = 2; step 1
    draws its games; the next steps show N = 3, 5, 10 and 20 without drawing them again (games
    still being drawn go on with the new N). Coming back from a later slide shows the end. The
@@ -2707,7 +2707,7 @@ const Games = (function(){
   const gH = S('g', null, svgT);
   S('path', {class: 'ln-pop', d: linePath(ts.map(X), G.M.map(Y))}, svgT);
   const avgP = S('path', {class: 'ln-avg'}, svgT);
-  // right: where it ends on average, zoomed, against the mean field with lambda_N
+  // right: where it ends on average, zoomed, between no penalty and the mean field
   const rb = {x0: 84, x1: 466, y0: 40, y1: 470}, CATS = NS.map(String).concat(['∞']);
   const XC = i => rb.x0 + 30 + i * (rb.x1 - rb.x0 - 60) / (CATS.length - 1), YZ = lin(1.055, 1.115, rb.y1, rb.y0);
   const gR = S('g', null, svgR);
@@ -2715,15 +2715,12 @@ const Games = (function(){
   S('line', {x1: rb.x0, x2: rb.x1, y1: rb.y1, y2: rb.y1, class: 'base'}, gR);
   CATS.forEach((c, i) => T(gR, XC(i), rb.y1 + 33, c, {class: 'ax', 'text-anchor': 'middle'}));
   rich(gR, rb.x0 - 64, rb.y0 - 18, ['where ', {i: 'y', bar: true}, ' ends, on average'], {class: 'ct'});
-  rich(gR, (rb.x0 + rb.x1) / 2, rb.y1 + 74, ['● real games   ○ mean field with ', {i: 'λ', sub: 'N'}], {class: 'labm', 'text-anchor': 'middle'});
   const MT = G.M[G.M.length - 1], MF = G.mean_field;
   S('line', {x1: rb.x0, x2: rb.x1, y1: YZ(MT), y2: YZ(MT), class: 'gref'}, gR);
   T(gR, rb.x1, YZ(MT) - 10, 'no penalty: ' + fixed(MT, 3), {class: 'labm', 'text-anchor': 'end'});
   S('line', {x1: rb.x0, x2: rb.x1, y1: YZ(MF), y2: YZ(MF), class: 'gmf'}, gR);
   T(gR, rb.x1, YZ(MF) + 26, 'mean field: ' + fixed(MF, 3), {class: 'labm', 'text-anchor': 'end'});
   const finals = NS.map(N => G.final[String(N)]);
-  finals.forEach((f, i) => S('circle', {cx: XC(i), cy: YZ(f.lam_N_mean_field), r: 11, class: 'gring'}, gR));
-  S('circle', {cx: XC(NS.length), cy: YZ(MF), r: 11, class: 'gring'}, gR);
   finals.forEach((f, i) => S('line', {x1: XC(i), x2: XC(i), y1: YZ(f.mean - f.se), y2: YZ(f.mean + f.se), class: 'gwhisk'}, gR));
   const dots = finals.map((f, i) => S('circle', {cx: XC(i), cy: YZ(f.mean), r: 7, class: 'gdot'}, gR));
   S('circle', {cx: XC(NS.length), cy: YZ(MF), r: 7, class: 'gdot'}, gR);
