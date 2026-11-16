@@ -35,7 +35,8 @@ other three were written in English.
 - Every number is inside the file: nothing else is needed to run it. The numbers come from saved
   results: the Monte Carlo investors of the finite-difference equilibrium (slide 3), the training
   of the V network at m̄ = 1.1 (slide 8), the density and the strategy at the equilibrium (slides 9
-  and 10, copied from `guides/figure_data.js` by `scripts/embed_slide_data.py`), the league runs in
-  `results/nplayer/main` (slides 13–15), and a second training of each N that saved photos of the
-  network as it learned (slide 17). Slide 18 is a sketch, not data; slide 2 (two roads) is an
+  and 10, copied from `guides/figure_data.js` by `scripts/embed_slide_data.py`; slide 16 also draws
+  that strategy as the N → ∞ limit), the league runs in `results/nplayer/main` (slides 13, 16 and
+  17; slide 16 plays one game per N with them), and a second training of each N that saved photos
+  of the network as it learned (slide 15). Slide 18 is a sketch, not data; slide 2 (two roads) is an
   illustration with made-up travel times.
