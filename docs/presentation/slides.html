@@ -2835,7 +2835,7 @@ const TrainN = (function(){
   const dots = PARTS.map(p => S('circle', {r: 7, class: 'dot-pinn', style: 'fill:var(' + p[1] + ')'}, svgL));
   const chipB = NS.map(N => { const bt = H('button', {type: 'button', class: 'nchip'}, $('tn-chips'), String(N)); bt.addEventListener('click', () => select(N)); return bt; });
   const slider = $('tn-u'), out = $('tn-out'), playB = $('tn-play');
-  let run = null, XL = null, u = 1, cancel = () => {}, timer = 0, playing = false;
+  let run = null, XL = null, u = 1, cancel = () => {}, playing = false;
   function rivalsAt(c, mean, sd, z){
     c.ybar.setAttribute('x1', X(mean)); c.ybar.setAttribute('x2', X(mean)); c.ybarLab.setAttribute('x', X(mean) + 8);
     clear(c.dots);
@@ -2912,24 +2912,22 @@ const TrainN = (function(){
     const u0 = from == null ? 0 : from;
     cancel = animate(16000 * (1 - u0), q => setU(u0 + (1 - u0) * q), () => { playing = false; label(); });
   }
-  function stop(){ cancel(); cancel = () => {}; clearTimeout(timer); playing = false; label(); }
+  function stop(){ cancel(); cancel = () => {}; playing = false; label(); }
   playB.addEventListener('click', () => { if (playing) stop(); else play(u >= 1 ? 0 : u); });
   slider.addEventListener('input', () => { stop(); setU(+slider.value); });
   function select(N){ stop(); build(N); setU(u); }
-  /* Driven by the clicker. Step 0: the loss. Step 1 folds it and replays the training of the first
-     N (N = 2); each later step shows the next N without replaying it (one hidden marker per N
-     after the first, so the clicker walks through them): a replay still running goes on with the
-     new N, and "Replay training" plays it again. Coming back from a later slide shows the end. */
-  for (let k = 2; k <= NS.length; k++) H('i', {'data-frag': String(k), hidden: ''}, slide);
+  /* Driven by the clicker. Step 0: the loss. Step 1 folds it into the training of the first N
+     (N = 2), still, at its start. Step 2 plays it; each later step shows the next N without
+     replaying it (one hidden marker per step after the fold, so the clicker walks through them):
+     a replay still running goes on with the new N, and "Replay training" plays it again. Coming
+     back from a later slide shows the end. */
+  for (let k = 2; k <= NS.length + 1; k++) H('i', {'data-frag': String(k), hidden: ''}, slide);
   function step(k, prev){
     slide.classList.toggle('fold', k >= 1);
-    const N = NS[clamp(k - 1, 0, NS.length - 1)];
+    const N = NS[clamp(k - 2, 0, NS.length - 1)];
     if (k === 0 || prev < 0){ stop(); build(N); setU(1); return; }
-    if (k === 1 && prev === 0){
-      stop(); build(N);
-      if (reduce) setU(1); else { setU(0); timer = setTimeout(() => play(0), 1300); }
-      return;
-    }
+    if (k === 1){ stop(); build(N); setU(0); return; }
+    if (k === 2 && prev === 1){ stop(); build(N); play(0); return; }
     build(N); setU(u);
   }
   build(NS[0]); setU(1);
