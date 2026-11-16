@@ -255,7 +255,9 @@ input[type=range]:focus-visible{outline:3px solid var(--accent);outline-offset:4
 .res .gap{stroke:var(--accent);stroke-width:2;stroke-dasharray:4 5}
 .res .story{gap:24px}
 .res .story li{font-size:26px}
-.res .bars{display:block;width:396px;height:300px;margin-top:14px;overflow:visible}
+.res .bars{display:block;width:396px;height:250px;margin-top:10px;overflow:visible}
+.res .hold{display:block;margin-top:16px;font:400 20px/1.35 var(--f-text);color:var(--ink2)}
+.res .hold b{display:block;font:700 30px/1.15 var(--f-display);color:var(--accent)}
 .res .b-no{fill:var(--ref);fill-opacity:.45}
 .res .b-yes{fill:var(--accent)}
 .res .b-base{stroke:var(--line);stroke-width:1.5}
@@ -968,7 +970,8 @@ setTimeout(() => document.documentElement.classList.remove('mj-wait'), 9000);
             <line x1="20" x2="376" y1="247" y2="247" class="b-base"/>
             <text x="100" y="278" class="b-l">no penalty</text><text x="296" y="278" class="b-l">with the penalty</text>
           </svg>
-          <span class="cite">the population’s average return over the year</span></li>
+          <span class="cite">the population’s average return over the year</span>
+          <span class="hold"><b>1.5 → 0.75 dollars</b>the population’s average stock holding is halved, so the stock’s 9% becomes 4.5%</span></li>
       </ol>
     </div>
   </section>
@@ -2434,7 +2437,7 @@ const Res = (function(){
   playB.addEventListener('click', play);
   slider.addEventListener('input', () => { cancel(); setT(+slider.value); });
   function step(k, prev){
-    cancel();
+    if (!(k === 2 && prev === 1)) cancel();  // moving on to the bars lets the year finish playing
     story.forEach((li, i) => li.classList.toggle('cur', i === k));
     if (k === 0) setT(0);
     else if (k === 1 && prev === 0 && !reduce){ setT(0); play(); }
